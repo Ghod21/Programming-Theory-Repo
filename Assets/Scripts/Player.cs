@@ -14,15 +14,16 @@ public class Player : MonoBehaviour
     [SerializeField] private float attackAngle = 180f; // Angle of the attack cone
     [SerializeField] private string[] targetTags; // Tags of the targets
     private Vector3 input;
-    private bool isDashing = false; // Track if the player is dashing
+    public bool isDashing = false; // Track if the player is dashing
     private bool isAttacking = false;
     private bool attacked = false;
     private bool dashIsOnCooldown = false;
     private float dashTime; // Track the dash time
     private float attackCooldown = 0f; // Cooldown for attack
     private const float attackCooldownDuration = 0.833f; // Duration of the attack cooldown
-
     private int attackCount;
+
+    public int playerHealth = 100;
 
     private void Start()
     {

@@ -1202,7 +1202,7 @@ MonoBehaviour:
   - {fileID: 182665493590272817, guid: 1b42ee39549bf4f4d8565e9f9713c491, type: 3}
   spawnArea: {fileID: 713906771}
   exclusionZone: {fileID: 1885716653}
-  numberOfEnemies: 10
+  numberOfEnemies: 5
 --- !u!4 &633954694
 Transform:
   m_ObjectHideFlags: 0
@@ -4144,6 +4144,7 @@ MonoBehaviour:
   attackAngle: 180
   targetTags:
   - Enemy
+  playerHealth: 100
 --- !u!135 &1885716653
 SphereCollider:
   m_ObjectHideFlags: 0

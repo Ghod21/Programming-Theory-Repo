@@ -5,9 +5,9 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private GameObject[] enemies; // Array to hold the enemy prefabs
     [SerializeField] private BoxCollider spawnArea; // The BoxCollider that defines the spawn area
     [SerializeField] private SphereCollider exclusionZone; // The SphereCollider where enemies should not spawn
-    [SerializeField] private int numberOfEnemies = 10; // Number of enemies to spawn
+    [SerializeField] private int numberOfEnemies = 5; // Number of enemies to spawn
     private float spawnHeight = 1.4f; // Desired spawn height
-    public static int waveDifficulty = 1;
+    public static int waveDifficulty = 3;
 
     private void Start()
     {

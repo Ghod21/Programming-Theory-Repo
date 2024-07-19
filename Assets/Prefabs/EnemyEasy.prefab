@@ -138,9 +138,9 @@ GameObject:
   m_Component:
   - component: {fileID: 5203907263543350769}
   - component: {fileID: 7931944467892529965}
-  - component: {fileID: 1084705757902472072}
   - component: {fileID: 2841940638912686703}
   - component: {fileID: 1205705979679649081}
+  - component: {fileID: -4423799093075737729}
   m_Layer: 7
   m_Name: EnemyEasy
   m_TagString: Enemy
@@ -186,20 +186,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.3
   m_Center: {x: 0, y: 0.2, z: 0}
---- !u!114 &1084705757902472072
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6783525327994550231}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 486b4073c021b944d88e5e5df9770c9f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  boundaryCollider: {fileID: 0}
-  exclusionZone: {fileID: 0}
 --- !u!54 &2841940638912686703
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -241,6 +227,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boundaryCollider: {fileID: 0}
   exclusionZone: {fileID: 0}
+  animator: {fileID: -4423799093075737729}
+  playerScript: {fileID: 0}
+  moveSpeed: 4
+  attackRange: 2
+--- !u!95 &-4423799093075737729
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6783525327994550231}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: eb340672e17c0af4089e561b61cdc548, type: 3}
+  m_Controller: {fileID: 9100000, guid: 707b944f06051734793367fc0c69bc07, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &7179312450826550136
 GameObject:
   m_ObjectHideFlags: 0

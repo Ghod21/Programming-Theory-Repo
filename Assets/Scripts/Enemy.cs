@@ -7,10 +7,12 @@ public class Enemy : MonoBehaviour
     // Main enemy parent script.
     [SerializeField] private BoxCollider boundaryCollider; // Collider defining the boundary
     [SerializeField] private SphereCollider exclusionZone; // Collider defining where enemies should not spawn
+    [SerializeField] private Animator animator;
+    [SerializeField] private Player playerScript;
     private float desiredY = 1.4f; // Desired height for the position
     private Transform player; // Reference to the player's Transform
     private Rigidbody rb; // Reference to the Rigidbody component
-    protected float moveSpeed = 3.5f;
+    [SerializeField] protected float moveSpeed = 3.5f;
     [SerializeField] private float attackRange = 2.0f; // Distance within which the enemy will attack
     private bool isAttacking = false; // To prevent multiple attack calls
 
@@ -22,6 +24,9 @@ public class Enemy : MonoBehaviour
         exclusionZone = GameObject.FindWithTag("Player").GetComponent<SphereCollider>();
         player = GameObject.FindWithTag("Player").GetComponent<Transform>();
         rb = GetComponent<Rigidbody>();
+        // Find the Player object and get the Player script
+        GameObject playerObject = GameObject.Find("Player");
+        playerScript = playerObject.GetComponent<Player>();
     }
 
     private void Update()
@@ -29,11 +34,13 @@ public class Enemy : MonoBehaviour
         LookAtPlayer(); // Ensure the enemy always faces the player
         CheckBoundary();
         CheckAttackRange(); // Check if the enemy is within attack range
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
     }
 
     private void FixedUpdate()
     {
-        if (!isAttacking) // Only move if not attacking
+        if (!isAttacking && !animator.GetBool("isAttacking")) // Only move if not attacking
         {
             MoveTowardsPlayer(); // Move the enemy towards the player
         }
@@ -90,13 +97,13 @@ public class Enemy : MonoBehaviour
 
     private void OnCollisionStay(Collision collision)
     {
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
+
     }
 
     private void CheckAttackRange()
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
         if (distanceToPlayer <= attackRange && !isAttacking)
         {
             isAttacking = true;
@@ -104,20 +111,29 @@ public class Enemy : MonoBehaviour
         }
     }
 
+
     private IEnumerator Attack()
     {
         // Attack logic
         EnemyAttack();
 
         // Wait for attack cooldown
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(0.6f);
 
         isAttacking = false;
+        animator.SetBool("isAttacking", false);
+        animator.SetTrigger("Idle");
     }
+
 
     void EnemyAttack()
     {
         // Method for enemy attacks
-        // Leave this method empty for now
+        animator.SetBool("isAttacking", true);
+        if (playerScript.isDashing == false)
+        {
+            playerScript.playerHealth--;
+            Debug.Log("Health: " + playerScript.playerHealth);
+        }
     }
 }

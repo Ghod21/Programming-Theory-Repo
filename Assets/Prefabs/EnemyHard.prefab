@@ -291,9 +291,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2938050411722781386}
   - component: {fileID: 95514748590785711}
-  - component: {fileID: -6940892861177940987}
   - component: {fileID: 5383173684095323130}
   - component: {fileID: 9024038251480952344}
+  - component: {fileID: -8960221690442551921}
   m_Layer: 7
   m_Name: EnemyHard
   m_TagString: Enemy
@@ -339,20 +339,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.37
   m_Center: {x: 0, y: 0.25, z: 0}
---- !u!114 &-6940892861177940987
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8967202976318139465}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 486b4073c021b944d88e5e5df9770c9f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  boundaryCollider: {fileID: 0}
-  exclusionZone: {fileID: 0}
 --- !u!54 &5383173684095323130
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -394,6 +380,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boundaryCollider: {fileID: 0}
   exclusionZone: {fileID: 0}
+  animator: {fileID: -8960221690442551921}
+  playerScript: {fileID: 0}
+  moveSpeed: 3
+  attackRange: 2
+--- !u!95 &-8960221690442551921
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8967202976318139465}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: eb340672e17c0af4089e561b61cdc548, type: 3}
+  m_Controller: {fileID: 9100000, guid: 707b944f06051734793367fc0c69bc07, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &3997832622786845584
 PrefabInstance:
   m_ObjectHideFlags: 0
