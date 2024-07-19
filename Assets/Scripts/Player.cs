@@ -4,12 +4,12 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] private Rigidbody rb;
+    [SerializeField] private Transform model;
+    [SerializeField] private Animator animator; // Add a reference to the Animator component
     [SerializeField] private float speed = 5;
     [SerializeField] private float verticalSpeedMultiplier = 1.5f; // Adjust this multiplier for vertical speed
     [SerializeField] private float dashSpeed = 10; // Speed during dash
     [SerializeField] private float dashDuration = 0.2f; // Duration of the dash
-    [SerializeField] private Transform model;
-    [SerializeField] private Animator animator; // Add a reference to the Animator component
     [SerializeField] private float attackRange = 3f; // Range of the attack
     [SerializeField] private float attackAngle = 180f; // Angle of the attack cone
     [SerializeField] private string[] targetTags; // Tags of the targets
@@ -23,6 +23,11 @@ public class Player : MonoBehaviour
     private const float attackCooldownDuration = 0.833f; // Duration of the attack cooldown
 
     private int attackCount;
+
+    private void Start()
+    {
+        animator.SetBool("isNotAttacking", true);
+    }
 
     private void Update()
     {
