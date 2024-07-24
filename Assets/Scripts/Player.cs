@@ -23,7 +23,9 @@ public class Player : MonoBehaviour
     private const float attackCooldownDuration = 0.833f; // Duration of the attack cooldown
     private int attackCount;
 
-    public int playerHealth = 100;
+    public int playerHealth = 30;
+
+    private bool isAttackQueued = false; // Flag to queue attacks
 
     private void Start()
     {
@@ -46,9 +48,13 @@ public class Player : MonoBehaviour
 
         attackCooldown -= Time.deltaTime; // Decrease the cooldown timer
 
-        if (Input.GetMouseButton(0) && !isAttacking && attackCooldown <= 0f) // Left mouse button for attack
+        if (Input.GetMouseButton(0) && !isAttacking && attackCooldown <= 0f)
         {
             Attack();
+        }
+        else if (Input.GetMouseButton(0) && isAttacking)
+        {
+            isAttackQueued = true; // Queue the attack if one is already in progress
         }
     }
 
@@ -135,6 +141,12 @@ public class Player : MonoBehaviour
 
     private void Attack()
     {
+        if (isAttacking)
+        {
+            isAttackQueued = true; // Queue the attack if already attacking
+            return;
+        }
+
         isAttacking = true;
         attackCooldown = attackCooldownDuration; // Reset the cooldown timer
         animator.SetBool("isAttacking", true);
@@ -151,41 +163,42 @@ public class Player : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
         foreach (var hitCollider in hitColliders)
         {
-            if (IsTargetInCone(hitCollider.transform) && !attacked)
+            if (IsTargetInCone(hitCollider.transform))
             {
-                // Apply damage to the target
-                attacked = true;
-                Debug.Log("Hit: " + hitCollider.name + " " + attackCount);
-                attackCount++;
-                // Implement damage logic here
+                if (hitCollider.CompareTag("Enemy"))
+                {
+                    // Apply damage to the target
+                    Debug.Log("Hit: " + hitCollider.name + " " + attackCount);
+                    attackCount++;
+                    Enemy enemy = hitCollider.GetComponent<Enemy>();
+                    if (enemy != null)
+                    {
+                        enemy.enemyHealth--;
+                    }
+                }
             }
         }
-
+        isAttackQueued = false;
         // Wait for the remaining half of the animation duration
         yield return new WaitForSeconds(0.833f / 2);
 
         // Reset attack state
         isAttacking = false;
         animator.SetBool("isAttacking", false);
-        attacked = false;
-    }
 
+        // If an attack was queued, start the next one
+        if (isAttackQueued)
+        {
+            isAttackQueued = false;
+            Attack();
+        }
+    }
 
     private bool IsTargetInCone(Transform target)
     {
         Vector3 directionToTarget = (target.position - transform.position).normalized;
         float angleToTarget = Vector3.Angle(model.forward, directionToTarget);
-        if (angleToTarget < attackAngle / 2)
-        {
-            foreach (string tag in targetTags)
-            {
-                if (target.CompareTag(tag))
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return angleToTarget < attackAngle / 2;
     }
 
     void isNotAttackingCheck()

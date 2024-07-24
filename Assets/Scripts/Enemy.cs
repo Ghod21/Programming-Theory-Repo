@@ -15,8 +15,10 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected float moveSpeed = 3.5f;
     [SerializeField] private float attackRange = 2.0f; // Distance within which the enemy will attack
     private bool isAttacking = false; // To prevent multiple attack calls
+    public int enemyHealth;
+    public bool attacked;
 
-    private void Start()
+    protected virtual void Start()
     {
         // Find and assign the BoxCollider with the "MapBox" tag
         boundaryCollider = GameObject.FindWithTag("MapBox").GetComponent<BoxCollider>();
@@ -36,6 +38,17 @@ public class Enemy : MonoBehaviour
         CheckAttackRange(); // Check if the enemy is within attack range
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
+        bool dead = false;
+        if(enemyHealth <= 0)
+        {
+            dead = true;
+            StartCoroutine(deathAnimation());
+        }
+        if(attacked && !dead)
+        {
+            animator.SetTrigger("Attacked");
+            attacked = false;
+        }
     }
 
     private void FixedUpdate()
@@ -55,8 +68,11 @@ public class Enemy : MonoBehaviour
 
     public virtual void MoveTowardsPlayer()
     {
-        Vector3 moveDirection = (player.position - transform.position).normalized; // Calculate direction towards the player
-        rb.MovePosition(transform.position + moveDirection * moveSpeed * Time.deltaTime); // Move towards the player using Rigidbody
+        if (!attacked && enemyHealth > 0)
+        {
+            Vector3 moveDirection = (player.position - transform.position).normalized; // Calculate direction towards the player
+            rb.MovePosition(transform.position + moveDirection * moveSpeed * Time.deltaTime); // Move towards the player using Rigidbody
+        }
     }
 
     private void CheckBoundary()
@@ -95,11 +111,6 @@ public class Enemy : MonoBehaviour
         return Vector3.Distance(point, closestPoint) < Mathf.Epsilon;
     }
 
-    private void OnCollisionStay(Collision collision)
-    {
-
-    }
-
     private void CheckAttackRange()
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
@@ -135,5 +146,12 @@ public class Enemy : MonoBehaviour
             playerScript.playerHealth--;
             Debug.Log("Health: " + playerScript.playerHealth);
         }
+    }
+
+    IEnumerator deathAnimation()
+    {
+        animator.SetTrigger("Dead");
+        yield return new WaitForSeconds(1.067f);
+        Destroy(gameObject);
     }
 }

@@ -5,10 +5,15 @@ using UnityEngine;
 public class BossEnemy : Enemy
 {
     // Boss enemy child script.
-
+    protected override void Start()
+    {
+        base.Start(); // Call the Start method from the base class
+        // Additional initialization code for EasyEnemy
+        enemyHealth = 25;
+    }
     public override void MoveTowardsPlayer()
     {
-        moveSpeed = 3f;
+        moveSpeed = 4f;
         base.MoveTowardsPlayer();
     }
 }

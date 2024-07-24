@@ -158,7 +158,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.9238796, z: -0, w: -0.38268325}
   m_LocalPosition: {x: -0.03371203, y: 1.2, z: 1.1806214}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.25, y: 1.25, z: 1.25}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2613915690289971441}
@@ -231,6 +231,8 @@ MonoBehaviour:
   playerScript: {fileID: 0}
   moveSpeed: 4
   attackRange: 2
+  enemyHealth: 0
+  attacked: 0
 --- !u!95 &-4423799093075737729
 Animator:
   serializedVersion: 5
