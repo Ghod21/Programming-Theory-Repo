@@ -16,7 +16,7 @@ public class Player : MonoBehaviour
     private Vector3 input;
     public bool isDashing = false; // Track if the player is dashing
     private bool isAttacking = false;
-    private bool attacked = false;
+    //private bool attacked = false;
     private bool dashIsOnCooldown = false;
     private float dashTime; // Track the dash time
     private float attackCooldown = 0f; // Cooldown for attack
@@ -174,6 +174,7 @@ public class Player : MonoBehaviour
                     if (enemy != null)
                     {
                         enemy.enemyHealth--;
+                        enemy.attacked = true;
                     }
                 }
             }

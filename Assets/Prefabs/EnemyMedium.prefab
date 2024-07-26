@@ -102,7 +102,7 @@ MonoBehaviour:
   animator: {fileID: 5434204365207285170}
   playerScript: {fileID: 0}
   moveSpeed: 3.5
-  attackRange: 2
+  attackRange: 1.25
   enemyHealth: 0
   attacked: 0
 --- !u!95 &5434204365207285170

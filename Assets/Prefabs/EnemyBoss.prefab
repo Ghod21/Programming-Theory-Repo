@@ -101,7 +101,10 @@ MonoBehaviour:
   exclusionZone: {fileID: 0}
   animator: {fileID: -6373334986911107143}
   playerScript: {fileID: 0}
+  moveSpeed: 3.5
   attackRange: 2
+  enemyHealth: 0
+  attacked: 0
 --- !u!95 &-6373334986911107143
 Animator:
   serializedVersion: 5

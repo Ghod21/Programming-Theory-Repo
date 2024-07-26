@@ -38,13 +38,11 @@ public class Enemy : MonoBehaviour
         CheckAttackRange(); // Check if the enemy is within attack range
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        bool dead = false;
         if(enemyHealth <= 0)
         {
-            dead = true;
             StartCoroutine(deathAnimation());
         }
-        if(attacked && !dead)
+        if(attacked && enemyHealth > 0)
         {
             animator.SetTrigger("Attacked");
             attacked = false;
