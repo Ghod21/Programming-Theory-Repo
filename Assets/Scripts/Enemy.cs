@@ -5,16 +5,16 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     // Main enemy parent script.
-    [SerializeField] private BoxCollider boundaryCollider; // Collider defining the boundary
-    [SerializeField] private SphereCollider exclusionZone; // Collider defining where enemies should not spawn
-    [SerializeField] private Animator animator;
-    [SerializeField] private Player playerScript;
+    [SerializeField] protected BoxCollider boundaryCollider; // Collider defining the boundary
+    [SerializeField] protected SphereCollider exclusionZone; // Collider defining where enemies should not spawn
+    [SerializeField] protected Animator animator;
+    [SerializeField] protected Player playerScript;
     private float desiredY = 1.4f; // Desired height for the position
-    private Transform player; // Reference to the player's Transform
-    private Rigidbody rb; // Reference to the Rigidbody component
+    protected Transform player; // Reference to the player's Transform
+    protected Rigidbody rb; // Reference to the Rigidbody component
     [SerializeField] protected float moveSpeed = 3.5f;
     [SerializeField] private float attackRange = 2.0f; // Distance within which the enemy will attack
-    private bool isAttacking = false; // To prevent multiple attack calls
+    protected bool isAttacking = false; // To prevent multiple attack calls
     public int enemyHealth;
     public bool attacked;
 

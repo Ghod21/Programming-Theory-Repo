@@ -22,6 +22,7 @@ public class SpawnManager : MonoBehaviour
         StartCoroutine(Spawner());
         mainManagerScript = mainManager.GetComponent<MainManager>();
         numberOfEnemies = 1;
+        spawnBoss();
     }
 
     private void Update()
@@ -60,6 +61,14 @@ public class SpawnManager : MonoBehaviour
             GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, Quaternion.identity);
             instantiatedEnemy.transform.position = new Vector3(instantiatedEnemy.transform.position.x, spawnHeight, instantiatedEnemy.transform.position.z);
         }
+    }
+
+    private void spawnBoss()
+    {
+        Vector3 spawnPosition = GetRandomPointInBounds(spawnArea.bounds, exclusionZone);
+        GameObject enemy = enemies[3];
+        GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, Quaternion.identity);
+        instantiatedEnemy.transform.position = new Vector3(instantiatedEnemy.transform.position.x, spawnHeight, instantiatedEnemy.transform.position.z);
     }
 
     private GameObject ChooseEnemyBasedOnDifficulty()
