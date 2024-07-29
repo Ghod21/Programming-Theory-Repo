@@ -36,18 +36,19 @@ public class Enemy : MonoBehaviour
         LookAtPlayer(); // Ensure the enemy always faces the player
         CheckBoundary();
         CheckAttackRange(); // Check if the enemy is within attack range
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        if(enemyHealth <= 0)
+        rb.velocity = Vector3.zero; // Reset velocity to avoid residual movement
+        rb.angularVelocity = Vector3.zero; // Reset angular velocity to avoid rotation issues
+        if (enemyHealth <= 0)
         {
             StartCoroutine(deathAnimation());
         }
-        if(attacked && enemyHealth > 0)
+        if (attacked && enemyHealth > 0)
         {
             animator.SetTrigger("Attacked");
             attacked = false;
         }
     }
+
 
     private void FixedUpdate()
     {
@@ -69,9 +70,10 @@ public class Enemy : MonoBehaviour
         if (!attacked && enemyHealth > 0)
         {
             Vector3 moveDirection = (player.position - transform.position).normalized; // Calculate direction towards the player
-            rb.MovePosition(transform.position + moveDirection * moveSpeed * Time.deltaTime); // Move towards the player using Rigidbody
+            rb.velocity = moveDirection * moveSpeed; // Use velocity to move the enemy towards the player
         }
     }
+
 
     private void CheckBoundary()
     {
