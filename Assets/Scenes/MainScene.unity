@@ -4685,7 +4685,7 @@ MonoBehaviour:
   rb: {fileID: 1885716649}
   model: {fileID: 1885716651}
   animator: {fileID: 1885716650}
-  speed: 5
+  speed: 2.5
   verticalSpeedMultiplier: 1.5
   dashSpeed: 7
   dashDuration: 0.15

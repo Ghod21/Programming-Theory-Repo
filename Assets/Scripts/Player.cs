@@ -20,17 +20,22 @@ public class Player : MonoBehaviour
     private Vector3 input;
     public bool isDashing = false; // Track if the player is dashing
     private bool isAttacking = false;
-    //private bool attacked = false;
     private bool dashIsOnCooldown = false;
     private float dashTime; // Track the dash time
     private float attackCooldown = 0f; // Cooldown for attack
     private const float attackCooldownDuration = 0.833f; // Duration of the attack cooldown
     private int attackCount;
-
     public int playerHealth = 30;
-
     private bool isAttackQueued = false; // Flag to queue attacks
 
+    private bool isShielding;
+    private float shieldCooldown = 3f;
+    private bool shieldIsOnCooldown = false;
+    private int attackToShieldCount = 0;
+    public bool isBlockingDamage = false;
+    public int shieldHealth = 10;
+
+    //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
         animator.SetBool("isNotAttacking", true);
@@ -43,13 +48,16 @@ public class Player : MonoBehaviour
         LookAtMouse();
         HandleAnimations(); // Call the method to handle animations
         isNotAttackingCheck(); // Check if not attacking
+        ShieldLogic();
 
-        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown)
+        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding)
         {
             Dash();
             dashIsOnCooldown = true;
             StartCoroutine(dashCooldown());
         }
+
+
 
         attackCooldown -= Time.deltaTime; // Decrease the cooldown timer
 
@@ -67,7 +75,77 @@ public class Player : MonoBehaviour
     {
         Move();
     }
+    //  ....................................................................MAIN PART END..................................................................
+    //  ....................................................................SHIELD PART START..............................................................
 
+    private void ShieldLogic()
+    {
+        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown)
+        {
+            ShieldStart();
+        }
+        else if (Input.GetMouseButtonUp(1) && isShielding)
+        {
+            ShieldStop();
+        }
+        if (attackToShieldCount == 3)
+        {
+            ShieldStop();
+            attackToShieldCount = 0;
+        }
+        
+        if(isShielding)
+        {
+            isBlockingDamage = IsEnemyInShieldCone();
+        }
+        else
+        {
+            isBlockingDamage = false;
+        }
+
+        if (shieldHealth <= 0)
+        {
+            ShieldStop();
+        }
+    }
+    private bool IsEnemyInShieldCone()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (IsTargetInCone(hitCollider.transform))
+            {
+                if (hitCollider.CompareTag("Enemy"))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    private void ShieldStart()
+    {
+        if (isShielding) return;
+        isShielding = true;
+        animator.SetBool("isShielding", true);
+    }
+    private void ShieldStop()
+    {
+        if (!isShielding) return;
+        isShielding = false;
+        shieldIsOnCooldown = true;
+        animator.SetBool("isShielding", false);
+        StartCoroutine(ShieldCooldown());
+    }
+    IEnumerator ShieldCooldown()
+    {
+        yield return new WaitForSeconds(shieldCooldown);
+        shieldIsOnCooldown = false;
+        shieldHealth = 10;
+    }
+
+    //  ....................................................................SHIELD PART END................................................................
+    //  ....................................................................MOVE PART START................................................................
     private void GatherInput()
     {
         input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
@@ -75,6 +153,7 @@ public class Player : MonoBehaviour
 
     private void Move()
     {
+        float currentSpeed = isShielding ? speed / 2 : speed;
         if (isDashing)
         {
             // Calculate movement direction in isometric space
@@ -91,7 +170,7 @@ public class Player : MonoBehaviour
         {
             // Calculate movement direction in isometric space
             Vector3 movement = CalculateMovement(input);
-            rb.velocity = movement;
+            rb.velocity = movement * currentSpeed;
         }
     }
 
@@ -145,7 +224,9 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(3);
         dashIsOnCooldown = false;
     }
+    //  ..............................................................MOVE PART END..........................................................................
 
+    //  ..............................................................ATTACK PART START......................................................................
     private void Attack()
     {
         if (isAttacking)
@@ -155,6 +236,10 @@ public class Player : MonoBehaviour
         }
         isAttacking = true;
         attackCooldown = attackCooldownDuration; // Reset the cooldown timer
+        if (isShielding)
+        {
+            animator.SetBool("isShielding", false);
+        }
         animator.SetBool("isAttacking", true);
 
         // Start attack animation coroutine
@@ -196,6 +281,10 @@ public class Player : MonoBehaviour
                 }
             }
         }
+        if (isShielding)
+        {
+            attackToShieldCount++;
+        }
 
         // Play the appropriate sound once after checking all colliders
         if (killed)
@@ -218,6 +307,11 @@ public class Player : MonoBehaviour
         // Reset attack state
         isAttacking = false;
         animator.SetBool("isAttacking", false);
+        if (isShielding)
+        {
+            animator.SetBool("isShielding", true);
+        }
+
 
         // If an attack was queued, start the next one
         if (isAttackQueued)
@@ -247,4 +341,6 @@ public class Player : MonoBehaviour
             animator.SetBool("isNotAttacking", true);
         }
     }
+    //  ....................................................................ATTACK PART END................................................................
+
 }

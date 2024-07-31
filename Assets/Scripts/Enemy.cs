@@ -141,10 +141,14 @@ public class Enemy : MonoBehaviour
     {
         // Method for enemy attacks
         animator.SetBool("isAttacking", true);
-        if (playerScript.isDashing == false)
+        if (playerScript.isDashing == false && !playerScript.isBlockingDamage)
         {
             playerScript.playerHealth--;
             Debug.Log("Health: " + playerScript.playerHealth);
+        } else if (playerScript.isDashing == false && playerScript.isBlockingDamage)
+        {
+            playerScript.shieldHealth--;
+            Debug.Log("ShieldHealth: " + playerScript.shieldHealth);
         }
     }
 
