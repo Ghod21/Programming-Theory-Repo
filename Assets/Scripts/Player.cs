@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 using static UnityEngine.EventSystems.EventTrigger;
 
 public class Player : MonoBehaviour
@@ -14,10 +16,17 @@ public class Player : MonoBehaviour
 
 
     // Move variables
+    [SerializeField] GameObject dashFillArea;
+    [SerializeField] UnityEngine.UI.Image dashFillImage;
     [SerializeField] private float speed = 5;
     [SerializeField] private float verticalSpeedMultiplier = 1f; // Adjust this multiplier for vertical speed
     [SerializeField] private float dashSpeed = 10; // Speed during dash
     [SerializeField] private float dashDuration = 0.2f; // Duration of the dash
+    private bool dashIsOnCooldown = false;
+    private float dashTime; // Track the dash time
+    private float dashCooldownSeconds = 10f;
+    private bool isCooldownCoroutineRunning = false;
+
     private Vector3 input;
     public bool isDashing = false; // Track if the player is dashing
 
@@ -26,12 +35,9 @@ public class Player : MonoBehaviour
     [SerializeField] private float attackRange = 3f; // Range of the attack
     [SerializeField] private float attackAngle = 180f; // Angle of the attack cone
     private bool isAttacking = false;
-    private bool dashIsOnCooldown = false;
-    private float dashTime; // Track the dash time
     private float attackCooldown = 0f; // Cooldown for attack
     private const float attackCooldownDuration = 0.833f; // Duration of the attack cooldown
     private int attackCount;
-    public int playerHealth = 30;
     private bool isAttackQueued = false; // Flag to queue attacks
 
     // Shield variables
@@ -39,19 +45,28 @@ public class Player : MonoBehaviour
     [SerializeField] GameObject shieldWallPieceOne;
     [SerializeField] GameObject shieldWallPieceTwo;
     [SerializeField] GameObject shieldWallPieceThree;
+    [SerializeField] GameObject shieldFillArea;
+    [SerializeField] UnityEngine.UI.Slider shieldSlider;
     private bool isShielding;
-    private float shieldCooldown = 3f;
     private bool shieldIsOnCooldown = false;
     private int attackToShieldCount = 0;
     public bool isBlockingDamage = false;
     public int shieldHealth = 10;
     public float shieldWallRotationSpeed = 30f;
 
+    // Death and Health variables
+    [SerializeField] UnityEngine.UI.Slider healthSlider;
+    [SerializeField] GameObject fillArea;
+    public float playerHealth = 30f;
+
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
         animator.SetBool("isNotAttacking", true);
         audioSource = GetComponent<AudioSource>();
+        fillArea.SetActive(true);
+        shieldFillArea.SetActive(true);
+        Time.timeScale = 1f;
     }
 
     private void Update()
@@ -61,6 +76,8 @@ public class Player : MonoBehaviour
         HandleAnimations(); // Call the method to handle animations
         isNotAttackingCheck(); // Check if not attacking
         ShieldLogic();
+        HealthLogic();
+        DashUILogic();
 
         if (Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding)
         {
@@ -91,10 +108,24 @@ public class Player : MonoBehaviour
         Move();
     }
     //  ....................................................................MAIN PART END..................................................................
+    //  ....................................................................DEATH PART START...............................................................
+    private void HealthLogic()
+    {
+        healthSlider.value = Mathf.MoveTowards(healthSlider.value, playerHealth / 30f, Time.deltaTime * 10f);
+        if (playerHealth <= 0)
+        {
+            fillArea.SetActive(false);
+            Time.timeScale = 0f;
+        }
+    }
+
+
+    //  ....................................................................DEATH PART END.................................................................
     //  ....................................................................SHIELD PART START..............................................................
 
     private void ShieldLogic()
     {
+        shieldSlider.value = Mathf.MoveTowards(shieldSlider.value, shieldHealth / 10f, Time.deltaTime * 10f);
         shieldWallPiecesLogic();
         if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown)
         {
@@ -157,9 +188,19 @@ public class Player : MonoBehaviour
     }
     IEnumerator ShieldCooldown()
     {
-        yield return new WaitForSeconds(shieldCooldown);
-        shieldIsOnCooldown = false;
-        shieldHealth = 10;
+        shieldFillArea.SetActive(false);
+        shieldHealth = 0;
+        yield return new WaitForSeconds(1f);
+        shieldFillArea.SetActive(true);
+        while (shieldHealth < 10)
+        {
+            shieldHealth++;
+            if (shieldHealth == 10)
+            {
+                shieldIsOnCooldown = false;
+            }
+            yield return new WaitForSeconds(1f);
+        }
     }
     private void shieldWallPiecesLogic()
     {
@@ -185,7 +226,36 @@ public class Player : MonoBehaviour
 
     //  ....................................................................SHIELD PART END................................................................
     //  ....................................................................MOVE PART START................................................................
-    private void GatherInput()
+    private void DashUILogic()
+    {
+        if (!dashIsOnCooldown)
+        {
+            dashFillImage.fillAmount = 1;
+        }
+        else
+        {
+            if (!isCooldownCoroutineRunning)
+            {
+                StartCoroutine(DashCooldownTimer());
+            }
+        }
+    }
+
+    IEnumerator DashCooldownTimer()
+    {
+        isCooldownCoroutineRunning = true;
+        dashFillImage.fillAmount = 0f; // Start fill from 0
+
+        while (dashFillImage.fillAmount < 1f)
+        {
+            dashFillImage.fillAmount += 0.01f; // Increase fillAmount value
+            yield return new WaitForSeconds(0.1f); // Wait before the next update
+        }
+
+        dashFillImage.fillAmount = 1f; // Ensure the value is 1 at the end
+        isCooldownCoroutineRunning = false;
+    }
+private void GatherInput()
     {
         input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
     }
@@ -260,7 +330,7 @@ public class Player : MonoBehaviour
 
     IEnumerator dashCooldown()
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(dashCooldownSeconds);
         dashIsOnCooldown = false;
     }
     //  ..............................................................MOVE PART END..........................................................................
@@ -268,7 +338,7 @@ public class Player : MonoBehaviour
     //  ..............................................................ATTACK PART START......................................................................
     private void Attack()
     {
-        if (isAttacking)
+        if (isAttacking && Input.GetMouseButtonDown(0))
         {
             isAttackQueued = true; // Queue the attack if already attacking
             return;
@@ -342,6 +412,7 @@ public class Player : MonoBehaviour
         isAttackQueued = false;
         // Wait for the remaining half of the animation duration
         yield return new WaitForSeconds(0.833f / 2);
+
 
         // Reset attack state
         isAttacking = false;
