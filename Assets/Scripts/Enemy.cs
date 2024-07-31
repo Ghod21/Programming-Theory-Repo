@@ -144,10 +144,13 @@ public class Enemy : MonoBehaviour
         if (playerScript.isDashing == false && !playerScript.isBlockingDamage)
         {
             playerScript.playerHealth--;
+            playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], 0.8f);
             Debug.Log("Health: " + playerScript.playerHealth);
+
         } else if (playerScript.isDashing == false && playerScript.isBlockingDamage)
         {
             playerScript.shieldHealth--;
+            playerScript.audioSource.PlayOneShot(playerScript.audioClips[6], 0.6f);
             Debug.Log("ShieldHealth: " + playerScript.shieldHealth);
         }
     }

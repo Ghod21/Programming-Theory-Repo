@@ -5,20 +5,26 @@ using static UnityEngine.EventSystems.EventTrigger;
 
 public class Player : MonoBehaviour
 {
+    // Main variables
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform model;
     [SerializeField] private Animator animator; // Add a reference to the Animator component
+    public AudioSource audioSource;
+    public AudioClip[] audioClips;
+
+
+    // Move variables
     [SerializeField] private float speed = 5;
     [SerializeField] private float verticalSpeedMultiplier = 1f; // Adjust this multiplier for vertical speed
     [SerializeField] private float dashSpeed = 10; // Speed during dash
     [SerializeField] private float dashDuration = 0.2f; // Duration of the dash
-    [SerializeField] private float attackRange = 3f; // Range of the attack
-    [SerializeField] private float attackAngle = 180f; // Angle of the attack cone
-    [SerializeField] private string[] targetTags; // Tags of the targets
-    private AudioSource audioSource;
-    public AudioClip[] audioClips;
     private Vector3 input;
     public bool isDashing = false; // Track if the player is dashing
+
+    // Attack variables
+    [SerializeField] private string[] targetTags; // Tags of the targets
+    [SerializeField] private float attackRange = 3f; // Range of the attack
+    [SerializeField] private float attackAngle = 180f; // Angle of the attack cone
     private bool isAttacking = false;
     private bool dashIsOnCooldown = false;
     private float dashTime; // Track the dash time
@@ -28,12 +34,18 @@ public class Player : MonoBehaviour
     public int playerHealth = 30;
     private bool isAttackQueued = false; // Flag to queue attacks
 
+    // Shield variables
+    [SerializeField] GameObject shieldWall;
+    [SerializeField] GameObject shieldWallPieceOne;
+    [SerializeField] GameObject shieldWallPieceTwo;
+    [SerializeField] GameObject shieldWallPieceThree;
     private bool isShielding;
     private float shieldCooldown = 3f;
     private bool shieldIsOnCooldown = false;
     private int attackToShieldCount = 0;
     public bool isBlockingDamage = false;
     public int shieldHealth = 10;
+    public float shieldWallRotationSpeed = 30f;
 
     //  ....................................................................MAIN PART START................................................................
     private void Start()
@@ -56,7 +68,10 @@ public class Player : MonoBehaviour
             dashIsOnCooldown = true;
             StartCoroutine(dashCooldown());
         }
-
+        if (shieldWall.activeSelf)
+        {
+            shieldWall.transform.Rotate(Vector3.up, shieldWallRotationSpeed * Time.deltaTime);
+        }
 
 
         attackCooldown -= Time.deltaTime; // Decrease the cooldown timer
@@ -80,9 +95,11 @@ public class Player : MonoBehaviour
 
     private void ShieldLogic()
     {
+        shieldWallPiecesLogic();
         if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown)
         {
             ShieldStart();
+            audioSource.PlayOneShot(audioClips[4], 0.4f);
         }
         else if (Input.GetMouseButtonUp(1) && isShielding)
         {
@@ -93,14 +110,15 @@ public class Player : MonoBehaviour
             ShieldStop();
             attackToShieldCount = 0;
         }
-        
         if(isShielding)
         {
             isBlockingDamage = IsEnemyInShieldCone();
+            shieldWall.SetActive(true);
         }
         else
         {
             isBlockingDamage = false;
+            shieldWall.SetActive(false);
         }
 
         if (shieldHealth <= 0)
@@ -142,6 +160,27 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(shieldCooldown);
         shieldIsOnCooldown = false;
         shieldHealth = 10;
+    }
+    private void shieldWallPiecesLogic()
+    {
+        if (attackToShieldCount == 0)
+        {
+            shieldWallPieceOne.SetActive(true);
+            shieldWallPieceTwo.SetActive(true);
+            shieldWallPieceThree.SetActive(true);
+        }
+        if (attackToShieldCount == 1)
+        {
+            shieldWallPieceOne.SetActive(false);
+        }
+        if (attackToShieldCount == 2)
+        {
+            shieldWallPieceTwo.SetActive(false);
+        }
+        if (attackToShieldCount == 3)
+        {
+            shieldWallPieceThree.SetActive(false);
+        }
     }
 
     //  ....................................................................SHIELD PART END................................................................
