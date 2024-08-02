@@ -9,6 +9,7 @@ public class MainManager : MonoBehaviour
     // The script is for data persistence and UI.
     [SerializeField] TextMeshProUGUI timerUI;
     [SerializeField] GameObject player;
+    [SerializeField] GameObject[] uiToggle;
     private Player playerScript;
     private int timerSeconds;
     private int timerMinutes;
@@ -17,12 +18,18 @@ public class MainManager : MonoBehaviour
 
     private void Start()
     {
+        UILogic();
+
         timerSeconds = 0;
         timerMinutes = 0;
-        isTimerRunning = true;  // Start the timer when the game starts
-        StartCoroutine(Timer());
+
         difficultyMeter = 60;
         playerScript = player.GetComponent<Player>();
+        if(SceneManager.GetActiveScene().name == "MainScene")
+        {
+            isTimerRunning = true;  // Start the timer when the game starts
+            StartCoroutine(Timer());
+        }
     }
 
     private void Update()
@@ -33,6 +40,31 @@ public class MainManager : MonoBehaviour
         {
             Restart();
         }
+    }
+    private void UILogic()
+    {
+        if(SceneManager.GetActiveScene().name == "Menu")
+        {
+            UILogicMenu();
+        }
+        else
+        {
+            UILogicMainScene();
+        }
+    }
+    private void UILogicMenu()
+    {
+        uiToggle[0].SetActive(false);
+        uiToggle[1].SetActive(false);
+        uiToggle[2].SetActive(false);
+        uiToggle[3].SetActive(false);
+    }
+    private void UILogicMainScene()
+    {
+        uiToggle[0].SetActive(true);
+        uiToggle[1].SetActive(true);
+        uiToggle[2].SetActive(true);
+        uiToggle[3].SetActive(true);
     }
 
     IEnumerator Timer()

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SpawnManager : MonoBehaviour
 {
@@ -18,11 +19,14 @@ public class SpawnManager : MonoBehaviour
 
     private void Start()
     {
-        startSpawn = true;
-        StartCoroutine(Spawner());
+        if (SceneManager.GetActiveScene().name == "MainScene")
+        {
+            startSpawn = true;
+            StartCoroutine(Spawner());
+            numberOfEnemies = 1;
+            spawnBoss();
+        }    
         mainManagerScript = mainManager.GetComponent<MainManager>();
-        numberOfEnemies = 1;
-        spawnBoss();
     }
 
     private void Update()

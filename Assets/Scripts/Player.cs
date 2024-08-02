@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
-using static UnityEngine.EventSystems.EventTrigger;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -71,41 +69,47 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        GatherInput();
-        LookAtMouse();
-        HandleAnimations(); // Call the method to handle animations
-        isNotAttackingCheck(); // Check if not attacking
-        ShieldLogic();
-        HealthLogic();
-        DashUILogic();
-
-        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding)
+        if (SceneManager.GetActiveScene().name == "MainScene")
         {
-            Dash();
-            dashIsOnCooldown = true;
-            StartCoroutine(dashCooldown());
-        }
-        if (shieldWall.activeSelf)
-        {
-            shieldWall.transform.Rotate(Vector3.up, shieldWallRotationSpeed * Time.deltaTime);
-        }
+            GatherInput();
+            LookAtMouse();
+            HandleAnimations(); // Call the method to handle animations
+            isNotAttackingCheck(); // Check if not attacking
+            ShieldLogic();
+            HealthLogic();
+            DashUILogic();
+
+            if (Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding)
+            {
+                Dash();
+                dashIsOnCooldown = true;
+                StartCoroutine(dashCooldown());
+            }
+            if (shieldWall.activeSelf)
+            {
+                shieldWall.transform.Rotate(Vector3.up, shieldWallRotationSpeed * Time.deltaTime);
+            }
 
 
-        attackCooldown -= Time.deltaTime; // Decrease the cooldown timer
+            attackCooldown -= Time.deltaTime; // Decrease the cooldown timer
 
-        if (Input.GetMouseButton(0) && !isAttacking && attackCooldown <= 0f)
-        {
-            Attack();
-        }
-        else if (Input.GetMouseButton(0) && isAttacking)
-        {
-            isAttackQueued = true; // Queue the attack if one is already in progress
+            if (Input.GetMouseButton(0) && !isAttacking && attackCooldown <= 0f)
+            {
+                Attack();
+            }
+            else if (Input.GetMouseButton(0) && isAttacking)
+            {
+                isAttackQueued = true; // Queue the attack if one is already in progress
+            }
         }
     }
 
     private void FixedUpdate()
     {
-        Move();
+        if (SceneManager.GetActiveScene().name == "MainScene")
+        {
+            Move();
+        }
     }
     //  ....................................................................MAIN PART END..................................................................
     //  ....................................................................DEATH PART START...............................................................
