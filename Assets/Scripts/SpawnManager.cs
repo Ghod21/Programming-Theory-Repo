@@ -7,9 +7,11 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private GameObject[] enemies; // Array to hold the enemy prefabs
     [SerializeField] private BoxCollider spawnArea; // The BoxCollider that defines the spawn area
     [SerializeField] private SphereCollider exclusionZone; // The SphereCollider where enemies should not spawn
-    private int numberOfEnemies; // Number of enemies to spawn
     [SerializeField] private GameObject mainManager;
+    [SerializeField] private GameObject healthPotionPrefab; // Prefab for health potion
+
     private MainManager mainManagerScript;
+    private int numberOfEnemies; // Number of enemies to spawn
     private float spawnHeight = 1.4f; // Desired spawn height
     public int waveDifficulty;
     private bool startSpawn;
@@ -25,7 +27,7 @@ public class SpawnManager : MonoBehaviour
             StartCoroutine(Spawner());
             numberOfEnemies = 1;
             spawnBoss();
-        }    
+        }
         mainManagerScript = mainManager.GetComponent<MainManager>();
     }
 
@@ -37,10 +39,11 @@ public class SpawnManager : MonoBehaviour
             spawnTime = 1f;
         }
         difficultyMeter = mainManagerScript.difficultyMeter / 60;
-        if(difficultyMeter < 1)
+        if (difficultyMeter < 1)
         {
             difficultyMeter = 1;
-        } else if(difficultyMeter > 10)
+        }
+        else if (difficultyMeter > 10)
         {
             difficultyMeter = 10;
         }
@@ -155,5 +158,17 @@ public class SpawnManager : MonoBehaviour
     {
         Vector3 closestPoint = exclusionZone.ClosestPoint(point);
         return Vector3.Distance(point, closestPoint) < Mathf.Epsilon;
+    }
+
+    // Public function to create the health potion prefab if none exist in the scene
+    public void CreateHealthPotionIfNotExists()
+    {
+        // Check if any instance of healthPotionPrefab exists in the scene
+        GameObject[] existingPotions = GameObject.FindGameObjectsWithTag(healthPotionPrefab.tag);
+        if (existingPotions.Length == 0)
+        {
+            Vector3 spawnPosition = GetRandomPointInBounds(spawnArea.bounds, exclusionZone);
+            Instantiate(healthPotionPrefab, spawnPosition, Quaternion.identity);
+        }
     }
 }

@@ -17,6 +17,7 @@ public class Enemy : MonoBehaviour
     protected bool isAttacking = false; // To prevent multiple attack calls
     public int enemyHealth;
     public bool attacked;
+    bool deathAnimationDone = false;
 
     protected virtual void Start()
     {
@@ -38,9 +39,10 @@ public class Enemy : MonoBehaviour
         CheckAttackRange(); // Check if the enemy is within attack range
         rb.velocity = Vector3.zero; // Reset velocity to avoid residual movement
         rb.angularVelocity = Vector3.zero; // Reset angular velocity to avoid rotation issues
-        if (enemyHealth <= 0)
+        if (enemyHealth <= 0 && !deathAnimationDone)
         {
             StartCoroutine(deathAnimation());
+            deathAnimationDone = true;
         }
         if (attacked && enemyHealth > 0)
         {
@@ -144,6 +146,7 @@ public class Enemy : MonoBehaviour
         if (playerScript.isDashing == false && !playerScript.isBlockingDamage)
         {
             playerScript.playerHealth--;
+            playerScript.scoreMultiplierBase -= 10;
             playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2);
             Debug.Log("Health: " + playerScript.playerHealth);
 

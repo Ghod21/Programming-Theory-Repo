@@ -18,7 +18,8 @@ public class HardEnemy : Enemy
     }
     protected override IEnumerator deathAnimation()
     {
-
+        DataPersistence.currentPlayerScore += 15 * playerScript.scoreMultiplier;
+        playerScript.scoreMultiplierBase += 3;
         return base.deathAnimation();
     }
 }

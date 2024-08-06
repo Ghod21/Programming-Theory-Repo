@@ -6403,6 +6403,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72d04f22a38543442ae5ded5107ac04e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  audioSource: {fileID: 0}
   musicSlider: {fileID: 1916606248}
   soundsSlider: {fileID: 718029870}
   playMusic: 1
@@ -9893,6 +9894,7 @@ MonoBehaviour:
   nameInputField: {fileID: 1611972304}
   nameFieldImage: {fileID: 1611972305}
   wrongNameText: {fileID: 1012237834}
+  audioManager: {fileID: 0}
   difficultyMeter: 0
 --- !u!4 &1839713938
 Transform:
@@ -10653,7 +10655,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 81652031b64c342cc8dbc59c138d77c5, type: 3}
   - {fileID: 8300000, guid: cd13436b01a4b5b4082c89e180d10dc3, type: 3}
   - {fileID: 8300000, guid: 4b4dd7245f6104c8c8eb07ccf6b386ed, type: 3}
-  audioManager: {fileID: 1177333150}
   dashFillArea: {fileID: 1554523609}
   dashFillImage: {fileID: 1554523611}
   speed: 2.5
@@ -10676,8 +10677,10 @@ MonoBehaviour:
   shieldWallRotationSpeed: 90
   healthSlider: {fileID: 1733566768}
   fillArea: {fileID: 2144242574}
-  playerHealth: 30
+  playerHealth: 5
   gameOver: 0
+  scoreMultiplier: 1
+  scoreMultiplierBase: 0
 --- !u!135 &1885716653
 SphereCollider:
   m_ObjectHideFlags: 0

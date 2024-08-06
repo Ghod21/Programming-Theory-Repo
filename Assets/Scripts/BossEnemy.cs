@@ -90,7 +90,7 @@ public class BossEnemy : Enemy
     }
     protected override IEnumerator deathAnimation()
     {
-
+        DataPersistence.currentPlayerScore += DataPersistence.currentPlayerScore * 0.5f;
         return base.deathAnimation();
     }
 }
