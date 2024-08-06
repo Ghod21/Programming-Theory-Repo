@@ -16,4 +16,9 @@ public class HardEnemy : Enemy
         moveSpeed = 3f;
         base.MoveTowardsPlayer();
     }
+    protected override IEnumerator deathAnimation()
+    {
+
+        return base.deathAnimation();
+    }
 }

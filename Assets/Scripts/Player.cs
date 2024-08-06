@@ -56,6 +56,7 @@ public class Player : MonoBehaviour
     [SerializeField] UnityEngine.UI.Slider healthSlider;
     [SerializeField] GameObject fillArea;
     public float playerHealth = 30f;
+    public bool gameOver;
 
     //  ....................................................................MAIN PART START................................................................
     private void Start()
@@ -65,11 +66,12 @@ public class Player : MonoBehaviour
         fillArea.SetActive(true);
         shieldFillArea.SetActive(true);
         Time.timeScale = 1f;
+        gameOver = false;
     }
 
     private void Update()
     {
-        if (SceneManager.GetActiveScene().name == "MainScene")
+        if (SceneManager.GetActiveScene().name == "MainScene" && !gameOver)
         {
             GatherInput();
             LookAtMouse();
@@ -102,6 +104,10 @@ public class Player : MonoBehaviour
                 isAttackQueued = true; // Queue the attack if one is already in progress
             }
         }
+        if (playerHealth <= 0f)
+        {
+            GameOver();
+        }
     }
 
     private void FixedUpdate()
@@ -119,8 +125,13 @@ public class Player : MonoBehaviour
         if (playerHealth <= 0)
         {
             fillArea.SetActive(false);
-            Time.timeScale = 0f;
         }
+    }
+    private void GameOver()
+    {
+        gameOver = true;
+        animator.SetBool("isGameOver", true);
+        Time.timeScale = 0f;
     }
 
 
