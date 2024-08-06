@@ -155,7 +155,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    IEnumerator deathAnimation()
+    protected virtual IEnumerator deathAnimation()
     {
         animator.SetTrigger("Dead");
         yield return new WaitForSeconds(1.067f);

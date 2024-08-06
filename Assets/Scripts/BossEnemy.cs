@@ -88,5 +88,10 @@ public class BossEnemy : Enemy
             yield return new WaitForSeconds(chargeCooldown - chargeDuration); // Adjust wait time
         }
     }
+    protected override IEnumerator deathAnimation()
+    {
+
+        return base.deathAnimation();
+    }
 }
 

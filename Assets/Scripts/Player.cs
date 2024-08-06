@@ -130,6 +130,7 @@ public class Player : MonoBehaviour
     private void GameOver()
     {
         gameOver = true;
+        animator.SetBool("isGameOver", true);
         Time.timeScale = 0f;
     }
 

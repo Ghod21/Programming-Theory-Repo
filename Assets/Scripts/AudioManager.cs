@@ -4,7 +4,7 @@ public class AudioManager : MonoBehaviour
 {
     // The script is for audio managing. Background music. Etc.
 
-    private AudioSource audioSource;
+    public AudioSource audioSource;
     [SerializeField] UnityEngine.UI.Slider musicSlider;
     [SerializeField] UnityEngine.UI.Slider soundsSlider;
     public bool playMusic = true;

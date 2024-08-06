@@ -20,17 +20,21 @@ public class MainManager : MonoBehaviour
     [SerializeField] TextMeshProUGUI[] gameOverUIText;
     [SerializeField] TextMeshProUGUI nameText;
     [SerializeField] Toggle startInfoToggle;
-    private int totalUiElements = 16;
     [SerializeField] TMP_InputField nameInputField;
-
+    [SerializeField] Image nameFieldImage;
+    [SerializeField] GameObject wrongNameText;
+    [SerializeField] GameObject audioManager;
     private Player playerScript;
+
+
+    private int totalUiElements = 16;
     private int timerSeconds;
     private int timerMinutes;
     private bool isTimerRunning = false;
     public int difficultyMeter;
     private bool infoIsOn;
     private bool startInfoIsOn;
-
+    bool deathSoundsPlayed;
     private bool correctNameToStart;
 
     public string PlayerName
@@ -118,7 +122,8 @@ public class MainManager : MonoBehaviour
                 // Check if the name is valid
                 correctNameToStart = IsValidName(nameInputField.text);
             }
-        } else
+        }
+        else
         {
             GameOverUI();
         }
@@ -141,7 +146,7 @@ public class MainManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Name is not valid. Please enter a valid name to start.");
+            StartCoroutine(NameFieldColorChange());
         }
     }
     public void ExitButtonClick()
@@ -284,14 +289,24 @@ public class MainManager : MonoBehaviour
                     gameOverUI[i].SetActive(true);
                 }
             }
-            float[] playerScores = { DataPersistence.playerOneScore, DataPersistence.playerTwoScore, DataPersistence.playerThreeScore};
-            if (DataPersistence.currentPlayerScore <= playerScores[0] && DataPersistence.currentPlayerScore <= playerScores[1] && DataPersistence.currentPlayerScore <= playerScores[2])
+            float[] playerScores = { DataPersistence.playerOneScore, DataPersistence.playerTwoScore, DataPersistence.playerThreeScore };
+            if (!deathSoundsPlayed)
             {
-                gameOverUIText[0].text = "Good Try!";// No new high score
-            } else
-            {
-                gameOverUIText[0].text = "Congratulations - You are on the Wall of Fame!";// New high score
+                if (DataPersistence.currentPlayerScore <= playerScores[0] && DataPersistence.currentPlayerScore <= playerScores[1] && DataPersistence.currentPlayerScore <= playerScores[2])
+                {
+                    gameOverUIText[0].text = "Good Try!";// No new high score
+                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[7], DataPersistence.soundsVolume * 0.6f);
+                }
+                else
+                {
+                    gameOverUIText[0].text = "Congratulations - You are on the Wall of Fame!";// New high score
+                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[8], DataPersistence.soundsVolume * 0.6f);
+                }
+                deathSoundsPlayed = true;
+                AudioManager audioManagerScript = audioManager.GetComponent<AudioManager>();
+                audioManagerScript.playMusic = false;
             }
+
 
             gameOverUIText[1].text = DataPersistence.currentPlayerName;// PlayerName
             gameOverUIText[2].text = DataPersistence.currentPlayerScore.ToString(); // Player Score
@@ -303,7 +318,25 @@ public class MainManager : MonoBehaviour
         wallOfFameLeaders[1].text = DataPersistence.playerTwo + ": " + DataPersistence.playerTwoScore.ToString();
         wallOfFameLeaders[2].text = DataPersistence.playerThree + ": " + DataPersistence.playerThreeScore.ToString();
     }
-
+    IEnumerator NameFieldColorChange()
+    {
+        wrongNameText.SetActive(true);
+        ChangeColor("#FFCCC9");
+        yield return new WaitForSeconds(1f);
+        ChangeColor("#CDFFC9");
+        wrongNameText.SetActive(false);
+    }
+    public void ChangeColor(string hexColor)
+    {
+        if (ColorUtility.TryParseHtmlString(hexColor, out Color newColor))
+        {
+            nameFieldImage.color = newColor;
+        }
+        else
+        {
+            Debug.LogError("Invalid Hex Color");
+        }
+    }
 
     //  ....................................................................MENU UI PART END................................................................
 

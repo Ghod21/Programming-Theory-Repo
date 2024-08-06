@@ -1,3 +1,5 @@
+using System.Collections;
+
 public class EasyEnemy : Enemy
 {
     // Easy enemy child script.
@@ -11,5 +13,10 @@ public class EasyEnemy : Enemy
     {
         moveSpeed = 5f;
         base.MoveTowardsPlayer();
+    }
+    protected override IEnumerator deathAnimation()
+    {
+
+        return base.deathAnimation();
     }
 }

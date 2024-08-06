@@ -16,4 +16,9 @@ public class MediumEnemy : Enemy
         moveSpeed = 4f;
         base.MoveTowardsPlayer();
     }
+    protected override IEnumerator deathAnimation()
+    {
+
+        return base.deathAnimation();
+    }
 }
