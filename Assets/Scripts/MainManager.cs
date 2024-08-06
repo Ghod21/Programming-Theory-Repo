@@ -6,7 +6,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 using System.Text.RegularExpressions;
 
 public class MainManager : MonoBehaviour
@@ -14,10 +13,13 @@ public class MainManager : MonoBehaviour
     // The script is for data persistence and UI.
     public static MainManager Instance;
     [SerializeField] TextMeshProUGUI timerUI;
+    [SerializeField] TextMeshProUGUI[] wallOfFameLeaders;
     [SerializeField] GameObject player;
     [SerializeField] GameObject[] uiToggle;
+    [SerializeField] GameObject[] gameOverUI;
+    [SerializeField] TextMeshProUGUI[] gameOverUIText;
     [SerializeField] TextMeshProUGUI nameText;
-    [SerializeField] UnityEngine.UI.Toggle startInfoToggle;
+    [SerializeField] Toggle startInfoToggle;
     private int totalUiElements = 16;
     [SerializeField] TMP_InputField nameInputField;
 
@@ -55,6 +57,7 @@ public class MainManager : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "Menu")
         {
             startInfoToggle.isOn = DataPersistence.startInfoDontShowData;
+            WallOfFameUpdate();
         }
         UISceneLogic();
         if (SceneManager.GetActiveScene().name == "Menu" && !DataPersistence.startInfoDontShowData)
@@ -73,30 +76,51 @@ public class MainManager : MonoBehaviour
             nameText.text = DataPersistence.currentPlayerName;
             isTimerRunning = true;  // Start the timer when the game starts
             StartCoroutine(Timer());
+            for (int i = 0; i < gameOverUI.Length; i++)
+            {
+                if (gameOverUI[i] != null)
+                {
+                    gameOverUI[i].SetActive(false);
+                }
+            }
         }
     }
 
     private void Update()
     {
-        UIStartInfoDontShowLogic();
-        timerUI.text = "Time: " + timerMinutes.ToString("D2") + ":" + timerSeconds.ToString("D2");
-
-        if (Input.GetKeyDown(KeyCode.Space) && playerScript.playerHealth <= 0)
+        if (!playerScript.gameOver)
         {
-            Restart();
-        }
-        if(startInfoIsOn && Input.anyKeyDown)
-        {
-            startInfoIsOn = false;
-            UILogicMenu();
-
-            for (int i = 14; i < 16; i++)
+            UIStartInfoDontShowLogic();
+            timerUI.text = "Time: " + timerMinutes.ToString("D2") + ":" + timerSeconds.ToString("D2");
+            if (startInfoIsOn && Input.anyKeyDown)
             {
-                if (uiToggle[i] != null)
+                startInfoIsOn = false;
+                UILogicMenu();
+
+                for (int i = 14; i < 16; i++)
                 {
-                    uiToggle[i].SetActive(false);
+                    if (uiToggle[i] != null)
+                    {
+                        uiToggle[i].SetActive(false);
+                    }
                 }
             }
+            if (SceneManager.GetActiveScene().name == "Menu")
+            {
+                NameInputFieldUI();
+                // Check if the InputField value has changed
+                if (nameInputField.text != DataPersistence.currentPlayerName)
+                {
+                    // Update the PlayerName property when the input field value changes
+                    PlayerName = nameInputField.text;
+                }
+
+                // Check if the name is valid
+                correctNameToStart = IsValidName(nameInputField.text);
+            }
+        } else
+        {
+            GameOverUI();
         }
         if (SceneManager.GetActiveScene().name == "MainScene")
         {
@@ -104,18 +128,8 @@ public class MainManager : MonoBehaviour
             {
                 SceneManager.LoadScene("Menu");
             }
+            nameText.text = DataPersistence.currentPlayerName + ": " + DataPersistence.currentPlayerScore.ToString();
         }
-        if (SceneManager.GetActiveScene().name == "Menu")
-        {
-            NameInputFieldUI();
-            // Check if the InputField value has changed
-            if (nameInputField.text != DataPersistence.currentPlayerName)
-            {
-                // Update the PlayerName property when the input field value changes
-                PlayerName = nameInputField.text;
-            }
-        }
-
     }
     //  ....................................................................MENU UI PART START..............................................................
     public void PlayButtonClick()
@@ -124,6 +138,10 @@ public class MainManager : MonoBehaviour
         {
             DataPersistence.Instance.SaveData();
             SceneManager.LoadScene("MainScene");
+        }
+        else
+        {
+            Debug.LogWarning("Name is not valid. Please enter a valid name to start.");
         }
     }
     public void ExitButtonClick()
@@ -157,7 +175,8 @@ public class MainManager : MonoBehaviour
             uiToggle[16].SetActive(true);
 
             infoIsOn = true;
-        } else
+        }
+        else
         {
             UILogicMenu();
             infoIsOn = false;
@@ -218,7 +237,7 @@ public class MainManager : MonoBehaviour
     }
     private void UILogicMainScene()
     {
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < uiToggle.Length; i++)
         {
             if (uiToggle[i] != null)
             {
@@ -244,6 +263,48 @@ public class MainManager : MonoBehaviour
         // Check if the name is between 3 and 10 characters and contains only English letters
         return Regex.IsMatch(name, "^[a-zA-Z]{3,10}$");
     }
+    private void GameOverUI()
+    {
+        for (int i = 0; i < uiToggle.Length; i++)
+        {
+            if (uiToggle[i] != null)
+            {
+                uiToggle[i].SetActive(false);
+            }
+        }
+        UpdateLeaderboard();
+        WallOfFameUpdate();
+        if (SceneManager.GetActiveScene().name == "MainScene")
+        {
+            // Show GameOver UI
+            for (int i = 0; i < gameOverUI.Length; i++)
+            {
+                if (gameOverUI[i] != null)
+                {
+                    gameOverUI[i].SetActive(true);
+                }
+            }
+            float[] playerScores = { DataPersistence.playerOneScore, DataPersistence.playerTwoScore, DataPersistence.playerThreeScore};
+            if (DataPersistence.currentPlayerScore <= playerScores[0] && DataPersistence.currentPlayerScore <= playerScores[1] && DataPersistence.currentPlayerScore <= playerScores[2])
+            {
+                gameOverUIText[0].text = "Good Try!";// No new high score
+            } else
+            {
+                gameOverUIText[0].text = "Congratulations - You are on the Wall of Fame!";// New high score
+            }
+
+            gameOverUIText[1].text = DataPersistence.currentPlayerName;// PlayerName
+            gameOverUIText[2].text = DataPersistence.currentPlayerScore.ToString(); // Player Score
+        }
+    }
+    private void WallOfFameUpdate()
+    {
+        wallOfFameLeaders[0].text = DataPersistence.playerOne + ": " + DataPersistence.playerOneScore.ToString();
+        wallOfFameLeaders[1].text = DataPersistence.playerTwo + ": " + DataPersistence.playerTwoScore.ToString();
+        wallOfFameLeaders[2].text = DataPersistence.playerThree + ": " + DataPersistence.playerThreeScore.ToString();
+    }
+
+
     //  ....................................................................MENU UI PART END................................................................
 
 
@@ -265,5 +326,46 @@ public class MainManager : MonoBehaviour
     {
         string currentSceneName = SceneManager.GetActiveScene().name;
         SceneManager.LoadScene(currentSceneName);
+    }
+    private void UpdateLeaderboard()
+    {
+        // Create arrays for player names and scores
+        string[] playerNames = { DataPersistence.playerOne, DataPersistence.playerTwo, DataPersistence.playerThree, DataPersistence.currentPlayerName };
+        float[] playerScores = { DataPersistence.playerOneScore, DataPersistence.playerTwoScore, DataPersistence.playerThreeScore, DataPersistence.currentPlayerScore };
+
+        // Sort the players by scores in descending order
+        if (playerScores[3] > playerScores[0] || playerScores[3] > playerScores[1] || playerScores[3] > playerScores[2])
+        {
+
+            for (int i = 0; i < playerScores.Length - 1; i++)
+            {
+                for (int j = i + 1; j < playerScores.Length; j++)
+                {
+                    if (playerScores[j] > playerScores[i])
+                    {
+                        // Swap scores
+                        float tempScore = playerScores[i];
+                        playerScores[i] = playerScores[j];
+                        playerScores[j] = tempScore;
+
+                        // Swap names
+                        string tempName = playerNames[i];
+                        playerNames[i] = playerNames[j];
+                        playerNames[j] = tempName;
+                    }
+                }
+            }
+
+            // Update DataPersistence with the new leaderboard
+            DataPersistence.playerOne = playerNames[0];
+            DataPersistence.playerOneScore = playerScores[0];
+            DataPersistence.playerTwo = playerNames[1];
+            DataPersistence.playerTwoScore = playerScores[1];
+            DataPersistence.playerThree = playerNames[2];
+            DataPersistence.playerThreeScore = playerScores[2];
+
+            // Save updated data
+            DataPersistence.Instance.SaveData();
+        }
     }
 }
