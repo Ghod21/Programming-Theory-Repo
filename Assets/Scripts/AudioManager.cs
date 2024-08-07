@@ -28,7 +28,7 @@ public class AudioManager : MonoBehaviour
 
     void Update()
     {
-        audioSource.volume = DataPersistence.musicVolume;
+        audioSource.volume = DataPersistence.musicVolume * 0.75f;
         if (playMusic && !audioSource.isPlaying)
         {
             audioSource.Play();

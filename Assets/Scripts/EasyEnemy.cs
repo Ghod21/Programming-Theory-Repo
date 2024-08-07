@@ -16,7 +16,8 @@ public class EasyEnemy : Enemy
     }
     protected override IEnumerator deathAnimation()
     {
-
+        DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;
+        playerScript.scoreMultiplierBase++;
         return base.deathAnimation();
     }
 }

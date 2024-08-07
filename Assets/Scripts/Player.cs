@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,7 +12,7 @@ public class Player : MonoBehaviour
     [SerializeField] private Animator animator; // Add a reference to the Animator component
     public AudioSource audioSource;
     public AudioClip[] audioClips;
-
+    float soundAdjustment = 0.6f;
 
     // Move variables
     [SerializeField] GameObject dashFillArea;
@@ -55,8 +56,14 @@ public class Player : MonoBehaviour
     // Death and Health variables
     [SerializeField] UnityEngine.UI.Slider healthSlider;
     [SerializeField] GameObject fillArea;
-    public float playerHealth = 30f;
+    [SerializeField] Collider boxCollider; // Assign this in the Inspector or via script
+    public float playerHealth = 5f;
     public bool gameOver;
+
+    // Score variables
+    public float scoreMultiplier = 1;
+    public float scoreMultiplierBase; // For adjusting scoreMultiplier based on killed enemies
+
 
     //  ....................................................................MAIN PART START................................................................
     private void Start()
@@ -80,6 +87,7 @@ public class Player : MonoBehaviour
             ShieldLogic();
             HealthLogic();
             DashUILogic();
+            ScoreUpdate();
 
             if (Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding)
             {
@@ -118,6 +126,29 @@ public class Player : MonoBehaviour
         }
     }
     //  ....................................................................MAIN PART END..................................................................
+    //  ....................................................................SCORE PART START...............................................................
+
+    private void ScoreUpdate()
+    {
+        if(scoreMultiplierBase < 10)
+        {
+            scoreMultiplier = 1;
+        } else if (scoreMultiplierBase >= 5 || scoreMultiplierBase < 10)
+        {
+            scoreMultiplier = 2;
+        } else if (scoreMultiplierBase >= 10 || scoreMultiplierBase < 20)
+        {
+            scoreMultiplier = 3;
+        } else if (scoreMultiplierBase >= 20 || scoreMultiplierBase < 50)
+        {
+            scoreMultiplier = 4;
+        } else if (scoreMultiplierBase >= 50)
+        {
+            scoreMultiplier = 5;
+        }
+    }
+
+    //  ....................................................................SCORE PART END.................................................................
     //  ....................................................................DEATH PART START...............................................................
     private void HealthLogic()
     {
@@ -135,6 +166,7 @@ public class Player : MonoBehaviour
     }
 
 
+
     //  ....................................................................DEATH PART END.................................................................
     //  ....................................................................SHIELD PART START..............................................................
 
@@ -145,7 +177,7 @@ public class Player : MonoBehaviour
         if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown)
         {
             ShieldStart();
-            audioSource.PlayOneShot(audioClips[4], DataPersistence.soundsVolume * 0.8f);
+            audioSource.PlayOneShot(audioClips[4], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
         }
         else if (Input.GetMouseButtonUp(1) && isShielding)
         {
@@ -333,7 +365,7 @@ private void GatherInput()
     private void Dash()
     {
         isDashing = true;
-        audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2);
+        audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
         dashTime = dashDuration;
     }
 
@@ -413,15 +445,15 @@ private void GatherInput()
         // Play the appropriate sound once after checking all colliders
         if (killed)
         {
-            audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f);
+            audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
         }
         else if (hitEnemy)
         {
-            audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f);
+            audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
         }
         else
         {
-            audioSource.PlayOneShot(audioClips[1], DataPersistence.soundsVolume * 0.8f);
+            audioSource.PlayOneShot(audioClips[1], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
         }
 
         isAttackQueued = false;

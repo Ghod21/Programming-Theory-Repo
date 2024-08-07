@@ -24,6 +24,8 @@ public class MainManager : MonoBehaviour
     [SerializeField] Image nameFieldImage;
     [SerializeField] GameObject wrongNameText;
     [SerializeField] GameObject audioManager;
+    [SerializeField] AudioClip[] menuSounds;
+    [SerializeField] AudioSource audioSource;
     private Player playerScript;
 
 
@@ -36,6 +38,8 @@ public class MainManager : MonoBehaviour
     private bool startInfoIsOn;
     bool deathSoundsPlayed;
     private bool correctNameToStart;
+    bool leaderBoardUpdated;
+    float soundAdjustment = 0.6f;
 
     public string PlayerName
     {
@@ -58,6 +62,7 @@ public class MainManager : MonoBehaviour
 
     private void Start()
     {
+        leaderBoardUpdated = false;
         if (SceneManager.GetActiveScene().name == "Menu")
         {
             startInfoToggle.isOn = DataPersistence.startInfoDontShowData;
@@ -73,7 +78,7 @@ public class MainManager : MonoBehaviour
         timerSeconds = 0;
         timerMinutes = 0;
 
-        difficultyMeter = 60;
+        difficultyMeter = 60; // Switch for difficulty. 60 is normal. 360 = 5 min. __________________________
         playerScript = player.GetComponent<Player>();
         if (SceneManager.GetActiveScene().name == "MainScene")
         {
@@ -87,6 +92,7 @@ public class MainManager : MonoBehaviour
                     gameOverUI[i].SetActive(false);
                 }
             }
+            DataPersistence.currentPlayerScore = 0;
         }
     }
 
@@ -141,16 +147,19 @@ public class MainManager : MonoBehaviour
     {
         if (correctNameToStart)
         {
+            audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 4f * soundAdjustment);
             DataPersistence.Instance.SaveData();
             SceneManager.LoadScene("MainScene");
         }
         else
         {
+            audioSource.PlayOneShot(menuSounds[1], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
             StartCoroutine(NameFieldColorChange());
         }
     }
     public void ExitButtonClick()
     {
+        audioSource.PlayOneShot(menuSounds[1], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
         DataPersistence.Instance.Exit();
 #if UNITY_EDITOR
         EditorApplication.isPlaying = false;
@@ -160,6 +169,7 @@ public class MainManager : MonoBehaviour
     }
     public void InfoButtonClick()
     {
+        audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 4f * soundAdjustment);
         if (!infoIsOn)
         {
             uiToggle[5].SetActive(false);
@@ -295,12 +305,12 @@ public class MainManager : MonoBehaviour
                 if (DataPersistence.currentPlayerScore <= playerScores[0] && DataPersistence.currentPlayerScore <= playerScores[1] && DataPersistence.currentPlayerScore <= playerScores[2])
                 {
                     gameOverUIText[0].text = "Good Try!";// No new high score
-                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[7], DataPersistence.soundsVolume * 0.6f);
+                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[7], DataPersistence.soundsVolume * soundAdjustment);
                 }
                 else
                 {
                     gameOverUIText[0].text = "Congratulations - You are on the Wall of Fame!";// New high score
-                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[8], DataPersistence.soundsVolume * 0.6f);
+                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[8], DataPersistence.soundsVolume * soundAdjustment);
                 }
                 deathSoundsPlayed = true;
                 AudioManager audioManagerScript = audioManager.GetComponent<AudioManager>();
@@ -363,42 +373,60 @@ public class MainManager : MonoBehaviour
     private void UpdateLeaderboard()
     {
         // Create arrays for player names and scores
-        string[] playerNames = { DataPersistence.playerOne, DataPersistence.playerTwo, DataPersistence.playerThree, DataPersistence.currentPlayerName };
-        float[] playerScores = { DataPersistence.playerOneScore, DataPersistence.playerTwoScore, DataPersistence.playerThreeScore, DataPersistence.currentPlayerScore };
+        string[] playerNames = { DataPersistence.playerOne, DataPersistence.playerTwo, DataPersistence.playerThree };
+        float[] playerScores = { DataPersistence.playerOneScore, DataPersistence.playerTwoScore, DataPersistence.playerThreeScore };
 
-        // Sort the players by scores in descending order
-        if (playerScores[3] > playerScores[0] || playerScores[3] > playerScores[1] || playerScores[3] > playerScores[2])
+        string currentPlayerName = DataPersistence.currentPlayerName;
+        float currentPlayerScore = DataPersistence.currentPlayerScore;
+
+        // Check if the current player's score is higher than any of the top three scores
+        if (currentPlayerScore > playerScores[0] && !leaderBoardUpdated)
         {
+            // Current player takes the first place
+            // Shift down the previous first and second places
+            playerScores[2] = playerScores[1];
+            playerNames[2] = playerNames[1];
 
-            for (int i = 0; i < playerScores.Length - 1; i++)
-            {
-                for (int j = i + 1; j < playerScores.Length; j++)
-                {
-                    if (playerScores[j] > playerScores[i])
-                    {
-                        // Swap scores
-                        float tempScore = playerScores[i];
-                        playerScores[i] = playerScores[j];
-                        playerScores[j] = tempScore;
+            playerScores[1] = playerScores[0];
+            playerNames[1] = playerNames[0];
 
-                        // Swap names
-                        string tempName = playerNames[i];
-                        playerNames[i] = playerNames[j];
-                        playerNames[j] = tempName;
-                    }
-                }
-            }
+            playerScores[0] = currentPlayerScore;
+            playerNames[0] = currentPlayerName;
 
-            // Update DataPersistence with the new leaderboard
-            DataPersistence.playerOne = playerNames[0];
-            DataPersistence.playerOneScore = playerScores[0];
-            DataPersistence.playerTwo = playerNames[1];
-            DataPersistence.playerTwoScore = playerScores[1];
-            DataPersistence.playerThree = playerNames[2];
-            DataPersistence.playerThreeScore = playerScores[2];
-
-            // Save updated data
-            DataPersistence.Instance.SaveData();
+            leaderBoardUpdated = true;
         }
+        else if (currentPlayerScore > playerScores[1] && !leaderBoardUpdated)
+        {
+            // Current player takes the second place
+            // Shift down the previous second place
+            playerScores[2] = playerScores[1];
+            playerNames[2] = playerNames[1];
+
+            playerScores[1] = currentPlayerScore;
+            playerNames[1] = currentPlayerName;
+
+            leaderBoardUpdated = true;
+        }
+        else if (currentPlayerScore > playerScores[2] && !leaderBoardUpdated)
+        {
+            // Current player takes the third place
+            playerScores[2] = currentPlayerScore;
+            playerNames[2] = currentPlayerName;
+
+            leaderBoardUpdated = true;
+        }
+
+        // Update DataPersistence with the new leaderboard
+        DataPersistence.playerOne = playerNames[0];
+        DataPersistence.playerOneScore = playerScores[0];
+        DataPersistence.playerTwo = playerNames[1];
+        DataPersistence.playerTwoScore = playerScores[1];
+        DataPersistence.playerThree = playerNames[2];
+        DataPersistence.playerThreeScore = playerScores[2];
+
+        // Save updated data
+        DataPersistence.Instance.SaveData();
     }
+
+
 }

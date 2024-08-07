@@ -841,6 +841,34 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 38335279662569219, guid: 34d3f526198dae440bb2ce6005d86055, type: 3}
   m_PrefabInstance: {fileID: 176794152}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &288700424 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2066896392038628068, guid: 45288819fde2143449a96207b14db0bb, type: 3}
+  m_PrefabInstance: {fileID: 1885716645}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &288700427
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 288700424}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.61
+  m_Height: 2.46
+  m_Direction: 2
+  m_Center: {x: 0.00000008940697, y: 0.17928885, z: 0.70225996}
 --- !u!1001 &292382749
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1752,6 +1780,7 @@ MonoBehaviour:
   spawnArea: {fileID: 713906771}
   exclusionZone: {fileID: 1885716653}
   mainManager: {fileID: 1839713936}
+  healthPotionPrefab: {fileID: 0}
   waveDifficulty: 0
 --- !u!4 &633954694
 Transform:
@@ -7431,6 +7460,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 2066896392038628068, guid: 45288819fde2143449a96207b14db0bb, type: 3}
+      propertyPath: m_TagString
+      value: PlayerToHealthPotion
+      objectReference: {fileID: 0}
     - target: {fileID: 2066896392038628070, guid: 45288819fde2143449a96207b14db0bb, type: 3}
       propertyPath: m_Layer
       value: 6
@@ -7673,6 +7706,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2066896392038628118, guid: 45288819fde2143449a96207b14db0bb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1885716654}
+    - targetCorrespondingSourceObject: {fileID: 2066896392038628068, guid: 45288819fde2143449a96207b14db0bb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 288700427}
   m_SourcePrefab: {fileID: 100100000, guid: 45288819fde2143449a96207b14db0bb, type: 3}
 --- !u!1 &1885716646 stripped
 GameObject:
@@ -7754,7 +7790,7 @@ MonoBehaviour:
   rb: {fileID: 1885716649}
   model: {fileID: 1885716651}
   animator: {fileID: 1885716650}
-  audioSource: {fileID: 0}
+  audioSource: {fileID: 1885716654}
   audioClips:
   - {fileID: 8300000, guid: 3df9bbbc130ccb344af5f3fc793a630f, type: 3}
   - {fileID: 8300000, guid: c266e86e5ec11e344bf66dede26cbc46, type: 3}
@@ -7763,8 +7799,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 4e7a9f408abdba8459fdccbeaea95215, type: 3}
   - {fileID: 8300000, guid: 81652031b64c342cc8dbc59c138d77c5, type: 3}
   - {fileID: 8300000, guid: cd13436b01a4b5b4082c89e180d10dc3, type: 3}
-  - {fileID: 8300000, guid: a0010a1a0c474473b81729eb770c485f, type: 3}
-  - {fileID: 8300000, guid: 7478151cf36724a7dada558f746c3633, type: 3}
+  - {fileID: 8300000, guid: 804a86dc05a8829408078dbb2ce2fc57, type: 3}
+  - {fileID: 8300000, guid: 3830029b89ea7a04992156c6adbc327c, type: 3}
   dashFillArea: {fileID: 1554523609}
   dashFillImage: {fileID: 1554523611}
   speed: 2.5
@@ -7787,8 +7823,11 @@ MonoBehaviour:
   shieldWallRotationSpeed: 90
   healthSlider: {fileID: 1733566768}
   fillArea: {fileID: 2144242574}
+  boxCollider: {fileID: 0}
   playerHealth: 30
   gameOver: 0
+  scoreMultiplier: 1
+  scoreMultiplierBase: 0
 --- !u!135 &1885716653
 SphereCollider:
   m_ObjectHideFlags: 0
