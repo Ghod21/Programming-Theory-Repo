@@ -90,7 +90,16 @@ public class BossEnemy : Enemy
     }
     protected override IEnumerator deathAnimation()
     {
-        DataPersistence.currentPlayerScore += DataPersistence.currentPlayerScore * 0.5f;
+        // Code to prevent 0.5 ending result when adding bonus points for killing the boss.
+        float newScore = DataPersistence.currentPlayerScore * 1.5f;
+        string scoreString = DataPersistence.currentPlayerScore.ToString();
+        char lastDigitChar = scoreString[scoreString.Length - 1];
+        if (lastDigitChar == '5')
+        {
+            newScore += 2.5f;
+        }
+        DataPersistence.currentPlayerScore = newScore;
+
         return base.deathAnimation();
     }
 }

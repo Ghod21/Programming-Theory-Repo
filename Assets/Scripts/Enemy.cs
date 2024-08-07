@@ -18,6 +18,7 @@ public class Enemy : MonoBehaviour
     public int enemyHealth;
     public bool attacked;
     bool deathAnimationDone = false;
+    float soundAdjustment = 0.6f;
 
     protected virtual void Start()
     {
@@ -62,9 +63,12 @@ public class Enemy : MonoBehaviour
 
     private void LookAtPlayer()
     {
-        Vector3 direction = (player.position - transform.position).normalized; // Calculate direction to the player
-        Quaternion lookRotation = Quaternion.LookRotation(direction); // Calculate the rotation to look at the player
-        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f); // Smoothly rotate towards the player
+        if (!attacked && enemyHealth > 0)
+        {
+            Vector3 direction = (player.position - transform.position).normalized; // Calculate direction to the player
+            Quaternion lookRotation = Quaternion.LookRotation(direction); // Calculate the rotation to look at the player
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f); // Smoothly rotate towards the player
+        }
     }
 
     public virtual void MoveTowardsPlayer()
@@ -127,16 +131,20 @@ public class Enemy : MonoBehaviour
 
     private IEnumerator Attack()
     {
-        // Attack logic
-        EnemyAttack();
+        if (enemyHealth > 0 && !deathAnimationDone)
+        {
+            // Attack logic
+            EnemyAttack();
 
-        // Wait for attack cooldown
-        yield return new WaitForSeconds(0.6f);
+            // Wait for attack cooldown
+            yield return new WaitForSeconds(0.6f);
 
-        isAttacking = false;
-        animator.SetBool("isAttacking", false);
-        animator.SetTrigger("Idle");
+            isAttacking = false;
+            animator.SetBool("isAttacking", false);
+            animator.SetTrigger("Idle");
+        }
     }
+
 
 
     void EnemyAttack()
@@ -147,13 +155,13 @@ public class Enemy : MonoBehaviour
         {
             playerScript.playerHealth--;
             playerScript.scoreMultiplierBase -= 10;
-            playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2);
+            playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
             Debug.Log("Health: " + playerScript.playerHealth);
 
         } else if (playerScript.isDashing == false && playerScript.isBlockingDamage)
         {
             playerScript.shieldHealth--;
-            playerScript.audioSource.PlayOneShot(playerScript.audioClips[6], DataPersistence.soundsVolume * 1.2f);
+            playerScript.audioSource.PlayOneShot(playerScript.audioClips[6], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
             Debug.Log("ShieldHealth: " + playerScript.shieldHealth);
         }
     }

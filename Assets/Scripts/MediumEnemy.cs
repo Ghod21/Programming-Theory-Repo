@@ -15,10 +15,6 @@ public class MediumEnemy : Enemy
 
         // Find the SpawnManager in the scene and store the reference
         spawnManager = FindObjectOfType<SpawnManager>();
-        if (Random.value < 0.1f)
-        {
-            spawnManager.CreateHealthPotionIfNotExists(); // Call the method to create health potion if not exists
-        }
     }
 
     public override void MoveTowardsPlayer()
@@ -31,6 +27,11 @@ public class MediumEnemy : Enemy
     {
         DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
         playerScript.scoreMultiplierBase += 2;
+        if (Random.value < 0.01f)
+        {
+            Vector3 currentPosition = transform.position;
+            spawnManager.CreateHealthPotionIfNotExists(currentPosition);
+        }
         return base.deathAnimation();
     }
 }

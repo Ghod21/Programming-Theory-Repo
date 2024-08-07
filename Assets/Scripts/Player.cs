@@ -12,7 +12,7 @@ public class Player : MonoBehaviour
     [SerializeField] private Animator animator; // Add a reference to the Animator component
     public AudioSource audioSource;
     public AudioClip[] audioClips;
-
+    float soundAdjustment = 0.6f;
 
     // Move variables
     [SerializeField] GameObject dashFillArea;
@@ -177,7 +177,7 @@ public class Player : MonoBehaviour
         if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown)
         {
             ShieldStart();
-            audioSource.PlayOneShot(audioClips[4], DataPersistence.soundsVolume * 0.8f);
+            audioSource.PlayOneShot(audioClips[4], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
         }
         else if (Input.GetMouseButtonUp(1) && isShielding)
         {
@@ -365,7 +365,7 @@ private void GatherInput()
     private void Dash()
     {
         isDashing = true;
-        audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2);
+        audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
         dashTime = dashDuration;
     }
 
@@ -445,15 +445,15 @@ private void GatherInput()
         // Play the appropriate sound once after checking all colliders
         if (killed)
         {
-            audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f);
+            audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
         }
         else if (hitEnemy)
         {
-            audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f);
+            audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
         }
         else
         {
-            audioSource.PlayOneShot(audioClips[1], DataPersistence.soundsVolume * 0.8f);
+            audioSource.PlayOneShot(audioClips[1], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
         }
 
         isAttackQueued = false;

@@ -8,7 +8,7 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private BoxCollider spawnArea; // The BoxCollider that defines the spawn area
     [SerializeField] private SphereCollider exclusionZone; // The SphereCollider where enemies should not spawn
     [SerializeField] private GameObject mainManager;
-    [SerializeField] private GameObject healthPotionPrefab; // Prefab for health potion
+    private GameObject healthPotionPrefab; // Prefab for health potion
 
     private MainManager mainManagerScript;
     private int numberOfEnemies; // Number of enemies to spawn
@@ -18,6 +18,7 @@ public class SpawnManager : MonoBehaviour
     private float spawnTime = 3;
     private float decreaseRate = 2f / 600f;
     private int difficultyMeter;
+    bool bossSpawned;
 
     private void Start()
     {
@@ -26,9 +27,10 @@ public class SpawnManager : MonoBehaviour
             startSpawn = true;
             StartCoroutine(Spawner());
             numberOfEnemies = 1;
-            spawnBoss();
+            // spawnBoss(); // Test for boss in the beginning
         }
         mainManagerScript = mainManager.GetComponent<MainManager>();
+        healthPotionPrefab = Resources.Load<GameObject>("Prefabs/HealthPotion");
     }
 
     private void Update()
@@ -43,11 +45,16 @@ public class SpawnManager : MonoBehaviour
         {
             difficultyMeter = 1;
         }
-        else if (difficultyMeter > 10)
+        else if (difficultyMeter > 11)
         {
-            difficultyMeter = 10;
+            difficultyMeter = 11;
         }
-        waveDifficulty = Mathf.Clamp(difficultyMeter, 1, 10); // Adjust waveDifficulty based on difficultyMeter
+        waveDifficulty = Mathf.Clamp(difficultyMeter, 1, 11); // Adjust waveDifficulty based on difficultyMeter
+        if (waveDifficulty == 11 && !bossSpawned)
+        {
+            spawnBoss();
+            bossSpawned = true;
+        }
     }
 
     IEnumerator Spawner()
@@ -105,24 +112,28 @@ public class SpawnManager : MonoBehaviour
             case 1:
                 return new float[] { 1f, 0f, 0f }; // 100% chance for first enemy
             case 2:
-                return new float[] { 0.95f, 0.05f, 0f };
-            case 3:
                 return new float[] { 0.9f, 0.1f, 0f };
+            case 3:
+                return new float[] { 0.8f, 0.2f, 0f };
             case 4:
-                return new float[] { 0.85f, 0.15f, 0f };
-            case 5:
                 return new float[] { 0.8f, 0.19f, 0.01f };
-            case 6:
+            case 5:
                 return new float[] { 0.75f, 0.23f, 0.02f };
+            case 6:
+                return new float[] { 0.7f, 0.25f, 0.05f };
             case 7:
-                return new float[] { 0.7f, 0.27f, 0.03f };
+                return new float[] { 0.6f, 0.32f, 0.08f };
             case 8:
-                return new float[] { 0.65f, 0.31f, 0.04f };
+                return new float[] { 0.5f, 0.4f, 0.1f };
             case 9:
-                return new float[] { 0.6f, 0.35f, 0.05f };
+                return new float[] { 0.5f, 0.35f, 0.15f };
+            case 10:
+                return new float[] { 0.4f, 0.4f, 0.2f };
+            case 11:
+                return new float[] { 0.8f, 0.19f, 0.01f };
             default:
                 // Define fallback probabilities for higher difficulties
-                return new float[] { 0.5f, 0.4f, 0.1f }; // Example: 50%, 40%, 10%
+                return new float[] { 0.4f, 0.4f, 0.2f }; // Example: 50%, 40%, 10%
         }
     }
 
@@ -161,14 +172,16 @@ public class SpawnManager : MonoBehaviour
     }
 
     // Public function to create the health potion prefab if none exist in the scene
-    public void CreateHealthPotionIfNotExists()
+    public void CreateHealthPotionIfNotExists(Vector3 callingObjectPosition)
     {
         // Check if any instance of healthPotionPrefab exists in the scene
         GameObject[] existingPotions = GameObject.FindGameObjectsWithTag(healthPotionPrefab.tag);
         if (existingPotions.Length == 0)
         {
-            Vector3 spawnPosition = GetRandomPointInBounds(spawnArea.bounds, exclusionZone);
+            // Set the spawn position to the calling object's position with the desired spawn height
+            Vector3 spawnPosition = new Vector3(callingObjectPosition.x, spawnHeight, callingObjectPosition.z);
             Instantiate(healthPotionPrefab, spawnPosition, Quaternion.identity);
         }
     }
+
 }
