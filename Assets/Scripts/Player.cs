@@ -46,7 +46,7 @@ public class Player : MonoBehaviour
     [SerializeField] GameObject shieldWallPieceThree;
     [SerializeField] GameObject shieldFillArea;
     [SerializeField] UnityEngine.UI.Slider shieldSlider;
-    private bool isShielding;
+    public bool isShielding;
     private bool shieldIsOnCooldown = false;
     private int attackToShieldCount = 0;
     public bool isBlockingDamage = false;
@@ -211,7 +211,18 @@ public class Player : MonoBehaviour
         {
             if (IsTargetInCone(hitCollider.transform))
             {
-                if (hitCollider.CompareTag("Enemy") || hitCollider.CompareTag("EnemyRange"))
+                if (hitCollider.CompareTag("Enemy"))
+                {
+                    return true;
+                }
+            }
+        }
+        Collider[] projectileColliders = Physics.OverlapSphere(transform.position, attackRange);
+        foreach (var hitCollider in projectileColliders)
+        {
+            if (IsTargetInCone(hitCollider.transform))
+            {
+                if (hitCollider.CompareTag("Projectile"))
                 {
                     return true;
                 }
@@ -229,6 +240,7 @@ public class Player : MonoBehaviour
     {
         if (!isShielding) return;
         isShielding = false;
+        shieldHealth = 0;
         shieldIsOnCooldown = true;
         animator.SetBool("isShielding", false);
         StartCoroutine(ShieldCooldown());

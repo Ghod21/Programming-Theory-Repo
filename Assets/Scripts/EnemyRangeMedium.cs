@@ -32,6 +32,7 @@ public class EnemyRangeMedium : Enemy
         return base.deathAnimation();
     }
 
+
     protected override void CheckAttackRange()
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
@@ -56,21 +57,41 @@ public class EnemyRangeMedium : Enemy
             if (!isAttacking)
             {
                 isAttacking = true;
-                EnemyAttack();
-                StartCoroutine(AttackCooldown());
+                StartCoroutine(EnemyAttackToAnimation());
                 yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
-                EnemyAttack();
-                StartCoroutine(AttackCooldown());
+                StartCoroutine(EnemySecondAttackToAnimation());
             }
             yield return new WaitForSeconds(attackInterval);
             isAttacking = false;
         }
     }
+    private IEnumerator EnemyAttackToAnimation()
+    {
+        animator.SetBool("isAttacking", true);
+        float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
 
-    protected override void EnemyAttack()
+        yield return new WaitForSeconds(animationLength * 0.3f);
+
+        EnemyAttack();
+
+        yield return new WaitForSeconds(animationLength * 0.7f);
+
+        StartCoroutine(AttackCooldown());
+    }
+    private IEnumerator EnemySecondAttackToAnimation()
     {
         animator.SetBool("isAttacking", true);
 
+        EnemyAttack();
+
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
+
+        StartCoroutine(AttackCooldown());
+    }
+
+    protected override void EnemyAttack()
+    {
+        playerScript.audioSource.PlayOneShot(playerScript.audioClips[9], DataPersistence.soundsVolume * 0.6f * soundAdjustment);
         Vector3 directionToPlayer = (player.position - transform.position).normalized;
 
         // Offset to spawn the projectile slightly in front of the enemy

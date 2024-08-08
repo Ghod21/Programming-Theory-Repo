@@ -29,14 +29,13 @@ public class EnemyRangeEasy : Enemy
         yield return new WaitForSeconds(1f);
         while (enemyHealth > 0)
         {
-            if (!isAttacking)
+            if (isInAttackRange && !isAttacking)
             {
                 isAttacking = true;
-                EnemyAttack();
-                StartCoroutine(AttackCooldown());
+                StartCoroutine(EnemyAttackToAnimation());
+                yield return new WaitForSeconds(attackInterval);
             }
-            yield return new WaitForSeconds(attackInterval);
-            isAttacking = false;
+            yield return null; // Добавляем ожидание в конце цикла, чтобы не перегружать процессор.
         }
     }
 
@@ -48,7 +47,6 @@ public class EnemyRangeEasy : Enemy
         {
             isInAttackRange = true;
             rb.velocity = Vector3.zero;
-            attackRange = 100f;
         }
         else
         {
@@ -58,8 +56,7 @@ public class EnemyRangeEasy : Enemy
 
     protected override void EnemyAttack()
     {
-        animator.SetBool("isAttacking", true);
-
+        playerScript.audioSource.PlayOneShot(playerScript.audioClips[9], DataPersistence.soundsVolume * 0.6f * soundAdjustment);
         Vector3 directionToPlayer = (player.position - transform.position).normalized;
 
         // Offset to spawn the projectile slightly in front of the enemy
@@ -72,11 +69,26 @@ public class EnemyRangeEasy : Enemy
         projectile.GetComponent<Projectile>().Initialize(directionToPlayer, projectileSpeed, playerScript, soundAdjustment);
     }
 
+    private IEnumerator EnemyAttackToAnimation()
+    {
+        animator.SetBool("isAttacking", true);
+        float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
+
+        yield return new WaitForSeconds(animationLength * 0.3f);
+
+        EnemyAttack();
+
+        yield return new WaitForSeconds(animationLength * 0.7f);
+
+        StartCoroutine(AttackCooldown());
+    }
+
     private IEnumerator AttackCooldown()
     {
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
         animator.SetBool("isAttacking", false);
         animator.SetTrigger("Idle");
+        isAttacking = false;
+        yield return null;
     }
 
     public override void MoveTowardsPlayer()

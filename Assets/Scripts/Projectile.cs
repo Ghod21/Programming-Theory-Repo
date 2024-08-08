@@ -34,20 +34,24 @@ public class Projectile : MonoBehaviour
     {
         if (other.CompareTag("PlayerToHealthPotion"))
         {
-            if (playerScript.isDashing == false && !playerScript.isBlockingDamage)
+
+            if (!playerScript.isDashing)
             {
-                playerScript.playerHealth -= 2;
-                playerScript.scoreMultiplierBase -= 10;
-                playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
-                Debug.Log("Health: " + playerScript.playerHealth);
-            }
-            else if (playerScript.isDashing == false && playerScript.isBlockingDamage)
-            {
-                playerScript.shieldHealth--;
-                playerScript.audioSource.PlayOneShot(playerScript.audioClips[6], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
-                Debug.Log("ShieldHealth: " + playerScript.shieldHealth);
+                if (!playerScript.isBlockingDamage)
+                {
+                    playerScript.playerHealth -= 2;
+                    playerScript.scoreMultiplierBase -= 10;
+                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+                }
+                else
+                {
+                    playerScript.shieldHealth -= 2;
+                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[6], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
+                }
             }
             Destroy(gameObject);
         }
     }
+
+
 }
