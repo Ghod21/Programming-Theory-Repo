@@ -8,6 +8,8 @@ TagManager:
   - Enemy
   - HealthPotion
   - PlayerToHealthPotion
+  - EnemyRange
+  - Projectile
   layers:
   - Default
   - TransparentFX
