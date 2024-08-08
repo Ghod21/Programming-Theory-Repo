@@ -102,5 +102,24 @@ public class BossEnemy : Enemy
 
         return base.deathAnimation();
     }
+    protected override void EnemyAttack()
+    {
+        // Method for enemy attacks
+        animator.SetBool("isAttacking", true);
+        if (playerScript.isDashing == false && !playerScript.isBlockingDamage)
+        {
+            playerScript.playerHealth -= 5;
+            playerScript.scoreMultiplierBase -= 10;
+            playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+            Debug.Log("Health: " + playerScript.playerHealth);
+
+        }
+        else if (playerScript.isDashing == false && playerScript.isBlockingDamage)
+        {
+            playerScript.shieldHealth -= 5;
+            playerScript.audioSource.PlayOneShot(playerScript.audioClips[6], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
+            Debug.Log("ShieldHealth: " + playerScript.shieldHealth);
+        }
+    }
 }
 

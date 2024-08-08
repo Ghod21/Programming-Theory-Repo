@@ -13,12 +13,12 @@ public class Enemy : MonoBehaviour
     protected Transform player; // Reference to the player's Transform
     protected Rigidbody rb; // Reference to the Rigidbody component
     [SerializeField] protected float moveSpeed = 3.5f;
-    [SerializeField] private float attackRange = 2.0f; // Distance within which the enemy will attack
+    [SerializeField] protected float attackRange = 2.0f; // Distance within which the enemy will attack
     protected bool isAttacking = false; // To prevent multiple attack calls
     public int enemyHealth;
     public bool attacked;
     bool deathAnimationDone = false;
-    float soundAdjustment = 0.6f;
+    protected float soundAdjustment = 0.6f;
 
     protected virtual void Start()
     {
@@ -117,7 +117,7 @@ public class Enemy : MonoBehaviour
         return Vector3.Distance(point, closestPoint) < Mathf.Epsilon;
     }
 
-    private void CheckAttackRange()
+    protected virtual void CheckAttackRange()
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
@@ -147,7 +147,7 @@ public class Enemy : MonoBehaviour
 
 
 
-    void EnemyAttack()
+    protected virtual void EnemyAttack()
     {
         // Method for enemy attacks
         animator.SetBool("isAttacking", true);

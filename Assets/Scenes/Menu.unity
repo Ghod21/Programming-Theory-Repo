@@ -4525,7 +4525,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Hold RMB to Shield (10 HP or 3 Player attacks to destroy)
+  m_text: Hold RMB to Shield (5 HP or 3 Player attacks to destroy)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -10677,12 +10677,12 @@ MonoBehaviour:
   shieldFillArea: {fileID: 3402831817934471391}
   shieldSlider: {fileID: 8251958868807645646}
   isBlockingDamage: 0
-  shieldHealth: 10
+  shieldHealth: 5
   shieldWallRotationSpeed: 90
   healthSlider: {fileID: 1733566768}
   fillArea: {fileID: 2144242574}
   boxCollider: {fileID: 0}
-  playerHealth: 5
+  playerHealth: 30
   gameOver: 0
   scoreMultiplier: 1
   scoreMultiplierBase: 0

@@ -23,7 +23,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float dashDuration = 0.2f; // Duration of the dash
     private bool dashIsOnCooldown = false;
     private float dashTime; // Track the dash time
-    private float dashCooldownSeconds = 10f;
+    public float dashCooldownSeconds = 10f;
     private bool isCooldownCoroutineRunning = false;
 
     private Vector3 input;
@@ -50,14 +50,14 @@ public class Player : MonoBehaviour
     private bool shieldIsOnCooldown = false;
     private int attackToShieldCount = 0;
     public bool isBlockingDamage = false;
-    public int shieldHealth = 10;
+    public int shieldHealth = 5;
     public float shieldWallRotationSpeed = 30f;
 
     // Death and Health variables
     [SerializeField] UnityEngine.UI.Slider healthSlider;
     [SerializeField] GameObject fillArea;
     [SerializeField] Collider boxCollider; // Assign this in the Inspector or via script
-    public float playerHealth = 5f;
+    public float playerHealth = 30f;
     public bool gameOver;
 
     // Score variables
@@ -172,7 +172,7 @@ public class Player : MonoBehaviour
 
     private void ShieldLogic()
     {
-        shieldSlider.value = Mathf.MoveTowards(shieldSlider.value, shieldHealth / 10f, Time.deltaTime * 10f);
+        shieldSlider.value = Mathf.MoveTowards(shieldSlider.value, shieldHealth / 5f, Time.deltaTime * 10f);
         shieldWallPiecesLogic();
         if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown)
         {
@@ -211,7 +211,7 @@ public class Player : MonoBehaviour
         {
             if (IsTargetInCone(hitCollider.transform))
             {
-                if (hitCollider.CompareTag("Enemy"))
+                if (hitCollider.CompareTag("Enemy") || hitCollider.CompareTag("EnemyRange"))
                 {
                     return true;
                 }
@@ -239,10 +239,10 @@ public class Player : MonoBehaviour
         shieldHealth = 0;
         yield return new WaitForSeconds(1f);
         shieldFillArea.SetActive(true);
-        while (shieldHealth < 10)
+        while (shieldHealth < 5)
         {
             shieldHealth++;
-            if (shieldHealth == 10)
+            if (shieldHealth == 5)
             {
                 shieldIsOnCooldown = false;
             }
@@ -415,7 +415,7 @@ private void GatherInput()
         {
             if (IsTargetInCone(hitCollider.transform))
             {
-                if (hitCollider.CompareTag("Enemy"))
+                if (hitCollider.CompareTag("Enemy") || hitCollider.CompareTag("EnemyRange"))
                 {
                     // Apply damage to the target
                     Debug.Log("Hit: " + hitCollider.name + " " + attackCount);

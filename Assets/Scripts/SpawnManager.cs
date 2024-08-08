@@ -20,6 +20,8 @@ public class SpawnManager : MonoBehaviour
     private int difficultyMeter;
     bool bossSpawned;
 
+    int spawnCases = 21;
+
     private void Start()
     {
         if (SceneManager.GetActiveScene().name == "MainScene")
@@ -40,17 +42,17 @@ public class SpawnManager : MonoBehaviour
         {
             spawnTime = 1f;
         }
-        difficultyMeter = mainManagerScript.difficultyMeter / 60;
+        difficultyMeter = mainManagerScript.difficultyMeter / 30;
         if (difficultyMeter < 1)
         {
             difficultyMeter = 1;
         }
-        else if (difficultyMeter > 11)
+        else if (difficultyMeter > spawnCases)
         {
-            difficultyMeter = 11;
+            difficultyMeter = spawnCases;
         }
-        waveDifficulty = Mathf.Clamp(difficultyMeter, 1, 11); // Adjust waveDifficulty based on difficultyMeter
-        if (waveDifficulty == 11 && !bossSpawned)
+        waveDifficulty = Mathf.Clamp(difficultyMeter, 1, spawnCases); // Adjust waveDifficulty based on difficultyMeter
+        if (waveDifficulty == spawnCases && !bossSpawned)
         {
             spawnBoss();
             bossSpawned = true;
@@ -80,7 +82,7 @@ public class SpawnManager : MonoBehaviour
     private void spawnBoss()
     {
         Vector3 spawnPosition = GetRandomPointInBounds(spawnArea.bounds, exclusionZone);
-        GameObject enemy = enemies[3];
+        GameObject enemy = enemies[5];
         GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, Quaternion.identity);
         instantiatedEnemy.transform.position = new Vector3(instantiatedEnemy.transform.position.x, spawnHeight, instantiatedEnemy.transform.position.z);
     }
@@ -110,32 +112,55 @@ public class SpawnManager : MonoBehaviour
         switch (difficulty)
         {
             case 1:
-                return new float[] { 1f, 0f, 0f }; // 100% chance for first enemy
+                return new float[] { 1f, 0f, 0f, 0f, 0f };
             case 2:
-                return new float[] { 0.9f, 0.1f, 0f };
+                return new float[] { 0.95f, 0.05f, 0f, 0f, 0f };
             case 3:
-                return new float[] { 0.8f, 0.2f, 0f };
+                return new float[] { 0.9f, 0.1f, 0f, 0f, 0f };
             case 4:
-                return new float[] { 0.8f, 0.19f, 0.01f };
+                return new float[] { 0.85f, 0.1f, 0.05f, 0f, 0f };
             case 5:
-                return new float[] { 0.75f, 0.23f, 0.02f };
+                return new float[] { 0.8f, 0.1f, 0.1f, 0f, 0f };
             case 6:
-                return new float[] { 0.7f, 0.25f, 0.05f };
+                return new float[] { 0.75f, 0.1f, 0.15f, 0f, 0f };
             case 7:
-                return new float[] { 0.6f, 0.32f, 0.08f };
+                return new float[] { 0.7f, 0.1f, 0.15f, 0.05f, 0f };
             case 8:
-                return new float[] { 0.5f, 0.4f, 0.1f };
+                return new float[] { 0.65f, 0.1f, 0.2f, 0.05f, 0f };
             case 9:
-                return new float[] { 0.5f, 0.35f, 0.15f };
+                return new float[] { 0.6f, 0.1f, 0.25f, 0.05f, 0f };
             case 10:
-                return new float[] { 0.4f, 0.4f, 0.2f };
+                return new float[] { 0.55f, 0.1f, 0.3f, 0.05f, 0f };
             case 11:
-                return new float[] { 0.8f, 0.19f, 0.01f };
+                return new float[] { 0.5f, 0.1f, 0.3f, 0.1f, 0.05f };
+            case 12:
+                return new float[] { 0.45f, 0.1f, 0.35f, 0.1f, 0.05f };
+            case 13:
+                return new float[] { 0.4f, 0.1f, 0.4f, 0.1f, 0.05f };
+            case 14:
+                return new float[] { 0.35f, 0.1f, 0.45f, 0.1f, 0.05f };
+            case 15:
+                return new float[] { 0.3f, 0.1f, 0.5f, 0.1f, 0.05f };
+            case 16:
+                return new float[] { 0.25f, 0.1f, 0.55f, 0.1f, 0.05f };
+            case 17:
+                return new float[] { 0.2f, 0.1f, 0.6f, 0.1f, 0.05f };
+            case 18:
+                return new float[] { 0.15f, 0.1f, 0.65f, 0.1f, 0.05f };
+            case 19:
+                return new float[] { 0.1f, 0.1f, 0.7f, 0.1f, 0.05f };
+            case 20:
+                return new float[] { 0.05f, 0.1f, 0.75f, 0.1f, 0.05f };
+            case 21:
+                return new float[] { 0.05f, 0.1f, 0.8f, 0.1f, 0.05f };
             default:
                 // Define fallback probabilities for higher difficulties
-                return new float[] { 0.4f, 0.4f, 0.2f }; // Example: 50%, 40%, 10%
+                return new float[] { 0.4f, 0.3f, 0.2f, 0.05f, 0.05f }; // Example: 40%, 30%, 20%, 5%, 5%
         }
     }
+
+
+
 
     private Vector3 GetRandomPointInBounds(Bounds bounds, SphereCollider exclusionZone)
     {

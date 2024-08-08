@@ -1774,13 +1774,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemies:
   - {fileID: 6783525327994550231, guid: b0e31def307e62f40a08eb37ce62a89e, type: 3}
+  - {fileID: 7099655024501674456, guid: 8760cc9eb30a2b340b14499b6e150dc4, type: 3}
   - {fileID: 2849717230518224067, guid: 5e55a9ebb5e3965439f941c52eed83a0, type: 3}
+  - {fileID: 6891580169314388076, guid: 66ae442726d1cf4428dacb34edd61ac4, type: 3}
   - {fileID: 8967202976318139465, guid: 6a9687af568d18b46bfb70edbed87d6f, type: 3}
   - {fileID: 182665493590272817, guid: 1b42ee39549bf4f4d8565e9f9713c491, type: 3}
   spawnArea: {fileID: 713906771}
   exclusionZone: {fileID: 1885716653}
   mainManager: {fileID: 1839713936}
-  healthPotionPrefab: {fileID: 0}
   waveDifficulty: 0
 --- !u!4 &633954694
 Transform:
@@ -7033,6 +7034,8 @@ MonoBehaviour:
   nameFieldImage: {fileID: 0}
   wrongNameText: {fileID: 0}
   audioManager: {fileID: 1177333150}
+  menuSounds: []
+  audioSource: {fileID: 0}
   difficultyMeter: 0
 --- !u!4 &1839713938
 Transform:
@@ -7807,6 +7810,7 @@ MonoBehaviour:
   verticalSpeedMultiplier: 1.5
   dashSpeed: 8
   dashDuration: 0.2
+  dashCooldownSeconds: 10
   isDashing: 0
   targetTags:
   - Enemy
@@ -7819,7 +7823,7 @@ MonoBehaviour:
   shieldFillArea: {fileID: 3402831817934471391}
   shieldSlider: {fileID: 8251958868807645646}
   isBlockingDamage: 0
-  shieldHealth: 10
+  shieldHealth: 5
   shieldWallRotationSpeed: 90
   healthSlider: {fileID: 1733566768}
   fillArea: {fileID: 2144242574}

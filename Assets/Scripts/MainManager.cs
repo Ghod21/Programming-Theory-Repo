@@ -78,7 +78,7 @@ public class MainManager : MonoBehaviour
         timerSeconds = 0;
         timerMinutes = 0;
 
-        difficultyMeter = 60; // Switch for difficulty. 60 is normal. 360 = 5 min. __________________________
+        difficultyMeter = 30; // Switch for difficulty. 30 is normal. __________________________
         playerScript = player.GetComponent<Player>();
         if (SceneManager.GetActiveScene().name == "MainScene")
         {

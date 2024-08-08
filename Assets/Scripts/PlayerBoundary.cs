@@ -6,7 +6,7 @@ public class PlayerBoundary : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("Player") || other.CompareTag("Enemy"))
+        if (other.CompareTag("Player") || other.CompareTag("Enemy") || other.CompareTag("EnemyRange"))
         {
             Vector3 playerPosition = other.transform.position;
             Vector3 closestPoint = boundaryCollider.ClosestPoint(playerPosition);
