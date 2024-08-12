@@ -18,8 +18,8 @@ public class Projectile : MonoBehaviour
         this.soundAdjustment = soundAdjustment;
 
         // Rotation for not round objects.
-        //Quaternion targetRotation = Quaternion.LookRotation(direction);
-        //transform.rotation = targetRotation * Quaternion.Euler(90f, 0f, 0f);
+        // Quaternion targetRotation = Quaternion.LookRotation(direction);
+        // transform.rotation = targetRotation * Quaternion.Euler(90f, 0f, 0f);
 
         Destroy(gameObject, 6f);
     }

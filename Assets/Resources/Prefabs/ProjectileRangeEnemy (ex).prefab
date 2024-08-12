@@ -119,7 +119,7 @@ GameObject:
   - component: {fileID: 1696153148425157204}
   - component: {fileID: 4858552689088677902}
   m_Layer: 8
-  m_Name: ProjectileRangeEnemy(ex2)
+  m_Name: ProjectileRangeEnemy (ex)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

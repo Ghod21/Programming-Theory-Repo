@@ -35,7 +35,7 @@ public class EnemyRangeEasy : Enemy
                 StartCoroutine(EnemyAttackToAnimation());
                 yield return new WaitForSeconds(attackInterval);
             }
-            yield return null; // Добавляем ожидание в конце цикла, чтобы не перегружать процессор.
+            yield return null;
         }
     }
 
