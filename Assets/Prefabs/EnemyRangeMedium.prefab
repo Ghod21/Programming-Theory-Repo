@@ -230,6 +230,7 @@ GameObject:
   - component: {fileID: 6558751153971004517}
   - component: {fileID: 5048373858234759715}
   - component: {fileID: 8976618242682331791}
+  - component: {fileID: -9087102231802117959}
   m_Layer: 7
   m_Name: EnemyRangeMedium
   m_TagString: Enemy
@@ -274,6 +275,7 @@ MonoBehaviour:
   attackRange: 20
   enemyHealth: 4
   attacked: 0
+  currentObject: {fileID: 0}
   escapeDistance: 5
 --- !u!135 &6558751153971004517
 SphereCollider:
@@ -344,6 +346,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-9087102231802117959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6891580169314388076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fad6e999902202e4eb26fa069d5428b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: medium
 --- !u!1 &7647819984296596885
 GameObject:
   m_ObjectHideFlags: 0

@@ -64,6 +64,9 @@ public class Player : MonoBehaviour
     public float scoreMultiplier = 1;
     public float scoreMultiplierBase; // For adjusting scoreMultiplier based on killed enemies
 
+    // Experience variables
+    public float playerExperience = 0;
+
 
     //  ....................................................................MAIN PART START................................................................
     private void Start()
@@ -74,6 +77,7 @@ public class Player : MonoBehaviour
         shieldFillArea.SetActive(true);
         Time.timeScale = 1f;
         gameOver = false;
+        playerExperience = 0;
     }
 
     private void Update()

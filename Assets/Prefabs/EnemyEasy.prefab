@@ -141,6 +141,7 @@ GameObject:
   - component: {fileID: 2841940638912686703}
   - component: {fileID: 1205705979679649081}
   - component: {fileID: -4423799093075737729}
+  - component: {fileID: -7428919575093458631}
   m_Layer: 7
   m_Name: EnemyEasy
   m_TagString: Enemy
@@ -233,6 +234,7 @@ MonoBehaviour:
   attackRange: 1
   enemyHealth: 0
   attacked: 0
+  currentObject: {fileID: 0}
 --- !u!95 &-4423799093075737729
 Animator:
   serializedVersion: 5
@@ -254,6 +256,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-7428919575093458631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6783525327994550231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fad6e999902202e4eb26fa069d5428b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: easy
 --- !u!1 &7179312450826550136
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6031047735019050205}
   - component: {fileID: 8755862211284699467}
   - component: {fileID: 6326534321113766162}
+  - component: {fileID: 4369602515471973908}
   m_Layer: 7
   m_Name: EnemyRangeEasy
   m_TagString: Enemy
@@ -58,6 +59,7 @@ MonoBehaviour:
   attackRange: 15
   enemyHealth: 2
   attacked: 0
+  currentObject: {fileID: 0}
   escapeDistance: 5
 --- !u!135 &6031047735019050205
 SphereCollider:
@@ -128,6 +130,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4369602515471973908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7099655024501674456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fad6e999902202e4eb26fa069d5428b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: easy
 --- !u!1 &7099655024573255015
 GameObject:
   m_ObjectHideFlags: 0

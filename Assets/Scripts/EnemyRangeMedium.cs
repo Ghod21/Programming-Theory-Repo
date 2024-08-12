@@ -7,7 +7,6 @@ public class EnemyRangeMedium : Enemy
     private GameObject projectilePrefab;
     private float projectileSpeed = 5f;
     private float attackInterval = 4f;
-    private SpawnManager spawnManager;
 
     private bool isInAttackRange = false;
     private bool isEscaping = false;
@@ -27,6 +26,11 @@ public class EnemyRangeMedium : Enemy
     {
         DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
         playerScript.scoreMultiplierBase += 2;
+        if (Random.value < 0.05f)
+        {
+            Vector3 currentPosition = transform.position;
+            spawnManager.CreateHealthPotionIfNotExists(currentPosition);
+        }
         return base.deathAnimation();
     }
 

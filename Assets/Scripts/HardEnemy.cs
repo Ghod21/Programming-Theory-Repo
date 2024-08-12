@@ -3,14 +3,12 @@ using UnityEngine;
 
 public class HardEnemy : Enemy
 {
-    private SpawnManager spawnManager;
     // Hard enemy child script.
     protected override void Start()
     {
         base.Start(); // Call the Start method from the base class
         // Additional initialization code for EasyEnemy
         enemyHealth = 7;
-        spawnManager = FindObjectOfType<SpawnManager>();
     }
     public override void MoveTowardsPlayer()
     {
