@@ -9,6 +9,11 @@ public class EnemyRangeEasy : Enemy
     private float attackInterval = 3f;
 
     private bool isInAttackRange = false;
+    private bool isEscaping = false;
+    bool attackIsOnCooldown = false;
+
+    // New variable to define the distance at which the enemy starts to escape
+    [SerializeField] private float escapeDistance = 1.0f;
 
     protected override void Start()
     {
@@ -33,7 +38,9 @@ public class EnemyRangeEasy : Enemy
             {
                 isAttacking = true;
                 StartCoroutine(EnemyAttackToAnimation());
+                attackIsOnCooldown = true;
                 yield return new WaitForSeconds(attackInterval);
+                attackIsOnCooldown = false;
             }
             yield return null;
         }
@@ -43,14 +50,22 @@ public class EnemyRangeEasy : Enemy
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-        if (distanceToPlayer <= attackRange)
+        // Determine if the enemy should escape or attack
+        if (distanceToPlayer <= escapeDistance && attackIsOnCooldown)
+        {
+            isEscaping = true;
+            isInAttackRange = false;
+        }
+        else if (distanceToPlayer <= attackRange)
         {
             isInAttackRange = true;
-            rb.velocity = Vector3.zero;
+            isEscaping = false;
+            rb.velocity = Vector3.zero; // Stop moving when in attack range
         }
         else
         {
             isInAttackRange = false;
+            isEscaping = false;
         }
     }
 
@@ -93,9 +108,25 @@ public class EnemyRangeEasy : Enemy
 
     public override void MoveTowardsPlayer()
     {
-        if (!isAttacking && !isInAttackRange)
+        if (!isAttacking)
         {
-            Vector3 moveDirection = (player.position - transform.position).normalized;
+            Vector3 moveDirection;
+
+            // Move towards the player if not in escape mode
+            if (!isEscaping && !isInAttackRange)
+            {
+                moveDirection = (player.position - transform.position).normalized;
+            }
+            // Move away from the player if in escape mode
+            else if (isEscaping)
+            {
+                moveDirection = (transform.position - player.position).normalized;
+            }
+            else
+            {
+                return;
+            }
+
             rb.velocity = moveDirection * moveSpeed;
         }
     }

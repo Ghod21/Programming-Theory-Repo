@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6031047735019050205}
   - component: {fileID: 8755862211284699467}
   - component: {fileID: 6326534321113766162}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: EnemyRangeEasy
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -54,10 +54,11 @@ MonoBehaviour:
   exclusionZone: {fileID: 0}
   animator: {fileID: 6326534321113766162}
   playerScript: {fileID: 0}
-  moveSpeed: 3.5
-  attackRange: 25
+  moveSpeed: 2
+  attackRange: 15
   enemyHealth: 2
   attacked: 0
+  escapeDistance: 5
 --- !u!135 &6031047735019050205
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -87,7 +88,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7099655024501674456}
   serializedVersion: 4
-  m_Mass: 0.0000001
+  m_Mass: 5
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -136,7 +137,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7099655024573255016}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Bone.003_L_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -167,7 +168,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7099655024979567538}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Rig
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -199,7 +200,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7099655025526803405}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Bone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -232,7 +233,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7099655025754887304}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Bone.003_R_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -263,7 +264,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7099655025822241480}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Bone.003_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -295,7 +296,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7099655025931116242}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Bone.003_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -328,7 +329,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7099655025966399805}
   - component: {fileID: 7099655025966399806}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Slime_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -465,7 +466,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: be4fadb40c54934419fd624cd0021acf, type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

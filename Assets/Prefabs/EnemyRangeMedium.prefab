@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 592038533539604657}
   - component: {fileID: 4926935057241198777}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Slime_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -98,7 +98,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9083326610525337203}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Bone.003_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -130,7 +130,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6199650665692110013}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Bone.003_R_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -161,7 +161,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9106879625567686149}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Bone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -195,7 +195,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4121160127506554413}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Bone.003_L_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -230,7 +230,7 @@ GameObject:
   - component: {fileID: 6558751153971004517}
   - component: {fileID: 5048373858234759715}
   - component: {fileID: 8976618242682331791}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: EnemyRangeMedium
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -270,10 +270,11 @@ MonoBehaviour:
   exclusionZone: {fileID: 0}
   animator: {fileID: 8976618242682331791}
   playerScript: {fileID: 0}
-  moveSpeed: 3.5
-  attackRange: 35
+  moveSpeed: 2
+  attackRange: 20
   enemyHealth: 4
   attacked: 0
+  escapeDistance: 5
 --- !u!135 &6558751153971004517
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -303,7 +304,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6891580169314388076}
   serializedVersion: 4
-  m_Mass: 0.0000001
+  m_Mass: 5
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -332,7 +333,7 @@ Animator:
   m_GameObject: {fileID: 6891580169314388076}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 85a6d29399c6de349be5ca4d40a07f95, type: 2}
+  m_Controller: {fileID: 9100000, guid: 48933c910ad44b142accce865d6482ca, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -352,7 +353,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8156797669871367162}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Bone.003_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -384,7 +385,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7744448503475035389}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Rig
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -465,7 +466,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: fc38eb1d15aad094cafb3cb0e7542241, type: 3}
       propertyPath: m_Layer
-      value: 8
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
