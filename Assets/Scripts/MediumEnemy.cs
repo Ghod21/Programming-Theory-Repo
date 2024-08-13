@@ -41,6 +41,10 @@ public class MediumEnemy : Enemy
         else if (playerScript.isDashing == false && playerScript.isBlockingDamage)
         {
             playerScript.shieldHealth -= 2;
+            if (shieldDamageTalentChosen)
+            {
+                enemyHealth--;
+            }
             playerScript.audioSource.PlayOneShot(playerScript.audioClips[6], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
             Debug.Log("ShieldHealth: " + playerScript.shieldHealth);
         }

@@ -234,7 +234,7 @@ MonoBehaviour:
   attackRange: 1
   enemyHealth: 0
   attacked: 0
-  currentObject: {fileID: 0}
+  shieldReflectionTalentChosen: 0
 --- !u!95 &-4423799093075737729
 Animator:
   serializedVersion: 5
@@ -268,7 +268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fad6e999902202e4eb26fa069d5428b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabName: easy
+  prefabName: EnemyEasy
 --- !u!1 &7179312450826550136
 GameObject:
   m_ObjectHideFlags: 0

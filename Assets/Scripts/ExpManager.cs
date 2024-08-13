@@ -8,6 +8,7 @@ public class ExpManager : MonoBehaviour
     public TextMeshProUGUI levelText;
     public UnityEngine.UI.Slider fillSlider;
     GameObject player;
+    [SerializeField] GameObject enemy;
     Player playerScript;
     [SerializeField] GameObject fillArea;
     public int level = 1;
@@ -15,13 +16,29 @@ public class ExpManager : MonoBehaviour
     AudioSource audioSource;
     AudioClip levelUpSound;
 
-    public int[] experienceThresholds; // Array to hold different experience thresholds
+    int[] experienceThresholds = new int[] { 100, 180, 270, 390, 550 };
+
     private int currentThresholdIndex; // Index to track current threshold
+
+    // Talents variables
+    [SerializeField] GameObject[] shieldTalentsUI;
+    [SerializeField] GameObject talentsUI;
+    public bool reflectionTalentIsChosenExpManager;
+    public bool shieldDamageTalentChosenExpManager;
+
+    bool showTestTalents = true;
 
     void Start()
     {
         player = GameObject.Find("Player");
-        playerScript = player.GetComponent<Player>();
+        if (player != null)
+        {
+            playerScript = player.GetComponent<Player>();
+        }
+        else
+        {
+            Debug.LogError("Player object not found in the scene!");
+        }
         UpdateLevelText();
         fillSlider.value = 0;
         audioSource = player.GetComponent<AudioSource>();
@@ -47,7 +64,74 @@ public class ExpManager : MonoBehaviour
         {
             fillArea.SetActive(true);
         }
+
+        if (level == 2 && showTestTalents)
+        {
+            ShowShieldTalentsUI();
+            showTestTalents = false;
+        }
     }
+
+    // --------------------------------------------------------------------------- TALENTS SECTION START --------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------- Shield part start
+
+    private void ShowShieldTalentsUI()
+    {
+        talentsUI.SetActive(true);
+        for (int i = 0; i < shieldTalentsUI.Length; i++)
+        {
+            shieldTalentsUI[i].SetActive(true);
+        }
+        playerScript.timeIsFrozen = true;
+        Time.timeScale = 0f;
+    }
+    private void HideShieldTalentsUI()
+    {
+        Debug.Log("HideShieldTalentsUI started");
+        Time.timeScale = 1f;
+        talentsUI.SetActive(false);
+        for (int i = 0; i < shieldTalentsUI.Length; i++)
+        {
+            shieldTalentsUI[i].SetActive(false);
+        }
+        playerScript.timeIsFrozen = false;
+        Debug.Log("HideShieldTalentsUI completed");
+    }
+
+    public void ShieldAttackTalent()
+    {
+        Time.timeScale = 1f;
+        HideShieldTalentsUI();
+        playerScript.shieldHealth -= 5;
+        playerScript.shieldAttackTalentChosen = true;
+        // UI sound
+
+        playerScript.shieldHealth = 5;
+        playerScript.shieldIsOnCooldown = false;
+    }
+    public void ShieldDamageTalent()
+    {
+        Time.timeScale = 1f;
+        HideShieldTalentsUI();
+        shieldDamageTalentChosenExpManager = true;
+        // UI sound
+
+        playerScript.shieldHealth = 10;
+        playerScript.shieldIsOnCooldown = false;
+    }
+    public void ShieldReflectionTalent()
+    {
+        Time.timeScale = 1f;
+        HideShieldTalentsUI();
+        reflectionTalentIsChosenExpManager = true;
+        // UI sound
+
+        playerScript.shieldHealth = 10;
+        playerScript.shieldIsOnCooldown = false;
+    }
+
+    // --------------------------------------------------------------------------- Shield part end
+    // --------------------------------------------------------------------------- TALENTS SECTION END ----------------------------------------------------------------------------------
 
     void UpdateLevelText()
     {
