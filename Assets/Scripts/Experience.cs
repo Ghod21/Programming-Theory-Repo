@@ -10,17 +10,23 @@ public class Experience : MonoBehaviour
     private Player playerScript;
     [SerializeField] private float rotationSpeed = 50f;
     float soundAdjustment = 0.6f;
-    [SerializeField] private GameObject currentObject;
+    GameObject playerExpGainObject;
+    public Transform playerExpGainPoint;
+    float initialSpeed = 1.0f;
+    float acceleration = 50.0f;
+
+    bool goToPlayer;
 
     protected float experiencePlus;
 
     void Start()
     {
         player = GameObject.Find("Player");
+        playerExpGainObject = GameObject.FindWithTag("ExperienceGainPosition");
+        playerExpGainPoint = playerExpGainObject.GetComponent<Transform>();
         playerScript = player.GetComponent<Player>();
         audioSource = player.GetComponent<AudioSource>();
         experienceSound = Resources.Load<AudioClip>("Audio/ExperienceSound");
-        currentObject = this.gameObject;
         CheckCurrentObject();
     }
 
@@ -28,6 +34,16 @@ public class Experience : MonoBehaviour
     private void Update()
     {
         transform.Rotate(Vector3.forward, rotationSpeed * Time.deltaTime);
+
+        if (playerExpGainPoint != null && goToPlayer)
+        {
+            float distance = Vector3.Distance(transform.position, playerExpGainPoint.position);
+
+            float currentSpeed = initialSpeed + acceleration / (distance + 1); // "+1" to not divide to 0.
+
+            Vector3 direction = (playerExpGainPoint.position - transform.position).normalized;
+            transform.position += direction * currentSpeed * Time.deltaTime;
+        }
 
     }
     private void CheckCurrentObject()
@@ -51,6 +67,10 @@ public class Experience : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("PlayerToHealthPotion"))
+        {
+            goToPlayer = true;
+        }
+        if (other.CompareTag("ExperienceGainPosition"))
         {
             playerScript.playerExperience += experiencePlus;
             audioSource.PlayOneShot(experienceSound, DataPersistence.soundsVolume * 0.5f * soundAdjustment);
