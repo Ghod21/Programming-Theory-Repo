@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemyRangeMedium : Enemy
@@ -8,18 +7,21 @@ public class EnemyRangeMedium : Enemy
     private GameObject projectilePrefab;
     private float projectileSpeed = 5f;
     private float attackInterval = 4f;
-    private SpawnManager spawnManager;
 
     private bool isInAttackRange = false;
+    private bool isEscaping = false;
+    private bool attackIsOnCooldown = false;
+
+    // New variable to define the distance at which the enemy starts to escape
+    [SerializeField] private float escapeDistance = 1.0f;
 
     protected override void Start()
     {
         projectilePrefab = Resources.Load<GameObject>("Prefabs/ProjectileRangeEnemy");
         base.Start();
         StartCoroutine(AttackRoutine());
-
-        spawnManager = FindObjectOfType<SpawnManager>();
     }
+
     protected override IEnumerator deathAnimation()
     {
         DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
@@ -32,23 +34,6 @@ public class EnemyRangeMedium : Enemy
         return base.deathAnimation();
     }
 
-
-    protected override void CheckAttackRange()
-    {
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-        if (distanceToPlayer <= attackRange)
-        {
-            isInAttackRange = true;
-            rb.velocity = Vector3.zero;
-            attackRange = 100f;
-        }
-        else
-        {
-            isInAttackRange = false;
-        }
-    }
-
     private IEnumerator AttackRoutine()
     {
         yield return new WaitForSeconds(1f);
@@ -57,36 +42,38 @@ public class EnemyRangeMedium : Enemy
             if (!isAttacking)
             {
                 isAttacking = true;
+                attackIsOnCooldown = true;
                 StartCoroutine(EnemyAttackToAnimation());
                 yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
                 StartCoroutine(EnemySecondAttackToAnimation());
             }
             yield return new WaitForSeconds(attackInterval);
+            attackIsOnCooldown = false;
             isAttacking = false;
         }
     }
-    private IEnumerator EnemyAttackToAnimation()
+
+    protected override void CheckAttackRange()
     {
-        animator.SetBool("isAttacking", true);
-        float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-        yield return new WaitForSeconds(animationLength * 0.3f);
-
-        EnemyAttack();
-
-        yield return new WaitForSeconds(animationLength * 0.7f);
-
-        StartCoroutine(AttackCooldown());
-    }
-    private IEnumerator EnemySecondAttackToAnimation()
-    {
-        animator.SetBool("isAttacking", true);
-
-        EnemyAttack();
-
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
-
-        StartCoroutine(AttackCooldown());
+        // Determine if the enemy should escape or attack
+        if (distanceToPlayer <= escapeDistance && attackIsOnCooldown)
+        {
+            isEscaping = true;
+            isInAttackRange = false;
+        }
+        else if (distanceToPlayer <= attackRange)
+        {
+            isInAttackRange = true;
+            isEscaping = false;
+            rb.velocity = Vector3.zero; // Stop moving when in attack range
+        }
+        else
+        {
+            isInAttackRange = false;
+            isEscaping = false;
+        }
     }
 
     protected override void EnemyAttack()
@@ -103,23 +90,61 @@ public class EnemyRangeMedium : Enemy
         GameObject projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
         projectile.GetComponent<Projectile>().Initialize(directionToPlayer, projectileSpeed, playerScript, soundAdjustment);
     }
+    private IEnumerator EnemySecondAttackToAnimation()
+    {
+        animator.SetBool("isAttacking", true);
 
+        EnemyAttack();
 
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
+
+        StartCoroutine(AttackCooldown());
+    }
+
+    private IEnumerator EnemyAttackToAnimation()
+    {
+        animator.SetBool("isAttacking", true);
+        float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
+
+        yield return new WaitForSeconds(animationLength * 0.3f);
+
+        EnemyAttack();
+
+        yield return new WaitForSeconds(animationLength * 0.7f);
+
+        StartCoroutine(AttackCooldown());
+    }
 
     private IEnumerator AttackCooldown()
     {
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
         animator.SetBool("isAttacking", false);
         animator.SetTrigger("Idle");
+        isAttacking = false;
+        yield return null;
     }
 
     public override void MoveTowardsPlayer()
     {
-        if (!isAttacking && !isInAttackRange)
+        if (!isAttacking)
         {
-            Vector3 moveDirection = (player.position - transform.position).normalized;
+            Vector3 moveDirection;
+
+            // Move towards the player if not in escape mode
+            if (!isEscaping && !isInAttackRange)
+            {
+                moveDirection = (player.position - transform.position).normalized;
+            }
+            // Move away from the player if in escape mode
+            else if (isEscaping)
+            {
+                moveDirection = (transform.position - player.position).normalized;
+            }
+            else
+            {
+                return;
+            }
+
             rb.velocity = moveDirection * moveSpeed;
         }
     }
 }
-

@@ -9,6 +9,8 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private SphereCollider exclusionZone; // The SphereCollider where enemies should not spawn
     [SerializeField] private GameObject mainManager;
     private GameObject healthPotionPrefab; // Prefab for health potion
+    [SerializeField] private GameObject[] experiencePrefabs;
+
 
     private MainManager mainManagerScript;
     private int numberOfEnemies; // Number of enemies to spawn
@@ -208,5 +210,24 @@ public class SpawnManager : MonoBehaviour
             Instantiate(healthPotionPrefab, spawnPosition, Quaternion.identity);
         }
     }
+    public void CreateExperienceAtPosition(Vector3 position, int prefabIndex)
+    {
+        // Validate index
+        if (prefabIndex < 0 || prefabIndex >= experiencePrefabs.Length)
+        {
+            Debug.LogWarning("Invalid prefab index.");
+            return; // Return early if the index is invalid
+        }
+
+        // Set the spawn position to the specified position with the desired spawn height
+        Vector3 spawnPosition = new Vector3(position.x, spawnHeight, position.z);
+
+        // Create a rotation of 90 degrees around the Z axis
+        Quaternion rotation = Quaternion.Euler(90, 0, 0);
+
+        // Instantiate the prefab at the spawn position with the specified rotation
+        Instantiate(experiencePrefabs[prefabIndex], spawnPosition, rotation);
+    }
+
 
 }

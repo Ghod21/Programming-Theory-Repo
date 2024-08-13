@@ -19,6 +19,11 @@ public class Enemy : MonoBehaviour
     public bool attacked;
     bool deathAnimationDone = false;
     protected float soundAdjustment = 0.6f;
+    int prefabIndex;
+
+    [SerializeField] private GameObject currentObject;
+
+    protected SpawnManager spawnManager;
 
     protected virtual void Start()
     {
@@ -31,6 +36,8 @@ public class Enemy : MonoBehaviour
         // Find the Player object and get the Player script
         GameObject playerObject = GameObject.Find("Player");
         playerScript = playerObject.GetComponent<Player>();
+        spawnManager = FindObjectOfType<SpawnManager>();
+        currentObject = this.gameObject;
     }
 
     private void Update()
@@ -168,8 +175,36 @@ public class Enemy : MonoBehaviour
 
     protected virtual IEnumerator deathAnimation()
     {
+        PrefabIdentifier prefabIdentifier = GetComponent<PrefabIdentifier>();
+        if (prefabIdentifier.prefabName != "boss")
+        {
+            ExperienceSpawnOnDeath();
+        }
         animator.SetTrigger("Dead");
         yield return new WaitForSeconds(1.067f);
         Destroy(gameObject);
+    }
+    void ExperienceSpawnOnDeath()
+    {
+        Vector3 position = transform.position + new Vector3(0, 0.5f, 0);
+        spawnManager.CreateExperienceAtPosition(position, CheckPrefabType());
+    }
+    private int CheckPrefabType()
+    {
+        PrefabIdentifier prefabIdentifier = GetComponent<PrefabIdentifier>();
+        if (prefabIdentifier != null)
+        {
+            if (prefabIdentifier.prefabName == "easy")
+            {
+                prefabIndex = 0;
+            } else if (prefabIdentifier.prefabName == "medium")
+            {
+                prefabIndex = 1;
+            } else if (prefabIdentifier.prefabName == "hard")
+            {
+                prefabIndex = 2;
+            }
+        }
+        return prefabIndex;
     }
 }

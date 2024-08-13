@@ -10,6 +10,7 @@ TagManager:
   - PlayerToHealthPotion
   - EnemyRange
   - Projectile
+  - ExperienceGainPosition
   layers:
   - Default
   - TransparentFX
