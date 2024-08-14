@@ -27,7 +27,8 @@ public class ExpManager : MonoBehaviour
     public bool reflectionTalentIsChosenExpManager;
     public bool shieldDamageTalentChosenExpManager;
 
-    bool showTestTalents = true;
+    bool showTestTalentsLevel2 = true;
+    bool showTestTalentsLevel3 = true;
 
     void Start()
     {
@@ -66,10 +67,15 @@ public class ExpManager : MonoBehaviour
             fillArea.SetActive(true);
         }
 
-        if (level == 2 && showTestTalents)
+        if (level == 2 && showTestTalentsLevel2)
         {
             ShowDashTalentsUI();
-            showTestTalents = false;
+            showTestTalentsLevel2 = false;
+        }
+        if (level == 3 && showTestTalentsLevel3)
+        {
+            ShowShieldTalentsUI();
+            showTestTalentsLevel3 = false;
         }
     }
 
@@ -112,11 +118,22 @@ public class ExpManager : MonoBehaviour
         HideDashTalentsUI();
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
         playerScript.backwardsDashTalentChosen = true;
+        playerScript.dashSpeed = 15;
+        playerScript.dashDuration = 0.3f;
+        playerScript.dashFillImage.fillAmount = 1;
+        playerScript.dashIsOnCooldown = false;
+        playerScript.isCooldownCoroutineRunning = false;
     }
-    public void TeleportDashTalent()
+    public void LongDashTalent()
     {
+        Time.timeScale = 1f;
+        HideDashTalentsUI();
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
-        playerScript.teleportDashTalentChosen = true;
+        playerScript.dashSpeed = 15;
+        playerScript.dashDuration = 0.3f;
+        playerScript.dashFillImage.fillAmount = 1;
+        playerScript.dashIsOnCooldown = false;
+        playerScript.isCooldownCoroutineRunning = false;
     }
 
     // ------------------------------------------------------------------------------- Dash part end

@@ -22,12 +22,12 @@ public class Player : MonoBehaviour
     [SerializeField] public UnityEngine.UI.Image dashFillImage;
     [SerializeField] private float speed = 5;
     [SerializeField] private float verticalSpeedMultiplier = 1f; // Adjust this multiplier for vertical speed
-    [SerializeField] private float dashSpeed = 10; // Speed during dash
-    [SerializeField] private float dashDuration = 0.2f; // Duration of the dash
+    [SerializeField] public float dashSpeed = 10; // Speed during dash
+    [SerializeField] public float dashDuration = 0.2f; // Duration of the dash
     public bool dashIsOnCooldown = false;
     private float dashTime; // Track the dash time
     public float dashCooldownSeconds = 10f;
-    private bool isCooldownCoroutineRunning = false;
+    public bool isCooldownCoroutineRunning = false;
 
     private Vector3 input;
     public bool isDashing = false; // Track if the player is dashing
@@ -80,17 +80,15 @@ public class Player : MonoBehaviour
     bool isDoubleDashTalentChosenActivated = false;
     bool isDoubleDashTalentChosenCanBeActivatedAgain = true;
     public bool backwardsDashTalentChosen = false;
-    public bool teleportDashTalentChosen = false;
     public int remainingDashes = 0; // New variable to track the remaining dashes
     public TextMeshProUGUI dashCountText; // TextMeshProUGUI to display dash count
 
     private List<Vector3> positionBackwardDashList = new List<Vector3>();
     private List<float> healthBackwardDashList = new List<float>();
     float updateInterval = 0.5f;
-    int maxValues = 6;
+    int maxValues = 7;
     public Vector3 currentVectorForBackwardDash;
     public float currentFloatForBackwardDash;
-    private float dashStartTime;
 
 
 
@@ -128,13 +126,6 @@ public class Player : MonoBehaviour
             HealthLogic();
             DashUILogic();
             ScoreUpdate();
-            if (backwardsDashTalentChosen && Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding)
-            {
-                BackwardsDashLogic();
-            } else if (!backwardsDashTalentChosen)
-            {
-                MainAndDoubleDashLogic();
-            }
 
             if (shieldWall.activeSelf)
             {
@@ -367,10 +358,8 @@ public class Player : MonoBehaviour
     {
         audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
         isDashing = true;
-        dashStartTime = Time.time;
 
         Vector3 targetPosition = GetPositionFrom3SecondsAgo();
-        float distance = Vector3.Distance(transform.position, targetPosition);
 
         StartCoroutine(BackwardDashCoroutine(targetPosition));
     }
@@ -390,7 +379,6 @@ public class Player : MonoBehaviour
         transform.position = targetPosition;
         dashIsOnCooldown = true;
         playerHealth = GetHealthFrom3SecondsAgo();
-        StartCoroutine(DashCooldown());
         yield return new WaitForSeconds(2f);
         isDashing = false;
     }
@@ -429,27 +417,33 @@ public class Player : MonoBehaviour
     }
     void MainAndDoubleDashLogic()
     {
-
-        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && remainingDashes > 0 && !isShielding)
+        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && !isShielding)
         {
             if (doubleDashTalentChosen && remainingDashes > 0)
             {
                 Dash();
                 remainingDashes--;
                 UpdateDashUI();
-                StartCoroutine(DashCooldown());
             }
             else if (!doubleDashTalentChosen && !dashIsOnCooldown)
             {
                 Dash();
                 dashIsOnCooldown = true;
-                StartCoroutine(DashCooldown());
             }
         }
     }
+
     private void DashUILogic()
     {
         UpdateDashUI();
+        if (backwardsDashTalentChosen && Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding)
+        {
+            BackwardsDashLogic();
+        }
+        else if (!backwardsDashTalentChosen)
+        {
+            MainAndDoubleDashLogic();
+        }
         isDoubleDashTalentChosenActivated = doubleDashTalentChosen;
         if (remainingDashes == 2 && doubleDashTalentChosen)
         {
@@ -506,14 +500,18 @@ public class Player : MonoBehaviour
                 dashFillImage.fillAmount += x * 0.2f; // Increase fillAmount value
                 yield return new WaitForSeconds(x); // Wait before the next update
             }
+            remainingDashes++;
         }
-        remainingDashes++;
         dashFillImage.fillAmount = 1f; // Ensure the value is 1 at the end
         isCooldownCoroutineRunning = false;
+        dashIsOnCooldown = false;
     }
     private void GatherInput()
     {
-        input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
+        if (!isDashing)
+        {
+            input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
+        }
     }
 
     private void Move()
@@ -582,12 +580,6 @@ public class Player : MonoBehaviour
     {
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-    }
-
-    private IEnumerator DashCooldown()
-    {
-        yield return new WaitForSeconds(dashCooldownSeconds);
-        dashIsOnCooldown = false;
     }
     private void UpdateDashUI()
     {
