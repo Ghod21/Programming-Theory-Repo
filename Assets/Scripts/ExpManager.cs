@@ -22,6 +22,7 @@ public class ExpManager : MonoBehaviour
 
     // Talents variables
     [SerializeField] GameObject[] shieldTalentsUI;
+    [SerializeField] GameObject[] dashTalentsUI;
     [SerializeField] GameObject talentsUI;
     public bool reflectionTalentIsChosenExpManager;
     public bool shieldDamageTalentChosenExpManager;
@@ -67,12 +68,58 @@ public class ExpManager : MonoBehaviour
 
         if (level == 2 && showTestTalents)
         {
-            ShowShieldTalentsUI();
+            ShowDashTalentsUI();
             showTestTalents = false;
         }
     }
 
     // --------------------------------------------------------------------------- TALENTS SECTION START --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------- Dash part start
+
+    void ShowDashTalentsUI()
+    {
+        talentsUI.SetActive(true);
+        for (int i = 0; i < dashTalentsUI.Length; i++)
+        {
+            dashTalentsUI[i].SetActive(true);
+        }
+        playerScript.timeIsFrozen = true;
+        Time.timeScale = 0f;
+    }
+    void HideDashTalentsUI()
+    {
+        Time.timeScale = 1f;
+        talentsUI.SetActive(false);
+        for (int i = 0; i < dashTalentsUI.Length; i++)
+        {
+            dashTalentsUI[i].SetActive(false);
+        }
+        playerScript.timeIsFrozen = false;
+    }
+    public void DoubleDashTalent()
+    {
+        Time.timeScale = 1f;
+        HideDashTalentsUI();
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
+        playerScript.dashCooldownSeconds = 5f;
+        playerScript.dashCountText.text = playerScript.remainingDashes.ToString();
+        playerScript.doubleDashTalentChosen = true;
+    }
+    public void DashBackwardsTalent()
+    {
+        Time.timeScale = 1f;
+        playerScript.StartCoroutine(playerScript.TrackBackwardsDashState());
+        HideDashTalentsUI();
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
+        playerScript.backwardsDashTalentChosen = true;
+    }
+    public void TeleportDashTalent()
+    {
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
+        playerScript.teleportDashTalentChosen = true;
+    }
+
+    // ------------------------------------------------------------------------------- Dash part end
     // --------------------------------------------------------------------------- Shield part start
 
     private void ShowShieldTalentsUI()
@@ -87,7 +134,6 @@ public class ExpManager : MonoBehaviour
     }
     private void HideShieldTalentsUI()
     {
-        Debug.Log("HideShieldTalentsUI started");
         Time.timeScale = 1f;
         talentsUI.SetActive(false);
         for (int i = 0; i < shieldTalentsUI.Length; i++)
@@ -95,7 +141,6 @@ public class ExpManager : MonoBehaviour
             shieldTalentsUI[i].SetActive(false);
         }
         playerScript.timeIsFrozen = false;
-        Debug.Log("HideShieldTalentsUI completed");
     }
 
     public void ShieldAttackTalent()
@@ -104,7 +149,7 @@ public class ExpManager : MonoBehaviour
         HideShieldTalentsUI();
         playerScript.shieldHealth -= 5;
         playerScript.shieldAttackTalentChosen = true;
-        // UI sound
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         playerScript.shieldHealth = 5;
         playerScript.shieldIsOnCooldown = false;
@@ -114,7 +159,7 @@ public class ExpManager : MonoBehaviour
         Time.timeScale = 1f;
         HideShieldTalentsUI();
         shieldDamageTalentChosenExpManager = true;
-        // UI sound
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         playerScript.shieldHealth = 10;
         playerScript.shieldIsOnCooldown = false;
@@ -124,7 +169,7 @@ public class ExpManager : MonoBehaviour
         Time.timeScale = 1f;
         HideShieldTalentsUI();
         reflectionTalentIsChosenExpManager = true;
-        // UI sound
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         playerScript.shieldHealth = 10;
         playerScript.shieldIsOnCooldown = false;

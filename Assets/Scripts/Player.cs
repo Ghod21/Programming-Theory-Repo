@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,12 +19,12 @@ public class Player : MonoBehaviour
 
     // Move variables
     [SerializeField] GameObject dashFillArea;
-    [SerializeField] UnityEngine.UI.Image dashFillImage;
+    [SerializeField] public UnityEngine.UI.Image dashFillImage;
     [SerializeField] private float speed = 5;
     [SerializeField] private float verticalSpeedMultiplier = 1f; // Adjust this multiplier for vertical speed
     [SerializeField] private float dashSpeed = 10; // Speed during dash
     [SerializeField] private float dashDuration = 0.2f; // Duration of the dash
-    private bool dashIsOnCooldown = false;
+    public bool dashIsOnCooldown = false;
     private float dashTime; // Track the dash time
     public float dashCooldownSeconds = 10f;
     private bool isCooldownCoroutineRunning = false;
@@ -70,8 +72,26 @@ public class Player : MonoBehaviour
     public float playerExperience = 0;
 
     // Talents variables
+    // Shield
     public bool shieldAttackTalentChosen = false;
     bool shieldAttackTalentChosenActivated = false;
+    // Dash
+    public bool doubleDashTalentChosen = false;
+    bool isDoubleDashTalentChosenActivated = false;
+    bool isDoubleDashTalentChosenCanBeActivatedAgain = true;
+    public bool backwardsDashTalentChosen = false;
+    public bool teleportDashTalentChosen = false;
+    public int remainingDashes = 0; // New variable to track the remaining dashes
+    public TextMeshProUGUI dashCountText; // TextMeshProUGUI to display dash count
+
+    private List<Vector3> positionBackwardDashList = new List<Vector3>();
+    private List<float> healthBackwardDashList = new List<float>();
+    float updateInterval = 0.5f;
+    int maxValues = 6;
+    public Vector3 currentVectorForBackwardDash;
+    public float currentFloatForBackwardDash;
+    private float dashStartTime;
+
 
 
     //  ....................................................................MAIN PART START................................................................
@@ -84,6 +104,16 @@ public class Player : MonoBehaviour
         Time.timeScale = 1f;
         gameOver = false;
         playerExperience = 0;
+        if (doubleDashTalentChosen)
+        {
+            remainingDashes = 2;
+        }
+        else
+        {
+            remainingDashes = 1;
+        }
+        UpdateDashUI();
+        StartCoroutine(TrackBackwardsDashState());
     }
 
     private void Update()
@@ -98,13 +128,14 @@ public class Player : MonoBehaviour
             HealthLogic();
             DashUILogic();
             ScoreUpdate();
-
-            if (Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding)
+            if (backwardsDashTalentChosen && Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding)
             {
-                Dash();
-                dashIsOnCooldown = true;
-                StartCoroutine(dashCooldown());
+                BackwardsDashLogic();
+            } else if (!backwardsDashTalentChosen)
+            {
+                MainAndDoubleDashLogic();
             }
+
             if (shieldWall.activeSelf)
             {
                 shieldWall.transform.Rotate(Vector3.up, shieldWallRotationSpeed * Time.deltaTime);
@@ -331,9 +362,99 @@ public class Player : MonoBehaviour
 
     //  ....................................................................SHIELD PART END................................................................
     //  ....................................................................MOVE PART START................................................................
+
+    private void BackwardsDashLogic()
+    {
+        audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+        isDashing = true;
+        dashStartTime = Time.time;
+
+        Vector3 targetPosition = GetPositionFrom3SecondsAgo();
+        float distance = Vector3.Distance(transform.position, targetPosition);
+
+        StartCoroutine(BackwardDashCoroutine(targetPosition));
+    }
+    private IEnumerator BackwardDashCoroutine(Vector3 targetPosition)
+    {
+        float elapsedTime = 0f;
+
+        while (elapsedTime < dashDuration)
+        {
+            float step = (elapsedTime / dashDuration);
+            transform.position = Vector3.Lerp(transform.position, targetPosition, step);
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.position = targetPosition;
+        dashIsOnCooldown = true;
+        playerHealth = GetHealthFrom3SecondsAgo();
+        StartCoroutine(DashCooldown());
+        yield return new WaitForSeconds(2f);
+        isDashing = false;
+    }
+    public IEnumerator TrackBackwardsDashState()
+    {
+        while (true)
+        {
+            currentVectorForBackwardDash = transform.position;
+            currentFloatForBackwardDash = playerHealth;
+            if (positionBackwardDashList.Count >= maxValues)
+            {
+                positionBackwardDashList.RemoveAt(0);
+            }
+            if (healthBackwardDashList.Count >= maxValues)
+            {
+                healthBackwardDashList.RemoveAt(0);
+            }
+            positionBackwardDashList.Add(currentVectorForBackwardDash);
+            healthBackwardDashList.Add(currentFloatForBackwardDash);
+            yield return new WaitForSeconds(updateInterval);
+        }
+    }
+
+    float GetHealthFrom3SecondsAgo()
+    {
+        if (healthBackwardDashList.Count == 0) return playerHealth;
+        int index = Mathf.Max(0, healthBackwardDashList.Count - maxValues);
+        return healthBackwardDashList[index];
+    }
+
+    Vector3 GetPositionFrom3SecondsAgo()
+    {
+        if (positionBackwardDashList.Count == 0) return transform.position;
+        int index = Mathf.Max(0, positionBackwardDashList.Count - maxValues);
+        return positionBackwardDashList[index];
+    }
+    void MainAndDoubleDashLogic()
+    {
+
+        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && remainingDashes > 0 && !isShielding)
+        {
+            if (doubleDashTalentChosen && remainingDashes > 0)
+            {
+                Dash();
+                remainingDashes--;
+                UpdateDashUI();
+                StartCoroutine(DashCooldown());
+            }
+            else if (!doubleDashTalentChosen && !dashIsOnCooldown)
+            {
+                Dash();
+                dashIsOnCooldown = true;
+                StartCoroutine(DashCooldown());
+            }
+        }
+    }
     private void DashUILogic()
     {
-        if (!dashIsOnCooldown)
+        UpdateDashUI();
+        isDoubleDashTalentChosenActivated = doubleDashTalentChosen;
+        if (remainingDashes == 2 && doubleDashTalentChosen)
+        {
+            dashFillImage.fillAmount = 1;
+        } else if(!doubleDashTalentChosen && !dashIsOnCooldown)
         {
             dashFillImage.fillAmount = 1;
         }
@@ -344,19 +465,49 @@ public class Player : MonoBehaviour
                 StartCoroutine(DashCooldownTimer());
             }
         }
+        if (remainingDashes > 2)
+        {
+            remainingDashes = 2;
+        }
     }
 
     IEnumerator DashCooldownTimer()
     {
         isCooldownCoroutineRunning = true;
         dashFillImage.fillAmount = 0f; // Start fill from 0
-
-        while (dashFillImage.fillAmount < 1f)
+        float x = 0.1f;
+        if (!doubleDashTalentChosen)
         {
-            dashFillImage.fillAmount += 0.01f; // Increase fillAmount value
-            yield return new WaitForSeconds(0.1f); // Wait before the next update
+            while (dashFillImage.fillAmount < 1f)
+            {
+                if (isDoubleDashTalentChosenActivated && isDoubleDashTalentChosenCanBeActivatedAgain)
+                {
+                    isCooldownCoroutineRunning = false;
+                    dashFillImage.fillAmount = 1f;
+                    remainingDashes = 2;
+                    isDoubleDashTalentChosenCanBeActivatedAgain = false;
+                    yield break;
+                }
+                dashFillImage.fillAmount += x * 0.1f; // Increase fillAmount value
+                yield return new WaitForSeconds(x); // Wait before the next update
+            }
+        } else
+        {
+            while (dashFillImage.fillAmount < 1f)
+            {
+                if (isDoubleDashTalentChosenActivated && isDoubleDashTalentChosenCanBeActivatedAgain)
+                {
+                    isCooldownCoroutineRunning = false;
+                    dashFillImage.fillAmount = 1f;
+                    remainingDashes = 2;
+                    isDoubleDashTalentChosenCanBeActivatedAgain = false;
+                    yield break;
+                }
+                dashFillImage.fillAmount += x * 0.2f; // Increase fillAmount value
+                yield return new WaitForSeconds(x); // Wait before the next update
+            }
         }
-
+        remainingDashes++;
         dashFillImage.fillAmount = 1f; // Ensure the value is 1 at the end
         isCooldownCoroutineRunning = false;
     }
@@ -433,11 +584,27 @@ public class Player : MonoBehaviour
         rb.angularVelocity = Vector3.zero;
     }
 
-    IEnumerator dashCooldown()
+    private IEnumerator DashCooldown()
     {
         yield return new WaitForSeconds(dashCooldownSeconds);
         dashIsOnCooldown = false;
     }
+    private void UpdateDashUI()
+    {
+        if (dashCountText != null)
+        {
+            if (doubleDashTalentChosen)
+            {
+                dashCountText.text = remainingDashes.ToString(); // Update with remaining dashes
+            }
+            else
+            {
+                dashCountText.text = ""; // Hide dash count if not applicable
+            }
+        }
+    }
+
+
     //  ..............................................................MOVE PART END..........................................................................
 
     //  ..............................................................ATTACK PART START......................................................................
