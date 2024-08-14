@@ -59,7 +59,7 @@ MonoBehaviour:
   attackRange: 15
   enemyHealth: 2
   attacked: 0
-  currentObject: {fileID: 0}
+  shieldDamageTalentChosen: 0
   escapeDistance: 5
 --- !u!135 &6031047735019050205
 SphereCollider:
@@ -142,7 +142,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fad6e999902202e4eb26fa069d5428b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabName: easy
+  prefabName: EnemyRangeEasy
 --- !u!1 &7099655024573255015
 GameObject:
   m_ObjectHideFlags: 0
@@ -183,9 +183,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7099655024979567538}
+  - component: {fileID: 8433806591723847539}
+  - component: {fileID: 6158837619072380309}
   m_Layer: 7
   m_Name: Rig
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -206,6 +208,40 @@ Transform:
   - {fileID: 7099655025526803405}
   m_Father: {fileID: 7099655024501674457}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &8433806591723847539
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7099655024979567537}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0.3}
+--- !u!114 &6158837619072380309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7099655024979567537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fad6e999902202e4eb26fa069d5428b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: EnemyRangeEasy
 --- !u!1 &7099655025526803404
 GameObject:
   m_ObjectHideFlags: 0

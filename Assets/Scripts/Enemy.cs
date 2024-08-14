@@ -9,6 +9,8 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected SphereCollider exclusionZone; // Collider defining where enemies should not spawn
     [SerializeField] protected Animator animator;
     [SerializeField] protected Player playerScript;
+    GameObject expManager;
+    ExpManager expManagerScript;
     private float desiredY = 1.4f; // Desired height for the position
     protected Transform player; // Reference to the player's Transform
     protected Rigidbody rb; // Reference to the Rigidbody component
@@ -21,12 +23,15 @@ public class Enemy : MonoBehaviour
     protected float soundAdjustment = 0.6f;
     int prefabIndex;
 
-    [SerializeField] private GameObject currentObject;
-
     protected SpawnManager spawnManager;
+
+    // Talents variables
+    public bool shieldDamageTalentChosen = false;
 
     protected virtual void Start()
     {
+        expManager = GameObject.Find("Exp_Bar");
+        expManagerScript = expManager.GetComponent<ExpManager>();
         // Find and assign the BoxCollider with the "MapBox" tag
         boundaryCollider = GameObject.FindWithTag("MapBox").GetComponent<BoxCollider>();
         // Find and assign the SphereCollider with the "ExclusionZone" tag
@@ -37,7 +42,6 @@ public class Enemy : MonoBehaviour
         GameObject playerObject = GameObject.Find("Player");
         playerScript = playerObject.GetComponent<Player>();
         spawnManager = FindObjectOfType<SpawnManager>();
-        currentObject = this.gameObject;
     }
 
     private void Update()
@@ -57,6 +61,7 @@ public class Enemy : MonoBehaviour
             animator.SetTrigger("Attacked");
             attacked = false;
         }
+        shieldDamageTalentChosen = expManagerScript.shieldDamageTalentChosenExpManager;
     }
 
 
@@ -168,7 +173,20 @@ public class Enemy : MonoBehaviour
         } else if (playerScript.isDashing == false && playerScript.isBlockingDamage)
         {
             playerScript.shieldHealth--;
-            playerScript.audioSource.PlayOneShot(playerScript.audioClips[6], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
+            if (shieldDamageTalentChosen)
+            {
+                enemyHealth--;
+                if (enemyHealth > 0)
+                {
+                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+                } else
+                {
+                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+                }
+            } else
+            {
+                playerScript.audioSource.PlayOneShot(playerScript.audioClips[6], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
+            }
             Debug.Log("ShieldHealth: " + playerScript.shieldHealth);
         }
     }
@@ -176,7 +194,7 @@ public class Enemy : MonoBehaviour
     protected virtual IEnumerator deathAnimation()
     {
         PrefabIdentifier prefabIdentifier = GetComponent<PrefabIdentifier>();
-        if (prefabIdentifier.prefabName != "boss")
+        if (prefabIdentifier.prefabName != "EnemyBoss")
         {
             ExperienceSpawnOnDeath();
         }
@@ -194,13 +212,13 @@ public class Enemy : MonoBehaviour
         PrefabIdentifier prefabIdentifier = GetComponent<PrefabIdentifier>();
         if (prefabIdentifier != null)
         {
-            if (prefabIdentifier.prefabName == "easy")
+            if (prefabIdentifier.prefabName == "EnemyEasy" || prefabIdentifier.prefabName == "EnemyRangeEasy")
             {
                 prefabIndex = 0;
-            } else if (prefabIdentifier.prefabName == "medium")
+            } else if (prefabIdentifier.prefabName == "EnemyMedium" || prefabIdentifier.prefabName == "EnemyRangeMedium")
             {
                 prefabIndex = 1;
-            } else if (prefabIdentifier.prefabName == "hard")
+            } else if (prefabIdentifier.prefabName == "EnemyHard")
             {
                 prefabIndex = 2;
             }

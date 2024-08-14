@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
     public AudioSource audioSource;
     public AudioClip[] audioClips;
     float soundAdjustment = 0.6f;
+    public bool timeIsFrozen;
 
     // Move variables
     [SerializeField] GameObject dashFillArea;
@@ -47,10 +48,11 @@ public class Player : MonoBehaviour
     [SerializeField] GameObject shieldFillArea;
     [SerializeField] UnityEngine.UI.Slider shieldSlider;
     public bool isShielding;
-    private bool shieldIsOnCooldown = false;
+    public bool shieldIsOnCooldown = false;
+    private bool isShieldCooldownActive = false;
     private int attackToShieldCount = 0;
     public bool isBlockingDamage = false;
-    public int shieldHealth = 5;
+    public float shieldHealth = 10;
     public float shieldWallRotationSpeed = 30f;
 
     // Death and Health variables
@@ -67,6 +69,10 @@ public class Player : MonoBehaviour
     // Experience variables
     public float playerExperience = 0;
 
+    // Talents variables
+    public bool shieldAttackTalentChosen = false;
+    bool shieldAttackTalentChosenActivated = false;
+
 
     //  ....................................................................MAIN PART START................................................................
     private void Start()
@@ -82,7 +88,7 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if (SceneManager.GetActiveScene().name == "MainScene" && !gameOver)
+        if (SceneManager.GetActiveScene().name == "MainScene" && !gameOver && !timeIsFrozen)
         {
             GatherInput();
             LookAtMouse();
@@ -107,13 +113,18 @@ public class Player : MonoBehaviour
 
             attackCooldown -= Time.deltaTime; // Decrease the cooldown timer
 
-            if (Input.GetMouseButton(0) && !isAttacking && attackCooldown <= 0f)
+            if (Input.GetMouseButton(0) && !isAttacking && attackCooldown <= 0f && !isShielding || Input.GetMouseButton(0) && !isAttacking && attackCooldown <= 0f && shieldAttackTalentChosen)
             {
                 Attack();
             }
             else if (Input.GetMouseButton(0) && isAttacking)
             {
                 isAttackQueued = true; // Queue the attack if one is already in progress
+            }
+            if (!shieldAttackTalentChosenActivated && shieldAttackTalentChosen)
+            {
+                shieldHealth = 5;
+                shieldAttackTalentChosenActivated = true;
             }
         }
         if (playerHealth <= 0f)
@@ -134,19 +145,23 @@ public class Player : MonoBehaviour
 
     private void ScoreUpdate()
     {
-        if(scoreMultiplierBase < 10)
+        if (scoreMultiplierBase < 10)
         {
             scoreMultiplier = 1;
-        } else if (scoreMultiplierBase >= 5 || scoreMultiplierBase < 10)
+        }
+        else if (scoreMultiplierBase >= 5 || scoreMultiplierBase < 10)
         {
             scoreMultiplier = 2;
-        } else if (scoreMultiplierBase >= 10 || scoreMultiplierBase < 20)
+        }
+        else if (scoreMultiplierBase >= 10 || scoreMultiplierBase < 20)
         {
             scoreMultiplier = 3;
-        } else if (scoreMultiplierBase >= 20 || scoreMultiplierBase < 50)
+        }
+        else if (scoreMultiplierBase >= 20 || scoreMultiplierBase < 50)
         {
             scoreMultiplier = 4;
-        } else if (scoreMultiplierBase >= 50)
+        }
+        else if (scoreMultiplierBase >= 50)
         {
             scoreMultiplier = 5;
         }
@@ -176,9 +191,13 @@ public class Player : MonoBehaviour
 
     private void ShieldLogic()
     {
-        shieldSlider.value = Mathf.MoveTowards(shieldSlider.value, shieldHealth / 5f, Time.deltaTime * 10f);
+        float x = shieldAttackTalentChosen ? 5f : 10f;
+
+        shieldSlider.value = Mathf.MoveTowards(shieldSlider.value, shieldHealth / x, Time.deltaTime * 100f);
+
         shieldWallPiecesLogic();
-        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown)
+
+        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive)
         {
             ShieldStart();
             audioSource.PlayOneShot(audioClips[4], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
@@ -187,12 +206,14 @@ public class Player : MonoBehaviour
         {
             ShieldStop();
         }
+
         if (attackToShieldCount == 3)
         {
             ShieldStop();
             attackToShieldCount = 0;
         }
-        if(isShielding)
+
+        if (isShielding)
         {
             isBlockingDamage = IsEnemyInShieldCone();
             shieldWall.SetActive(true);
@@ -238,32 +259,52 @@ public class Player : MonoBehaviour
     {
         if (isShielding) return;
         isShielding = true;
+        attackToShieldCount = 0;
         animator.SetBool("isShielding", true);
     }
+
     private void ShieldStop()
     {
         if (!isShielding) return;
-        isShielding = false;
-        shieldHealth = 0;
-        shieldIsOnCooldown = true;
-        animator.SetBool("isShielding", false);
-        StartCoroutine(ShieldCooldown());
+        if (!shieldIsOnCooldown && !isShieldCooldownActive)
+        {
+            isShielding = false;
+            animator.SetBool("isShielding", false);
+            shieldIsOnCooldown = true;
+            isShieldCooldownActive = true; // Mark the cooldown as active
+            StartCoroutine(ShieldCooldown());
+        }
     }
     IEnumerator ShieldCooldown()
     {
-        shieldFillArea.SetActive(false);
-        shieldHealth = 0;
-        yield return new WaitForSeconds(1f);
-        shieldFillArea.SetActive(true);
-        while (shieldHealth < 5)
+        float x = shieldAttackTalentChosen ? 5f : 10f;
+        float healthIncrement = shieldAttackTalentChosen ? 0.5f : 1f;
+
+        if (shieldHealth == x)
         {
-            shieldHealth++;
-            if (shieldHealth == 5)
+            yield return new WaitForSeconds(0.5f);
+            shieldIsOnCooldown = false;
+            isShieldCooldownActive = false;
+            yield break;
+        }
+
+        yield return new WaitForSeconds(1f);
+
+        shieldFillArea.SetActive(true);
+
+        while (shieldHealth < x && shieldIsOnCooldown)
+        {
+            shieldHealth += healthIncrement;
+            if (shieldHealth >= x)
             {
+                shieldHealth = x;
                 shieldIsOnCooldown = false;
             }
             yield return new WaitForSeconds(1f);
         }
+
+        // Once cooldown is complete, mark it as inactive
+        isShieldCooldownActive = false;
     }
     private void shieldWallPiecesLogic()
     {
@@ -284,6 +325,7 @@ public class Player : MonoBehaviour
         if (attackToShieldCount == 3)
         {
             shieldWallPieceThree.SetActive(false);
+            shieldHealth = 0;
         }
     }
 
@@ -318,7 +360,7 @@ public class Player : MonoBehaviour
         dashFillImage.fillAmount = 1f; // Ensure the value is 1 at the end
         isCooldownCoroutineRunning = false;
     }
-private void GatherInput()
+    private void GatherInput()
     {
         input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
     }
@@ -453,7 +495,7 @@ private void GatherInput()
                 }
             }
         }
-        if (isShielding)
+        if (isShielding && shieldAttackTalentChosen)
         {
             attackToShieldCount++;
         }

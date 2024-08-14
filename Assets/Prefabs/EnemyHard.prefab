@@ -387,7 +387,7 @@ MonoBehaviour:
   attackRange: 1.5
   enemyHealth: 0
   attacked: 0
-  currentObject: {fileID: 0}
+  shieldReflectionTalentChosen: 0
 --- !u!95 &-8960221690442551921
 Animator:
   serializedVersion: 5
@@ -421,7 +421,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fad6e999902202e4eb26fa069d5428b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabName: hard
+  prefabName: EnemyHard
 --- !u!1001 &3997832622786845584
 PrefabInstance:
   m_ObjectHideFlags: 0
