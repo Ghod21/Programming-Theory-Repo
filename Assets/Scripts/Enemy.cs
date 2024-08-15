@@ -7,21 +7,23 @@ public class Enemy : MonoBehaviour
     // Main enemy parent script.
     [SerializeField] protected BoxCollider boundaryCollider; // Collider defining the boundary
     [SerializeField] protected SphereCollider exclusionZone; // Collider defining where enemies should not spawn
-    [SerializeField] protected Animator animator;
+    [SerializeField] public Animator animator;
     [SerializeField] protected Player playerScript;
-    GameObject expManager;
-    ExpManager expManagerScript;
+    public GameObject expManager;
+    public ExpManager expManagerScript;
     private float desiredY = 1.4f; // Desired height for the position
     protected Transform player; // Reference to the player's Transform
     protected Rigidbody rb; // Reference to the Rigidbody component
     [SerializeField] protected float moveSpeed = 3.5f;
     [SerializeField] protected float attackRange = 2.0f; // Distance within which the enemy will attack
     protected bool isAttacking = false; // To prevent multiple attack calls
-    public int enemyHealth;
+    public float enemyHealth;
     public bool attacked;
     bool deathAnimationDone = false;
     protected float soundAdjustment = 0.6f;
     int prefabIndex;
+    public bool enemyIsBleeding;
+    public bool enemyIsHitByFire;
 
     protected SpawnManager spawnManager;
 
