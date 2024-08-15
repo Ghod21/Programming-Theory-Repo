@@ -5,6 +5,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class Player : MonoBehaviour
 {
@@ -98,12 +99,29 @@ public class Player : MonoBehaviour
     public bool damageAttackTalentIsChosen = false;
     public float attackRangeTalentAdd = 0f;
     public bool bleedAttackTalentIsChosen = false;
+    bool bleedSoundIsPossible = true;
+
+    // Skills variables
+    public bool fireBreathTalentIsChosen = false;
+    private ParticleSystem fireBreathParticle;
+    bool isFireBreathing;
+    [SerializeField] public UnityEngine.UI.Image skillFillImage;
+
+    public float fireBreathInitialConeRadius = 1f;
+    float fireBreathMaxConeRadius = 10f;
+    public float fireBreathConeAngle = 30f;
+    public float fireBreathConeDurationIncrease = 1f;
+    bool isUsingSpell;
+    float spellCooldown = 3f;
+    bool spellIsOnCooldown = false;
 
 
 
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
+        Transform childFireBreath = transform.Find("FireBreath");
+        fireBreathParticle = childFireBreath.GetComponentInChildren<ParticleSystem>();
         animator.SetBool("isNotAttacking", true);
         audioSource = GetComponent<AudioSource>();
         fillArea.SetActive(true);
@@ -144,7 +162,7 @@ public class Player : MonoBehaviour
 
             attackCooldown -= Time.deltaTime; // Decrease the cooldown timer
 
-            if (Input.GetMouseButton(0) && !isAttacking && attackCooldown <= 0f && !isShielding || Input.GetMouseButton(0) && !isAttacking && attackCooldown <= 0f && shieldAttackTalentChosen)
+            if (Input.GetMouseButton(0) && !isAttacking && attackCooldown <= 0f && !isShielding && !isUsingSpell || Input.GetMouseButton(0) && !isAttacking && attackCooldown <= 0f && shieldAttackTalentChosen && !isUsingSpell)
             {
                 Attack();
             }
@@ -156,6 +174,12 @@ public class Player : MonoBehaviour
             {
                 shieldHealth = 5;
                 shieldAttackTalentChosenActivated = true;
+            }
+
+
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                UseSpell();
             }
         }
         if (playerHealth <= 0f)
@@ -172,6 +196,117 @@ public class Player : MonoBehaviour
         }
     }
     //  ....................................................................MAIN PART END..................................................................
+    //  ....................................................................SKILLS PART START..............................................................
+    void UseSpell()
+    {
+        if (!isAttacking && !isDashing && !isShielding && !spellIsOnCooldown)
+        {
+            FireBreath();
+            StartCoroutine(SpellCooldownTimer());
+        }
+    }
+    // Separate spells
+    IEnumerator SpellCooldownTimer()
+    {
+        spellIsOnCooldown = true;
+        skillFillImage.fillAmount = 0f; // Start fill from 0
+        float updateInterval = 0.1f; // Interval between updates
+        int updateCount = Mathf.CeilToInt(spellCooldown / updateInterval); // Number of updates needed
+        float fillStep = 1f / updateCount; // Amount to increase fillAmount per update
+
+        while (skillFillImage.fillAmount < 1f)
+        {
+            skillFillImage.fillAmount += fillStep; // Increase fillAmount value
+            yield return new WaitForSeconds(updateInterval); // Wait before the next update
+        }
+
+        skillFillImage.fillAmount = 1f; // Ensure the value is 1 at the end
+
+        spellIsOnCooldown = false;
+
+        isFireBreathing = false;
+        isUsingSpell = false;
+    }
+    void FireBreath()
+    {
+        if (!isFireBreathing)
+        {
+            isUsingSpell = true;
+            isFireBreathing = true;
+            fireBreathParticle.Play();
+            StartCoroutine(ActivateFireBreath());
+            StartCoroutine(FireBreathCoolDown());
+        }
+    }
+    IEnumerator FireBreathCoolDown()
+    {
+        float x = speed;
+        speed *= 0.75f;
+        StartCoroutine(FireBreathAnimation());
+        yield return new WaitForSeconds(1f);
+        speed = x;
+        yield return new WaitForSeconds(1f);
+        fireBreathParticle.Stop();
+        fireBreathParticle.Clear();
+    }
+    IEnumerator FireBreathAnimation()
+    {
+        animator.SetBool("isFireBreathing", true);
+        yield return new WaitForSeconds(0.75f);
+        animator.SetBool("isFireBreathing", false);
+
+        isFireBreathing = false;
+        isUsingSpell = false;
+    }
+    IEnumerator FireBreathHitCooldown(Enemy x)
+    {
+        yield return new WaitForSeconds(2f);
+        x.enemyIsHitByFire = false;
+    }
+    private IEnumerator ActivateFireBreath()
+    {
+        float elapsedTime = 0f;
+        while (elapsedTime < fireBreathConeDurationIncrease)
+        {
+            float currentRadius = Mathf.Lerp(fireBreathInitialConeRadius, fireBreathMaxConeRadius, elapsedTime / fireBreathConeDurationIncrease);
+            DetectEnemiesInCone(currentRadius);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        DetectEnemiesInCone(fireBreathMaxConeRadius);
+    }
+    private void DetectEnemiesInCone(float currentRadius)
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, currentRadius);
+        bool hitEnemy = false;
+
+        foreach (var hitCollider in hitColliders)
+        {
+            if (IsTargetInCone(hitCollider.transform))
+            {
+                if (hitCollider.CompareTag("Enemy"))
+                {
+                    hitEnemy = true;
+                    Enemy enemy = hitCollider.GetComponent<Enemy>();
+
+                    if (enemy != null && !enemy.enemyIsHitByFire)
+                    {
+                        enemy.enemyIsHitByFire = true;
+                        StartCoroutine(FireBreathHitCooldown(enemy));
+                        enemy.enemyHealth--;
+                        enemy.animator.SetTrigger("Attacked");
+                    }
+                }
+            }
+        }
+
+        if (hitEnemy)
+        {
+
+        }
+    }
+
+    //  ....................................................................SKILLS PART END................................................................
     //  ....................................................................SCORE PART START...............................................................
 
     private void ScoreUpdate()
@@ -245,7 +380,7 @@ public class Player : MonoBehaviour
 
         shieldWallPiecesLogic();
 
-        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive)
+        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isFireBreathing)
         {
             ShieldStart();
             audioSource.PlayOneShot(audioClips[4], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
@@ -472,11 +607,11 @@ public class Player : MonoBehaviour
     private void DashUILogic()
     {
         UpdateDashUI();
-        if (backwardsDashTalentChosen && Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding)
+        if (backwardsDashTalentChosen && Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding && !isFireBreathing)
         {
             BackwardsDashLogic();
         }
-        else if (!backwardsDashTalentChosen)
+        else if (!backwardsDashTalentChosen && !isFireBreathing)
         {
             MainAndDoubleDashLogic();
         }
@@ -484,7 +619,8 @@ public class Player : MonoBehaviour
         if (remainingDashes == 2 && doubleDashTalentChosen)
         {
             dashFillImage.fillAmount = 1;
-        } else if(!doubleDashTalentChosen && !dashIsOnCooldown)
+        }
+        else if (!doubleDashTalentChosen && !dashIsOnCooldown)
         {
             dashFillImage.fillAmount = 1;
         }
@@ -521,7 +657,8 @@ public class Player : MonoBehaviour
                 dashFillImage.fillAmount += x * 0.1f; // Increase fillAmount value
                 yield return new WaitForSeconds(x); // Wait before the next update
             }
-        } else
+        }
+        else
         {
             while (dashFillImage.fillAmount < 1f)
             {
@@ -666,16 +803,31 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(3);
         if (x != null)
         {
-            x.enemyHealth--;
-            if (x.enemyHealth <= 0)
-            {
-                audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
-            } else
-            {
-                audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
-            }
+            x.enemyHealth--;;
+            x.animator.SetTrigger("Attacked");
             x.enemyIsBleeding = false;
+            BleedSound(x);
         }
+
+    }
+    void BleedSound(Enemy x)
+    {
+        if (bleedSoundIsPossible && x.enemyHealth <= 0)
+        {
+            audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            StartCoroutine(DamageSoundCooldown());
+        }
+        else if (bleedSoundIsPossible && x.enemyHealth > 0)
+        {
+            audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            StartCoroutine(DamageSoundCooldown());
+        }
+    }
+    IEnumerator DamageSoundCooldown()
+    {
+        bleedSoundIsPossible = false;
+        yield return new WaitForSeconds(0.5f);
+        bleedSoundIsPossible = true;
     }
 
     IEnumerator AttackCoroutine()
@@ -702,11 +854,8 @@ public class Player : MonoBehaviour
                         if (!damageAttackTalentIsChosen)
                         {
                             enemy.enemyHealth--;
-                            if (bleedAttackTalentIsChosen && !enemy.enemyIsBleeding)
-                            {
-                                StartCoroutine(BleedTalentEffect(enemy));
-                            }
-                        } else
+                        }
+                        else
                         {
                             enemy.enemyHealth -= 1.5f;
                         }
@@ -718,6 +867,10 @@ public class Player : MonoBehaviour
                         else
                         {
                             hitEnemy = true;
+                        }
+                        if (bleedAttackTalentIsChosen && !enemy.enemyIsBleeding)
+                        {
+                            StartCoroutine(BleedTalentEffect(enemy));
                         }
                     }
                 }
@@ -731,8 +884,12 @@ public class Player : MonoBehaviour
 
         // Play the appropriate sound once after checking all colliders
         if (killed)
-        {
-            audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+        { 
+            if (bleedSoundIsPossible)
+            {
+                audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+                StartCoroutine(DamageSoundCooldown());
+            }
             if (vampireHealthTalentIsChosen)
             {
                 killsToVampire--;
@@ -776,6 +933,8 @@ public class Player : MonoBehaviour
             isAttackQueued = false;
             Attack();
         }
+
+        isUsingSpell = false;
     }
 
 

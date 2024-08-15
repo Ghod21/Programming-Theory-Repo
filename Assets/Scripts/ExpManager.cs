@@ -113,6 +113,45 @@ public class ExpManager : MonoBehaviour
     // Talents UI showcase part end
 
     // --------------------------------------------------------------------------- TALENTS SECTION START --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------- Skills part start
+
+    void ShowSkillsTalentsUI()
+    {
+
+    }
+    void HideSkillsTalentsUI()
+    {
+
+    }
+    public void FireSkillTalent()
+    {
+        Time.timeScale = 1f;
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
+        HideAttackTalentsUI();
+        Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/fireSkill");
+
+        playerScript.fireBreathTalentIsChosen = true;
+    }
+    public void LightningSkillTalent()
+    {
+        Time.timeScale = 1f;
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
+        HideAttackTalentsUI();
+        Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/lightningSkill");
+
+
+    }
+    public void VortexSkillTalent()
+    {
+        Time.timeScale = 1f;
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
+        HideAttackTalentsUI();
+        Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/vortexSkill");
+
+
+    }
+
+    // ------------------------------------------------------------------------------- Skills part end
     // ----------------------------------------------------------------------------- Attack part start
 
     void ShowAttackTalentsUI()
@@ -250,6 +289,8 @@ public class ExpManager : MonoBehaviour
         playerScript.dashCooldownSeconds = 5f;
         playerScript.dashCountText.text = playerScript.remainingDashes.ToString();
         playerScript.doubleDashTalentChosen = true;
+        Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Dash/doubleDash");
+        AssignTalentImage(x);
     }
     public void DashBackwardsTalent()
     {
@@ -263,6 +304,8 @@ public class ExpManager : MonoBehaviour
         playerScript.dashFillImage.fillAmount = 1;
         playerScript.dashIsOnCooldown = false;
         playerScript.isCooldownCoroutineRunning = false;
+        Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Dash/backDash");
+        AssignTalentImage(x);
     }
     public void SprintDashTalent()
     {
@@ -273,6 +316,8 @@ public class ExpManager : MonoBehaviour
         playerScript.dashFillImage.fillAmount = 1;
         playerScript.dashIsOnCooldown = false;
         playerScript.isCooldownCoroutineRunning = false;
+        Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Dash/sprintDash");
+        AssignTalentImage(x);
     }
 
     // ------------------------------------------------------------------------------- Dash part end

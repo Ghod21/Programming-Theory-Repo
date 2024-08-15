@@ -7,7 +7,7 @@ public class Enemy : MonoBehaviour
     // Main enemy parent script.
     [SerializeField] protected BoxCollider boundaryCollider; // Collider defining the boundary
     [SerializeField] protected SphereCollider exclusionZone; // Collider defining where enemies should not spawn
-    [SerializeField] protected Animator animator;
+    [SerializeField] public Animator animator;
     [SerializeField] protected Player playerScript;
     public GameObject expManager;
     public ExpManager expManagerScript;
@@ -23,6 +23,7 @@ public class Enemy : MonoBehaviour
     protected float soundAdjustment = 0.6f;
     int prefabIndex;
     public bool enemyIsBleeding;
+    public bool enemyIsHitByFire;
 
     protected SpawnManager spawnManager;
 
