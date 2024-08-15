@@ -34,7 +34,8 @@ public class Player : MonoBehaviour
 
     // Attack variables
     [SerializeField] private string[] targetTags; // Tags of the targets
-    [SerializeField] private float attackRange = 3f; // Range of the attack
+    public float attackRange = 3f; // Range of the attack
+    float attackRangeMultiplier = 1f;
     [SerializeField] private float attackAngle = 180f; // Angle of the attack cone
     private bool isAttacking = false;
     private float attackCooldown = 0f; // Cooldown for attack
@@ -89,6 +90,14 @@ public class Player : MonoBehaviour
     int maxValues = 7;
     public Vector3 currentVectorForBackwardDash;
     public float currentFloatForBackwardDash;
+    public bool sprintDashTalentChosen = false;
+
+    public bool vampireHealthTalentIsChosen = false;
+    int killsToVampire = 7;
+
+    public bool damageAttackTalentIsChosen = false;
+    public float attackRangeTalentAdd = 0f;
+    public bool bleedAttackTalentIsChosen = false;
 
 
 
@@ -191,6 +200,23 @@ public class Player : MonoBehaviour
 
     //  ....................................................................SCORE PART END.................................................................
     //  ....................................................................DEATH PART START...............................................................
+    // Health talents start
+
+    public IEnumerator HealthRegenTalent()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(10);
+            playerHealth++;
+            if (playerHealth > 30)
+            {
+                playerHealth = 30;
+            }
+        }
+    }
+
+    // Health talents end
+
     private void HealthLogic()
     {
         healthSlider.value = Mathf.MoveTowards(healthSlider.value, playerHealth / 30f, Time.deltaTime * 10f);
@@ -353,7 +379,13 @@ public class Player : MonoBehaviour
 
     //  ....................................................................SHIELD PART END................................................................
     //  ....................................................................MOVE PART START................................................................
-
+    public IEnumerator SprintDashTalent()
+    {
+        yield return new WaitForSeconds(0.2f);
+        speed = 3.25f;
+        yield return new WaitForSeconds(3f);
+        speed = 2.5f;
+    }
     private void BackwardsDashLogic()
     {
         audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
@@ -428,6 +460,10 @@ public class Player : MonoBehaviour
             else if (!doubleDashTalentChosen && !dashIsOnCooldown)
             {
                 Dash();
+                if (sprintDashTalentChosen)
+                {
+                    StartCoroutine(SprintDashTalent());
+                }
                 dashIsOnCooldown = true;
             }
         }
@@ -600,6 +636,10 @@ public class Player : MonoBehaviour
     //  ..............................................................MOVE PART END..........................................................................
 
     //  ..............................................................ATTACK PART START......................................................................
+    public void AttackRangeCalculation()
+    {
+        attackRange = (3 * attackRangeMultiplier) + attackRangeTalentAdd;
+    }
     private void Attack()
     {
         if (isAttacking && Input.GetMouseButtonDown(0))
@@ -617,6 +657,25 @@ public class Player : MonoBehaviour
 
         // Start attack animation coroutine
         StartCoroutine(AttackCoroutine());
+    }
+
+
+    IEnumerator BleedTalentEffect(Enemy x)
+    {
+        x.enemyIsBleeding = true;
+        yield return new WaitForSeconds(3);
+        if (x != null)
+        {
+            x.enemyHealth--;
+            if (x.enemyHealth <= 0)
+            {
+                audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            } else
+            {
+                audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            }
+            x.enemyIsBleeding = false;
+        }
     }
 
     IEnumerator AttackCoroutine()
@@ -640,7 +699,17 @@ public class Player : MonoBehaviour
                     Enemy enemy = hitCollider.GetComponent<Enemy>();
                     if (enemy != null)
                     {
-                        enemy.enemyHealth--;
+                        if (!damageAttackTalentIsChosen)
+                        {
+                            enemy.enemyHealth--;
+                            if (bleedAttackTalentIsChosen && !enemy.enemyIsBleeding)
+                            {
+                                StartCoroutine(BleedTalentEffect(enemy));
+                            }
+                        } else
+                        {
+                            enemy.enemyHealth -= 1.5f;
+                        }
                         enemy.attacked = true;
                         if (enemy.enemyHealth < 1)
                         {
@@ -654,6 +723,7 @@ public class Player : MonoBehaviour
                 }
             }
         }
+
         if (isShielding && shieldAttackTalentChosen)
         {
             attackToShieldCount++;
@@ -663,6 +733,19 @@ public class Player : MonoBehaviour
         if (killed)
         {
             audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            if (vampireHealthTalentIsChosen)
+            {
+                killsToVampire--;
+                if (killsToVampire <= 0)
+                {
+                    playerHealth++;
+                    if (playerHealth > 30)
+                    {
+                        playerHealth = 30;
+                    }
+                    killsToVampire = 7;
+                }
+            }
         }
         else if (hitEnemy)
         {

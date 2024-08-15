@@ -1,5 +1,5 @@
 using System.Collections;
-
+using UnityEngine;
 public class EasyEnemy : Enemy
 {
     // Easy enemy child script.
@@ -18,6 +18,11 @@ public class EasyEnemy : Enemy
     {
         DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;
         playerScript.scoreMultiplierBase++;
+        if (Random.value < 0.01f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
+        {
+            Vector3 currentPosition = transform.position;
+            spawnManager.CreateHealthPotionIfNotExists(currentPosition);
+        }
         return base.deathAnimation();
     }
 }

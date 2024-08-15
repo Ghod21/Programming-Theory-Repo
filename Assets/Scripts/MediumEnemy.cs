@@ -23,6 +23,11 @@ public class MediumEnemy : Enemy
     {
         DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
         playerScript.scoreMultiplierBase += 2;
+        if (Random.value < 0.02f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
+        {
+            Vector3 currentPosition = transform.position;
+            spawnManager.CreateHealthPotionIfNotExists(currentPosition);
+        }
         return base.deathAnimation();
     }
 

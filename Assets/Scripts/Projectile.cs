@@ -64,6 +64,7 @@ public class Projectile : MonoBehaviour
                     Destroy(gameObject);
                 } else if (playerScript.isBlockingDamage && reflectionTalentIsChosen)
                 {
+                    playerScript.shieldHealth--;
                     direction = -direction;
                     isReflected = true;
                     playerScript.audioSource.PlayOneShot(playerScript.audioClips[9], DataPersistence.soundsVolume * 0.6f * soundAdjustment);
