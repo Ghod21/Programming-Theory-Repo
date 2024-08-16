@@ -27,6 +27,7 @@ public class ExpManager : MonoBehaviour
     [SerializeField] GameObject[] dashTalentsUI;
     [SerializeField] GameObject[] healthTalentsUI;
     [SerializeField] GameObject[] attackTalentsUI;
+    [SerializeField] GameObject[] skillsTalentsUI;
     [SerializeField] GameObject talentsUI;
     private List<Action> talentFunctions = new List<Action>();
     public bool reflectionTalentIsChosenExpManager;
@@ -50,6 +51,7 @@ public class ExpManager : MonoBehaviour
         fillSlider.value = 0;
         audioSource = player.GetComponent<AudioSource>();
         levelUpSound = Resources.Load<AudioClip>("Audio/LevelUpSound");
+        ShowSkillsTalentsUI();
     }
 
     void Update()
@@ -117,17 +119,29 @@ public class ExpManager : MonoBehaviour
 
     void ShowSkillsTalentsUI()
     {
-
+        talentsUI.SetActive(true);
+        for (int i = 0; i < skillsTalentsUI.Length; i++)
+        {
+            skillsTalentsUI[i].SetActive(true);
+        }
+        playerScript.timeIsFrozen = true;
+        Time.timeScale = 0f;
     }
     void HideSkillsTalentsUI()
     {
-
+        Time.timeScale = 1f;
+        talentsUI.SetActive(false);
+        for (int i = 0; i < skillsTalentsUI.Length; i++)
+        {
+            skillsTalentsUI[i].SetActive(false);
+        }
+        playerScript.timeIsFrozen = false;
     }
     public void FireSkillTalent()
     {
         Time.timeScale = 1f;
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
-        HideAttackTalentsUI();
+        HideSkillsTalentsUI();
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/fireSkill");
 
         playerScript.fireBreathTalentIsChosen = true;
@@ -136,16 +150,16 @@ public class ExpManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
-        HideAttackTalentsUI();
+        HideSkillsTalentsUI();
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/lightningSkill");
 
-
+        playerScript.lightningTalentIsChosen = true;
     }
     public void VortexSkillTalent()
     {
         Time.timeScale = 1f;
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
-        HideAttackTalentsUI();
+        HideSkillsTalentsUI();
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/vortexSkill");
 
 

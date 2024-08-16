@@ -104,7 +104,6 @@ public class Player : MonoBehaviour
     // Skills variables
     public bool fireBreathTalentIsChosen = false;
     private ParticleSystem fireBreathParticle;
-    bool isFireBreathing;
     [SerializeField] public UnityEngine.UI.Image skillFillImage;
 
     public float fireBreathInitialConeRadius = 1f;
@@ -115,11 +114,19 @@ public class Player : MonoBehaviour
     float spellCooldown = 3f;
     bool spellIsOnCooldown = false;
 
+    [SerializeField] GameObject lightningParticles;
+    [SerializeField] GameObject weaponCharge;
+    ParticleSystem ParticleSystemParticles;
+
+    public bool lightningTalentIsChosen = false;
+    bool weaponIsCharged = false;
+
 
 
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
+        ParticleSystemParticles = weaponCharge.GetComponent<ParticleSystem>();
         Transform childFireBreath = transform.Find("FireBreath");
         fireBreathParticle = childFireBreath.GetComponentInChildren<ParticleSystem>();
         animator.SetBool("isNotAttacking", true);
@@ -153,6 +160,7 @@ public class Player : MonoBehaviour
             HealthLogic();
             DashUILogic();
             ScoreUpdate();
+            //ChargedWeaponSoundLogic();
 
             if (shieldWall.activeSelf)
             {
@@ -199,9 +207,13 @@ public class Player : MonoBehaviour
     //  ....................................................................SKILLS PART START..............................................................
     void UseSpell()
     {
-        if (!isAttacking && !isDashing && !isShielding && !spellIsOnCooldown)
+        if (!isAttacking && !isDashing && !isShielding && !spellIsOnCooldown && fireBreathTalentIsChosen && !isUsingSpell)
         {
             FireBreath();
+            StartCoroutine(SpellCooldownTimer());
+        } else if(!isAttacking && !isDashing && !isShielding && !spellIsOnCooldown && lightningTalentIsChosen && !isUsingSpell)
+        {
+            StartCoroutine(ChargeWeapon());
             StartCoroutine(SpellCooldownTimer());
         }
     }
@@ -223,20 +235,89 @@ public class Player : MonoBehaviour
         skillFillImage.fillAmount = 1f; // Ensure the value is 1 at the end
 
         spellIsOnCooldown = false;
-
-        isFireBreathing = false;
         isUsingSpell = false;
     }
+    // Lightning
+
+    IEnumerator ChargeWeapon()
+    {
+        isUsingSpell = true;
+        float x = speed;
+        speed *= 0.75f;
+        StartCoroutine(WeaponChargeAnimation());
+        yield return new WaitForSeconds(1f);
+        speed = x;
+        isUsingSpell = false;
+    }
+    IEnumerator WeaponChargeAnimation()
+    {
+        animator.SetBool("isChargingWeapon", true);
+        yield return new WaitForSeconds(0.4f);
+        weaponCharge.SetActive(true);
+        ParticleSystemParticles.Play();
+        weaponIsCharged = true;
+        audioSource.PlayOneShot(audioClips[12], DataPersistence.soundsVolume * 3f * soundAdjustment);
+        yield return new WaitForSeconds(0.4f);
+        animator.SetBool("isChargingWeapon", false);
+    }
+    IEnumerator ChainLightningCoroutine(Enemy initialTarget)
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        if (initialTarget != null && lightningTalentIsChosen && weaponIsCharged)
+        {
+            // Instantiate the lightning particles prefab
+            GameObject lightningInstance = Instantiate(lightningParticles);
+
+            // Get the ChainLightning component from the instantiated prefab
+            ChainLightning chainLightning = lightningInstance.GetComponent<ChainLightning>();
+
+            if (chainLightning != null)
+            {
+                // Set the lightningParticleObject and ParticleSystem for ChainLightning
+                chainLightning.SetLightningParticleObject(lightningInstance);
+
+                // Optionally, attach the instance to the target if needed
+                lightningInstance.transform.parent = initialTarget.transform;
+
+                // Start the chain lightning effect
+                chainLightning.StartChainLightning(initialTarget, this);
+            }
+            else
+            {
+                Debug.LogError("ChainLightning component is missing from the instantiated prefab.");
+            }
+
+            // Reset weapon charge status
+            weaponIsCharged = false;
+
+            // Stop and clear original particle system
+            ParticleSystemParticles.Stop();
+            ParticleSystemParticles.Clear();
+            weaponCharge.SetActive(false);
+        }
+        else
+        {
+            Debug.Log("Chain Lightning not activated. InitialTarget: " + (initialTarget != null) +
+                ", LightningTalentIsChosen: " + lightningTalentIsChosen +
+                ", SpellIsOnCooldown: " + spellIsOnCooldown +
+                ", WeaponIsCharged: " + weaponIsCharged);
+        }
+    }
+    void ChainLightningOnAttack(Enemy initialTarget)
+    {
+        StartCoroutine(ChainLightningCoroutine(initialTarget));
+    }
+
+
+    // Fire
     void FireBreath()
     {
-        if (!isFireBreathing)
-        {
+            audioSource.PlayOneShot(audioClips[11], DataPersistence.soundsVolume * 1f * soundAdjustment);
             isUsingSpell = true;
-            isFireBreathing = true;
             fireBreathParticle.Play();
             StartCoroutine(ActivateFireBreath());
             StartCoroutine(FireBreathCoolDown());
-        }
     }
     IEnumerator FireBreathCoolDown()
     {
@@ -253,10 +334,8 @@ public class Player : MonoBehaviour
     {
         animator.SetBool("isFireBreathing", true);
         yield return new WaitForSeconds(0.75f);
-        animator.SetBool("isFireBreathing", false);
-
-        isFireBreathing = false;
         isUsingSpell = false;
+        animator.SetBool("isFireBreathing", false);
     }
     IEnumerator FireBreathHitCooldown(Enemy x)
     {
@@ -380,7 +459,7 @@ public class Player : MonoBehaviour
 
         shieldWallPiecesLogic();
 
-        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isFireBreathing)
+        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell)
         {
             ShieldStart();
             audioSource.PlayOneShot(audioClips[4], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
@@ -607,11 +686,11 @@ public class Player : MonoBehaviour
     private void DashUILogic()
     {
         UpdateDashUI();
-        if (backwardsDashTalentChosen && Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding && !isFireBreathing)
+        if (backwardsDashTalentChosen && Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding && !isUsingSpell)
         {
             BackwardsDashLogic();
         }
-        else if (!backwardsDashTalentChosen && !isFireBreathing)
+        else if (!backwardsDashTalentChosen && !isUsingSpell)
         {
             MainAndDoubleDashLogic();
         }
@@ -826,7 +905,7 @@ public class Player : MonoBehaviour
     IEnumerator DamageSoundCooldown()
     {
         bleedSoundIsPossible = false;
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1f);
         bleedSoundIsPossible = true;
     }
 
@@ -838,6 +917,8 @@ public class Player : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
         bool hitEnemy = false; // Track if any enemy was hit
         bool killed = false;
+
+        Enemy initialTarget = null; // Variable to store the first enemy hit
 
         foreach (var hitCollider in hitColliders)
         {
@@ -860,6 +941,13 @@ public class Player : MonoBehaviour
                             enemy.enemyHealth -= 1.5f;
                         }
                         enemy.attacked = true;
+
+                        // Store the first enemy as the initial target for the lightning
+                        if (initialTarget == null)
+                        {
+                            initialTarget = enemy;
+                        }
+
                         if (enemy.enemyHealth < 1)
                         {
                             killed = true;
@@ -877,6 +965,9 @@ public class Player : MonoBehaviour
             }
         }
 
+        // Call the lightning effect on the first hit enemy, if one was hit
+        ChainLightningOnAttack(initialTarget);
+
         if (isShielding && shieldAttackTalentChosen)
         {
             attackToShieldCount++;
@@ -884,7 +975,7 @@ public class Player : MonoBehaviour
 
         // Play the appropriate sound once after checking all colliders
         if (killed)
-        { 
+        {
             if (bleedSoundIsPossible)
             {
                 audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
@@ -917,7 +1008,6 @@ public class Player : MonoBehaviour
         // Wait for the remaining half of the animation duration
         yield return new WaitForSeconds(0.833f / 2);
 
-
         // Reset attack state
         isAttacking = false;
         animator.SetBool("isAttacking", false);
@@ -925,7 +1015,6 @@ public class Player : MonoBehaviour
         {
             animator.SetBool("isShielding", true);
         }
-
 
         // If an attack was queued, start the next one
         if (isAttackQueued)
@@ -936,6 +1025,7 @@ public class Player : MonoBehaviour
 
         isUsingSpell = false;
     }
+
 
 
 
