@@ -155,14 +155,14 @@ public class ExpManager : MonoBehaviour
 
         playerScript.lightningTalentIsChosen = true;
     }
-    public void VortexSkillTalent()
+    public void BladeVortexSkillTalent()
     {
         Time.timeScale = 1f;
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
         HideSkillsTalentsUI();
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/vortexSkill");
 
-
+        playerScript.bladeVortexSkillTalentIsChosen = true;
     }
 
     // ------------------------------------------------------------------------------- Skills part end
@@ -207,6 +207,8 @@ public class ExpManager : MonoBehaviour
         AssignTalentImage(x);
 
         playerScript.attackRangeTalentAdd = 1f;
+        playerScript.swordSizePushAttackRangeTalentIsOn = 0.5f;
+        playerScript.SwordSizeForAttackRange();
         playerScript.AttackRangeCalculation();
     }
     public void BleedAttackTalent()

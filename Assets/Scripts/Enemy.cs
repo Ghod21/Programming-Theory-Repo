@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
@@ -24,6 +26,11 @@ public class Enemy : MonoBehaviour
     int prefabIndex;
     public bool enemyIsBleeding;
     public bool enemyIsHitByFire;
+    private SkinnedMeshRenderer skinnedMeshRenderer;
+    private UnityEngine.Color originalColor;
+    private UnityEngine.Color newColor;
+
+    string newColorHex = "#FFD3D3";
 
     protected SpawnManager spawnManager;
 
@@ -44,6 +51,7 @@ public class Enemy : MonoBehaviour
         GameObject playerObject = GameObject.Find("Player");
         playerScript = playerObject.GetComponent<Player>();
         spawnManager = FindObjectOfType<SpawnManager>();
+        SkinnedMeshRendererSearch();
     }
 
     private void Update()
@@ -201,7 +209,9 @@ public class Enemy : MonoBehaviour
             ExperienceSpawnOnDeath();
         }
         animator.SetTrigger("Dead");
-        yield return new WaitForSeconds(1.067f);
+        yield return new WaitForSeconds(0.1f);
+        playerScript.StartCoroutine(playerScript.KillSoundCooldown());
+        yield return new WaitForSeconds(1.067f - 0.1f);
         Destroy(gameObject);
     }
     void ExperienceSpawnOnDeath()
@@ -227,4 +237,46 @@ public class Enemy : MonoBehaviour
         }
         return prefabIndex;
     }
+    void SkinnedMeshRendererSearch()
+    {
+        foreach (Transform child in transform)
+        {
+            SkinnedMeshRenderer renderer = child.GetComponent<SkinnedMeshRenderer>();
+
+            if (renderer != null)
+            {
+                skinnedMeshRenderer = renderer;
+                originalColor = skinnedMeshRenderer.material.color;
+                break;
+            }
+        }
+
+        if (skinnedMeshRenderer == null)
+        {
+            Debug.LogWarning("SkinnedMeshRenderer not found.");
+        }
+    }
+    public void AddMaterial()
+    {
+        if (skinnedMeshRenderer != null)
+        {
+            if (UnityEngine.ColorUtility.TryParseHtmlString(newColorHex, out newColor))
+            {
+                skinnedMeshRenderer.material.color = newColor;
+            }
+            else
+            {
+                Debug.LogWarning("Invalid hex color string.");
+            }
+        }
+    }
+
+    public void RemoveMaterial()
+    {
+        if (skinnedMeshRenderer != null)
+        {
+            skinnedMeshRenderer.material.color = originalColor;
+        }
+    }
+
 }

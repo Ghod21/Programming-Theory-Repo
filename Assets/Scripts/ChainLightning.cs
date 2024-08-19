@@ -5,8 +5,8 @@ using System.Collections.Generic;
 public class ChainLightning : MonoBehaviour
 {
     private ParticleSystem lightningParticles; // Reference to the ParticleSystem
-    public float detectionRadius = 5f; // Radius for detecting enemies
-    public float delayBetweenJumps = 0.2f; // Delay between lightning jumps
+    float detectionRadius = 5f; // Radius for detecting enemies
+    float delayBetweenJumps = 0.15f; // Delay between lightning jumps
 
     private List<Enemy> hitEnemies = new List<Enemy>(); // List of enemies that have been hit
     // Call this method to set the lightning particle object and get the ParticleSystem
@@ -64,7 +64,7 @@ public class ChainLightning : MonoBehaviour
                 playerScript.audioSource.PlayOneShot(playerScript.audioClips[12], DataPersistence.soundsVolume * 2.5f * DataPersistence.soundAdjustment);
                 Debug.Log("Enemy is hit by lightning");
 
-                // Wait for 0.2 seconds
+                // Wait for delay
                 yield return new WaitForSeconds(delayBetweenJumps);
 
                 // Stop and clear the particles
@@ -104,7 +104,7 @@ public class ChainLightning : MonoBehaviour
         foreach (Collider collider in hitColliders)
         {
             Enemy enemy = collider.GetComponent<Enemy>();
-            if (enemy != null && !hitEnemies.Contains(enemy))
+            if (enemy != null && !hitEnemies.Contains(enemy) && enemy.enemyHealth > 0)
             {
                 float distance = Vector3.Distance(position, enemy.transform.position);
                 if (distance < minDistance)
@@ -117,4 +117,5 @@ public class ChainLightning : MonoBehaviour
 
         return nearestEnemy;
     }
+
 }

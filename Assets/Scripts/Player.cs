@@ -42,7 +42,7 @@ public class Player : MonoBehaviour
     private float attackCooldown = 0f; // Cooldown for attack
     private const float attackCooldownDuration = 0.833f; // Duration of the attack cooldown
     private int attackCount;
-    private bool isAttackQueued = false; // Flag to queue attacks
+    private bool isAttackQueued = false; // Flag to queue attacksW
 
     // Shield variables
     [SerializeField] GameObject shieldWall;
@@ -92,14 +92,20 @@ public class Player : MonoBehaviour
     public Vector3 currentVectorForBackwardDash;
     public float currentFloatForBackwardDash;
     public bool sprintDashTalentChosen = false;
+    bool dashSprintIsOn = false;
 
     public bool vampireHealthTalentIsChosen = false;
     int killsToVampire = 7;
 
     public bool damageAttackTalentIsChosen = false;
     public float attackRangeTalentAdd = 0f;
+    [SerializeField] Transform swordTransform;
+    public float swordSizeY = 1f;
+    public float swordSizeMultiplier = 1f;
+    public float swordSizePushAttackRangeTalentIsOn = 0f;
     public bool bleedAttackTalentIsChosen = false;
-    bool bleedSoundIsPossible = true;
+    bool hasPlayedKillSound = false;
+    bool bleedSoundCooldown = false;
 
     // Skills variables
     public bool fireBreathTalentIsChosen = false;
@@ -121,11 +127,22 @@ public class Player : MonoBehaviour
     public bool lightningTalentIsChosen = false;
     bool weaponIsCharged = false;
 
+    public bool bladeVortexSkillTalentIsChosen = false;
+    [SerializeField] Transform playerTransform;
+
+    private Quaternion initialRotation;
+    bool isInBladeVortex = false;
+    float bladeVortexDuration = 0.5f;
+    [SerializeField] ParticleSystem bladeVortexParticle;
+    [SerializeField] GameObject bladeVortexParticleObject;
+
+
 
 
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
+        initialRotation = gameObject.transform.rotation;
         ParticleSystemParticles = weaponCharge.GetComponent<ParticleSystem>();
         Transform childFireBreath = transform.Find("FireBreath");
         fireBreathParticle = childFireBreath.GetComponentInChildren<ParticleSystem>();
@@ -211,9 +228,16 @@ public class Player : MonoBehaviour
         {
             FireBreath();
             StartCoroutine(SpellCooldownTimer());
-        } else if(!isAttacking && !isDashing && !isShielding && !spellIsOnCooldown && lightningTalentIsChosen && !isUsingSpell)
+        }
+        else if (!isAttacking && !isDashing && !isShielding && !spellIsOnCooldown && lightningTalentIsChosen && !isUsingSpell)
         {
             StartCoroutine(ChargeWeapon());
+
+            skillFillImage.fillAmount = 0f;
+        }
+        else if (!isAttacking && !isDashing && !spellIsOnCooldown && bladeVortexSkillTalentIsChosen && !spellIsOnCooldown && !isUsingSpell)
+        {
+            BladeVortexDash();
             StartCoroutine(SpellCooldownTimer());
         }
     }
@@ -237,6 +261,132 @@ public class Player : MonoBehaviour
         spellIsOnCooldown = false;
         isUsingSpell = false;
     }
+    // Blade Vortex
+    private void BladeVortexDash()
+    {
+        isUsingSpell = true;
+        isDashing = true;
+        audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+        dashTime = dashDuration;
+
+        StartCoroutine(RotatePlayerCoroutine());
+        StartCoroutine(BladeVortexAttackCoroutine());
+    }
+    private IEnumerator RotatePlayerCoroutine()
+    {
+        bladeVortexParticle.Play();
+        dashTime = bladeVortexDuration;
+        isInBladeVortex = true;
+        float elapsedTime = 0f;
+        float totalRotation = 360f * 3; // Total rotation needed (3 full rotations)
+        float rotationDuration = bladeVortexDuration; // Duration of the rotation
+
+        // Calculate the rotation step based on the duration and speed
+        float rotationStep = totalRotation / rotationDuration;
+
+        // Store the initial rotation
+        Quaternion startRotation = playerTransform.rotation;
+
+        while (elapsedTime < rotationDuration)
+        {
+            // Calculate how much to rotate this frame
+            float step = rotationStep * Time.deltaTime;
+
+            // Rotate the player
+            playerTransform.Rotate(0, step, 0);
+
+            elapsedTime += Time.deltaTime;
+
+            yield return null;
+        }
+
+        // Ensure we end up exactly at the final rotation
+        playerTransform.rotation = startRotation * Quaternion.Euler(0, totalRotation, 0);
+
+        // Optional delay before resetting to the initial rotation
+        yield return new WaitForSeconds(0.1f);
+
+        // Reset to the initial rotation
+        playerTransform.rotation = initialRotation;
+
+        // End dashing
+        isDashing = false;
+        isInBladeVortex = false;
+        isUsingSpell = false;
+    }
+    private IEnumerator BladeVortexAttackCoroutine()
+    {
+        float elapsedTime = 0f;
+
+        while (elapsedTime < bladeVortexDuration)
+        {
+            // Perform attack action
+            Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
+            bool hitEnemy = false; // Track if any enemy was hit
+            bool killed = false;
+
+            foreach (var hitCollider in hitColliders)
+            {
+                if (hitCollider.CompareTag("Enemy") || hitCollider.CompareTag("EnemyRange"))
+                {
+                    Debug.Log("Hit: " + hitCollider.name + " " + attackCount);
+                    attackCount++;
+                    Enemy enemy = hitCollider.GetComponent<Enemy>();
+                    if (enemy != null)
+                    {
+                        if (!damageAttackTalentIsChosen)
+                        {
+                            enemy.enemyHealth--;
+                        }
+                        else
+                        {
+                            enemy.enemyHealth -= 1.5f;
+                        }
+                        enemy.attacked = true;
+
+
+                        if (enemy.enemyHealth < 1)
+                        {
+                            killed = true;
+                        }
+                        else
+                        {
+                            hitEnemy = true;
+                        }
+                        if (bleedAttackTalentIsChosen && !enemy.enemyIsBleeding)
+                        {
+                            StartCoroutine(BleedTalentEffect(enemy));
+                            enemy.AddMaterial();
+                        }
+                    }
+
+                }
+
+            }
+            if (killed)
+            {
+                if (!hasPlayedKillSound)
+                {
+                    audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+                    StartCoroutine(KillSoundCooldown());
+                }
+            }
+            else if (hitEnemy)
+            {
+                audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            }
+            else
+            {
+                audioSource.PlayOneShot(audioClips[1], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            }
+
+            yield return new WaitForSeconds(0.2f); // Delay between attacks
+            elapsedTime += 0.2f;
+        }
+
+    }
+
+
     // Lightning
 
     IEnumerator ChargeWeapon()
@@ -313,11 +463,11 @@ public class Player : MonoBehaviour
     // Fire
     void FireBreath()
     {
-            audioSource.PlayOneShot(audioClips[11], DataPersistence.soundsVolume * 1f * soundAdjustment);
-            isUsingSpell = true;
-            fireBreathParticle.Play();
-            StartCoroutine(ActivateFireBreath());
-            StartCoroutine(FireBreathCoolDown());
+        audioSource.PlayOneShot(audioClips[11], DataPersistence.soundsVolume * 1f * soundAdjustment);
+        isUsingSpell = true;
+        fireBreathParticle.Play();
+        StartCoroutine(ActivateFireBreath());
+        StartCoroutine(FireBreathCoolDown());
     }
     IEnumerator FireBreathCoolDown()
     {
@@ -593,12 +743,23 @@ public class Player : MonoBehaviour
 
     //  ....................................................................SHIELD PART END................................................................
     //  ....................................................................MOVE PART START................................................................
+    void DashSprintCheck()
+    {
+        if (dashSprintIsOn)
+        {
+            speed = 3.25f;
+        }
+        else
+        {
+            speed = 2.5f;
+        }
+    }
     public IEnumerator SprintDashTalent()
     {
         yield return new WaitForSeconds(0.2f);
-        speed = 3.25f;
+        dashSprintIsOn = true;
         yield return new WaitForSeconds(3f);
-        speed = 2.5f;
+        dashSprintIsOn = false;
     }
     private void BackwardsDashLogic()
     {
@@ -686,6 +847,7 @@ public class Player : MonoBehaviour
     private void DashUILogic()
     {
         UpdateDashUI();
+        DashSprintCheck();
         if (backwardsDashTalentChosen && Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding && !isUsingSpell)
         {
             BackwardsDashLogic();
@@ -787,6 +949,7 @@ public class Player : MonoBehaviour
             Vector3 movement = CalculateMovement(input);
             rb.velocity = movement * currentSpeed;
         }
+
     }
 
     private Vector3 CalculateMovement(Vector3 inputDirection)
@@ -807,7 +970,7 @@ public class Player : MonoBehaviour
         Plane playerPlane = new Plane(Vector3.up, transform.position);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if (playerPlane.Raycast(ray, out float hitDist))
+        if (playerPlane.Raycast(ray, out float hitDist) && !isInBladeVortex)
         {
             Vector3 targetPoint = ray.GetPoint(hitDist);
             Quaternion targetRotation = Quaternion.LookRotation(targetPoint - transform.position);
@@ -852,9 +1015,16 @@ public class Player : MonoBehaviour
     //  ..............................................................MOVE PART END..........................................................................
 
     //  ..............................................................ATTACK PART START......................................................................
+
     public void AttackRangeCalculation()
     {
         attackRange = (3 * attackRangeMultiplier) + attackRangeTalentAdd;
+    }
+    public void SwordSizeForAttackRange()
+    {
+        Vector3 newScale = swordTransform.localScale;
+        newScale.y = (swordSizeY * swordSizeMultiplier) + swordSizePushAttackRangeTalentIsOn;
+        swordTransform.localScale = newScale;
     }
     private void Attack()
     {
@@ -882,31 +1052,41 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(3);
         if (x != null)
         {
-            x.enemyHealth--;;
-            x.animator.SetTrigger("Attacked");
-            x.enemyIsBleeding = false;
-            BleedSound(x);
+            x.enemyHealth--; ;
+            if (x != null)
+            {
+                x.animator.SetTrigger("Attacked");
+                x.enemyIsBleeding = false;
+                BleedSound(x);
+                x.RemoveMaterial();
+            }
         }
 
     }
     void BleedSound(Enemy x)
     {
-        if (bleedSoundIsPossible && x.enemyHealth <= 0)
+        if (x.enemyHealth <= 0 && !hasPlayedKillSound)
         {
             audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
-            StartCoroutine(DamageSoundCooldown());
+            StartCoroutine(KillSoundCooldown());
         }
-        else if (bleedSoundIsPossible && x.enemyHealth > 0)
+        else if (x.enemyHealth > 0 && !bleedSoundCooldown)
         {
             audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
-            StartCoroutine(DamageSoundCooldown());
+            StartCoroutine(BleedSoundCooldown());
         }
     }
-    IEnumerator DamageSoundCooldown()
+    public IEnumerator KillSoundCooldown()
     {
-        bleedSoundIsPossible = false;
-        yield return new WaitForSeconds(1f);
-        bleedSoundIsPossible = true;
+        hasPlayedKillSound = true;
+        yield return new WaitForSeconds(0.8f);
+        hasPlayedKillSound = false;
+    }
+    public IEnumerator BleedSoundCooldown()
+    {
+        bleedSoundCooldown = true;
+        yield return new WaitForSeconds(0.1f);
+        bleedSoundCooldown = false;
     }
 
     IEnumerator AttackCoroutine()
@@ -959,6 +1139,7 @@ public class Player : MonoBehaviour
                         if (bleedAttackTalentIsChosen && !enemy.enemyIsBleeding)
                         {
                             StartCoroutine(BleedTalentEffect(enemy));
+                            enemy.AddMaterial();
                         }
                     }
                 }
@@ -966,7 +1147,12 @@ public class Player : MonoBehaviour
         }
 
         // Call the lightning effect on the first hit enemy, if one was hit
-        ChainLightningOnAttack(initialTarget);
+        if (weaponIsCharged)
+        {
+            ChainLightningOnAttack(initialTarget);
+
+            StartCoroutine(SpellCooldownTimer());
+        }
 
         if (isShielding && shieldAttackTalentChosen)
         {
@@ -976,10 +1162,10 @@ public class Player : MonoBehaviour
         // Play the appropriate sound once after checking all colliders
         if (killed)
         {
-            if (bleedSoundIsPossible)
+            if (!hasPlayedKillSound)
             {
                 audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
-                StartCoroutine(DamageSoundCooldown());
+                StartCoroutine(KillSoundCooldown());
             }
             if (vampireHealthTalentIsChosen)
             {
