@@ -4,11 +4,26 @@ using UnityEngine;
 public class HardEnemy : Enemy
 {
     // Hard enemy child script.
+    private GameObject defenceAuraObject;
+    private DefenceAura defenceAuraScript;
     protected override void Start()
     {
         base.Start(); // Call the Start method from the base class
         // Additional initialization code for EasyEnemy
         enemyHealth = 7;
+        isHardEnemy = true;
+        DefenceAuraSearch();
+        defenceAuraScript = defenceAuraObject.GetComponent<DefenceAura>();
+    }
+    protected override void Update()
+    {
+        base.Update();
+        if (enemyHealth < 1)
+        {
+            defenceAuraScript.auraIsOn = false;
+            defenceAuraScript.DisableDefenceAuraForAllEnemies();
+            Destroy(defenceAuraObject, 0.5f);
+        }
     }
     public override void MoveTowardsPlayer()
     {
@@ -49,4 +64,27 @@ public class HardEnemy : Enemy
             Debug.Log("ShieldHealth: " + playerScript.shieldHealth);
         }
     }
+    void DefenceAuraSearch()
+    {
+        string targetName = "DefenceAura";
+
+        foreach (Transform child in transform)
+        {
+            if (child.name == targetName)
+            {
+                defenceAuraObject = child.gameObject;
+                Collider collider = defenceAuraObject.GetComponent<Collider>();
+                if (collider != null)
+                {
+                    collider.isTrigger = true;
+                }
+                else
+                {
+                    Debug.LogError("Collider not found on child object with name 'DefenceAura'");
+                }
+                break;
+            }
+        }
+    }
+
 }

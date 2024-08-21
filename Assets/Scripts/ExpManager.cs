@@ -143,8 +143,14 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
         HideSkillsTalentsUI();
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/fireSkill");
+        chosenTalentsUIImages[4].gameObject.SetActive(true);
+        chosenTalentsUIImages[4].sprite = x;
 
         playerScript.fireBreathTalentIsChosen = true;
+
+        playerScript.skillImageObject.SetActive(true);
+        playerScript.skillImage.sprite = Resources.Load<Sprite>("TalentsUIMaterials/Skills/fireSkillImage");
+        playerScript.skillFillImage.sprite = Resources.Load<Sprite>("TalentsUIMaterials/Skills/fireSkillImage");
     }
     public void LightningSkillTalent()
     {
@@ -152,8 +158,14 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
         HideSkillsTalentsUI();
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/lightningSkill");
+        chosenTalentsUIImages[4].gameObject.SetActive(true);
+        chosenTalentsUIImages[4].sprite = x;
 
         playerScript.lightningTalentIsChosen = true;
+
+        playerScript.skillImageObject.SetActive(true);
+        playerScript.skillImage.sprite = Resources.Load<Sprite>("TalentsUIMaterials/Skills/lightningSkillImage");
+        playerScript.skillFillImage.sprite = Resources.Load<Sprite>("TalentsUIMaterials/Skills/lightningSkillImage");
     }
     public void BladeVortexSkillTalent()
     {
@@ -161,8 +173,14 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
         HideSkillsTalentsUI();
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/vortexSkill");
+        chosenTalentsUIImages[4].gameObject.SetActive(true);
+        chosenTalentsUIImages[4].sprite = x;
 
         playerScript.bladeVortexSkillTalentIsChosen = true;
+
+        playerScript.skillImageObject.SetActive(true);
+        playerScript.skillImage.sprite = Resources.Load<Sprite>("TalentsUIMaterials/Skills/vortexSkillImage");
+        playerScript.skillFillImage.sprite = Resources.Load<Sprite>("TalentsUIMaterials/Skills/vortexSkillImage");
     }
 
     // ------------------------------------------------------------------------------- Skills part end

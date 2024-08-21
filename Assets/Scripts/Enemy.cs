@@ -30,7 +30,12 @@ public class Enemy : MonoBehaviour
     private UnityEngine.Color originalColor;
     private UnityEngine.Color newColor;
 
-    string newColorHex = "#FFD3D3";
+    public bool damagedByVortex = false;
+
+    readonly string newColorHex = "#FFD3D3";
+
+    public bool isUnderDefenceAura = false;
+    public bool isHardEnemy = false;
 
     protected SpawnManager spawnManager;
 
@@ -54,7 +59,7 @@ public class Enemy : MonoBehaviour
         SkinnedMeshRendererSearch();
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         LookAtPlayer(); // Ensure the enemy always faces the player
         CheckBoundary();
@@ -81,6 +86,12 @@ public class Enemy : MonoBehaviour
         {
             MoveTowardsPlayer(); // Move the enemy towards the player
         }
+    }
+    public IEnumerator BladeVortexDamageCooldown()
+    {
+        damagedByVortex = true;
+        yield return new WaitForSeconds(1);
+        damagedByVortex = false;
     }
 
     private void LookAtPlayer()
@@ -185,7 +196,10 @@ public class Enemy : MonoBehaviour
             playerScript.shieldHealth--;
             if (shieldDamageTalentChosen)
             {
-                enemyHealth--;
+                if (!isUnderDefenceAura)
+                {
+                    enemyHealth--;
+                }
                 if (enemyHealth > 0)
                 {
                     playerScript.audioSource.PlayOneShot(playerScript.audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);

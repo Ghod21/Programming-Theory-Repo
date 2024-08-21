@@ -11,6 +11,7 @@ TagManager:
   - EnemyRange
   - Projectile
   - ExperienceGainPosition
+  - DefenceAura
   layers:
   - Default
   - TransparentFX

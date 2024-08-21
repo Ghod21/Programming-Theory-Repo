@@ -110,7 +110,9 @@ public class Player : MonoBehaviour
     // Skills variables
     public bool fireBreathTalentIsChosen = false;
     private ParticleSystem fireBreathParticle;
-    [SerializeField] public UnityEngine.UI.Image skillFillImage;
+    public UnityEngine.UI.Image skillFillImage;
+    public UnityEngine.UI.Image skillImage;
+    public GameObject skillImageObject;
 
     public float fireBreathInitialConeRadius = 1f;
     float fireBreathMaxConeRadius = 10f;
@@ -135,6 +137,8 @@ public class Player : MonoBehaviour
     float bladeVortexDuration = 0.5f;
     [SerializeField] ParticleSystem bladeVortexParticle;
     [SerializeField] GameObject bladeVortexParticleObject;
+    float vortexSpeed;
+    float vortexDuration;
 
 
 
@@ -142,6 +146,8 @@ public class Player : MonoBehaviour
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
+        vortexSpeed = dashSpeed;
+        vortexDuration = dashDuration;
         initialRotation = gameObject.transform.rotation;
         ParticleSystemParticles = weaponCharge.GetComponent<ParticleSystem>();
         Transform childFireBreath = transform.Find("FireBreath");
@@ -264,6 +270,11 @@ public class Player : MonoBehaviour
     // Blade Vortex
     private void BladeVortexDash()
     {
+        if (backwardsDashTalentChosen)
+        {
+            dashSpeed = vortexSpeed;
+            dashDuration = vortexDuration;
+        }
         isUsingSpell = true;
         isDashing = true;
         audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
@@ -313,7 +324,13 @@ public class Player : MonoBehaviour
         isDashing = false;
         isInBladeVortex = false;
         isUsingSpell = false;
+        if (backwardsDashTalentChosen)
+        {
+            dashSpeed = 15f;
+            dashDuration = 0.3f;
+        }
     }
+
     private IEnumerator BladeVortexAttackCoroutine()
     {
         float elapsedTime = 0f;
@@ -334,13 +351,15 @@ public class Player : MonoBehaviour
                     Enemy enemy = hitCollider.GetComponent<Enemy>();
                     if (enemy != null)
                     {
-                        if (!damageAttackTalentIsChosen)
+                        if (!damageAttackTalentIsChosen && !enemy.damagedByVortex && !enemy.isUnderDefenceAura)
                         {
                             enemy.enemyHealth--;
+                            enemy.StartCoroutine(enemy.BladeVortexDamageCooldown());
                         }
-                        else
+                        else if (damageAttackTalentIsChosen && !enemy.damagedByVortex && !enemy.isUnderDefenceAura)
                         {
                             enemy.enemyHealth -= 1.5f;
+                            enemy.StartCoroutine(enemy.BladeVortexDamageCooldown());
                         }
                         enemy.attacked = true;
 
@@ -522,7 +541,10 @@ public class Player : MonoBehaviour
                     {
                         enemy.enemyIsHitByFire = true;
                         StartCoroutine(FireBreathHitCooldown(enemy));
-                        enemy.enemyHealth--;
+                        if (!enemy.isUnderDefenceAura)
+                        {
+                            enemy.enemyHealth--;
+                        }
                         enemy.animator.SetTrigger("Attacked");
                     }
                 }
@@ -1052,7 +1074,11 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(3);
         if (x != null)
         {
-            x.enemyHealth--; ;
+            if (x.isUnderDefenceAura)
+            {
+                x.enemyHealth--;
+            }
+
             if (x != null)
             {
                 x.animator.SetTrigger("Attacked");
@@ -1112,11 +1138,11 @@ public class Player : MonoBehaviour
                     Enemy enemy = hitCollider.GetComponent<Enemy>();
                     if (enemy != null)
                     {
-                        if (!damageAttackTalentIsChosen)
+                        if (!damageAttackTalentIsChosen && !enemy.isUnderDefenceAura)
                         {
                             enemy.enemyHealth--;
                         }
-                        else
+                        else if (damageAttackTalentIsChosen && !enemy.isUnderDefenceAura)
                         {
                             enemy.enemyHealth -= 1.5f;
                         }
