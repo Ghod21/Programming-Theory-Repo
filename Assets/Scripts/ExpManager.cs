@@ -27,6 +27,7 @@ public class ExpManager : MonoBehaviour
     [SerializeField] GameObject[] dashTalentsUI;
     [SerializeField] GameObject[] healthTalentsUI;
     [SerializeField] GameObject[] attackTalentsUI;
+    [SerializeField] GameObject[] skillsTalentsUI;
     [SerializeField] GameObject talentsUI;
     private List<Action> talentFunctions = new List<Action>();
     public bool reflectionTalentIsChosenExpManager;
@@ -50,6 +51,7 @@ public class ExpManager : MonoBehaviour
         fillSlider.value = 0;
         audioSource = player.GetComponent<AudioSource>();
         levelUpSound = Resources.Load<AudioClip>("Audio/LevelUpSound");
+        ShowSkillsTalentsUI();
     }
 
     void Update()
@@ -117,38 +119,68 @@ public class ExpManager : MonoBehaviour
 
     void ShowSkillsTalentsUI()
     {
-
+        talentsUI.SetActive(true);
+        for (int i = 0; i < skillsTalentsUI.Length; i++)
+        {
+            skillsTalentsUI[i].SetActive(true);
+        }
+        playerScript.timeIsFrozen = true;
+        Time.timeScale = 0f;
     }
     void HideSkillsTalentsUI()
     {
-
+        Time.timeScale = 1f;
+        talentsUI.SetActive(false);
+        for (int i = 0; i < skillsTalentsUI.Length; i++)
+        {
+            skillsTalentsUI[i].SetActive(false);
+        }
+        playerScript.timeIsFrozen = false;
     }
     public void FireSkillTalent()
     {
         Time.timeScale = 1f;
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
-        HideAttackTalentsUI();
+        HideSkillsTalentsUI();
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/fireSkill");
+        chosenTalentsUIImages[4].gameObject.SetActive(true);
+        chosenTalentsUIImages[4].sprite = x;
 
         playerScript.fireBreathTalentIsChosen = true;
+
+        playerScript.skillImageObject.SetActive(true);
+        playerScript.skillImage.sprite = Resources.Load<Sprite>("TalentsUIMaterials/Skills/fireSkillImage");
+        playerScript.skillFillImage.sprite = Resources.Load<Sprite>("TalentsUIMaterials/Skills/fireSkillImage");
     }
     public void LightningSkillTalent()
     {
         Time.timeScale = 1f;
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
-        HideAttackTalentsUI();
+        HideSkillsTalentsUI();
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/lightningSkill");
+        chosenTalentsUIImages[4].gameObject.SetActive(true);
+        chosenTalentsUIImages[4].sprite = x;
 
+        playerScript.lightningTalentIsChosen = true;
 
+        playerScript.skillImageObject.SetActive(true);
+        playerScript.skillImage.sprite = Resources.Load<Sprite>("TalentsUIMaterials/Skills/lightningSkillImage");
+        playerScript.skillFillImage.sprite = Resources.Load<Sprite>("TalentsUIMaterials/Skills/lightningSkillImage");
     }
-    public void VortexSkillTalent()
+    public void BladeVortexSkillTalent()
     {
         Time.timeScale = 1f;
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
-        HideAttackTalentsUI();
+        HideSkillsTalentsUI();
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Skills/vortexSkill");
+        chosenTalentsUIImages[4].gameObject.SetActive(true);
+        chosenTalentsUIImages[4].sprite = x;
 
+        playerScript.bladeVortexSkillTalentIsChosen = true;
 
+        playerScript.skillImageObject.SetActive(true);
+        playerScript.skillImage.sprite = Resources.Load<Sprite>("TalentsUIMaterials/Skills/vortexSkillImage");
+        playerScript.skillFillImage.sprite = Resources.Load<Sprite>("TalentsUIMaterials/Skills/vortexSkillImage");
     }
 
     // ------------------------------------------------------------------------------- Skills part end
@@ -193,6 +225,8 @@ public class ExpManager : MonoBehaviour
         AssignTalentImage(x);
 
         playerScript.attackRangeTalentAdd = 1f;
+        playerScript.swordSizePushAttackRangeTalentIsOn = 0.5f;
+        playerScript.SwordSizeForAttackRange();
         playerScript.AttackRangeCalculation();
     }
     public void BleedAttackTalent()

@@ -42,7 +42,7 @@ public class Player : MonoBehaviour
     private float attackCooldown = 0f; // Cooldown for attack
     private const float attackCooldownDuration = 0.833f; // Duration of the attack cooldown
     private int attackCount;
-    private bool isAttackQueued = false; // Flag to queue attacks
+    private bool isAttackQueued = false; // Flag to queue attacksW
 
     // Shield variables
     [SerializeField] GameObject shieldWall;
@@ -92,20 +92,27 @@ public class Player : MonoBehaviour
     public Vector3 currentVectorForBackwardDash;
     public float currentFloatForBackwardDash;
     public bool sprintDashTalentChosen = false;
+    bool dashSprintIsOn = false;
 
     public bool vampireHealthTalentIsChosen = false;
     int killsToVampire = 7;
 
     public bool damageAttackTalentIsChosen = false;
     public float attackRangeTalentAdd = 0f;
+    [SerializeField] Transform swordTransform;
+    public float swordSizeY = 1f;
+    public float swordSizeMultiplier = 1f;
+    public float swordSizePushAttackRangeTalentIsOn = 0f;
     public bool bleedAttackTalentIsChosen = false;
-    bool bleedSoundIsPossible = true;
+    bool hasPlayedKillSound = false;
+    bool bleedSoundCooldown = false;
 
     // Skills variables
     public bool fireBreathTalentIsChosen = false;
     private ParticleSystem fireBreathParticle;
-    bool isFireBreathing;
-    [SerializeField] public UnityEngine.UI.Image skillFillImage;
+    public UnityEngine.UI.Image skillFillImage;
+    public UnityEngine.UI.Image skillImage;
+    public GameObject skillImageObject;
 
     public float fireBreathInitialConeRadius = 1f;
     float fireBreathMaxConeRadius = 10f;
@@ -115,11 +122,34 @@ public class Player : MonoBehaviour
     float spellCooldown = 3f;
     bool spellIsOnCooldown = false;
 
+    [SerializeField] GameObject lightningParticles;
+    [SerializeField] GameObject weaponCharge;
+    ParticleSystem ParticleSystemParticles;
+
+    public bool lightningTalentIsChosen = false;
+    bool weaponIsCharged = false;
+
+    public bool bladeVortexSkillTalentIsChosen = false;
+    [SerializeField] Transform playerTransform;
+
+    private Quaternion initialRotation;
+    bool isInBladeVortex = false;
+    float bladeVortexDuration = 0.5f;
+    [SerializeField] ParticleSystem bladeVortexParticle;
+    [SerializeField] GameObject bladeVortexParticleObject;
+    float vortexSpeed;
+    float vortexDuration;
+
+
 
 
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
+        vortexSpeed = dashSpeed;
+        vortexDuration = dashDuration;
+        initialRotation = gameObject.transform.rotation;
+        ParticleSystemParticles = weaponCharge.GetComponent<ParticleSystem>();
         Transform childFireBreath = transform.Find("FireBreath");
         fireBreathParticle = childFireBreath.GetComponentInChildren<ParticleSystem>();
         animator.SetBool("isNotAttacking", true);
@@ -153,6 +183,7 @@ public class Player : MonoBehaviour
             HealthLogic();
             DashUILogic();
             ScoreUpdate();
+            //ChargedWeaponSoundLogic();
 
             if (shieldWall.activeSelf)
             {
@@ -199,9 +230,20 @@ public class Player : MonoBehaviour
     //  ....................................................................SKILLS PART START..............................................................
     void UseSpell()
     {
-        if (!isAttacking && !isDashing && !isShielding && !spellIsOnCooldown)
+        if (!isAttacking && !isDashing && !isShielding && !spellIsOnCooldown && fireBreathTalentIsChosen && !isUsingSpell)
         {
             FireBreath();
+            StartCoroutine(SpellCooldownTimer());
+        }
+        else if (!isAttacking && !isDashing && !isShielding && !spellIsOnCooldown && lightningTalentIsChosen && !isUsingSpell)
+        {
+            StartCoroutine(ChargeWeapon());
+
+            skillFillImage.fillAmount = 0f;
+        }
+        else if (!isAttacking && !isDashing && !spellIsOnCooldown && bladeVortexSkillTalentIsChosen && !spellIsOnCooldown && !isUsingSpell)
+        {
+            BladeVortexDash();
             StartCoroutine(SpellCooldownTimer());
         }
     }
@@ -223,20 +265,228 @@ public class Player : MonoBehaviour
         skillFillImage.fillAmount = 1f; // Ensure the value is 1 at the end
 
         spellIsOnCooldown = false;
-
-        isFireBreathing = false;
         isUsingSpell = false;
     }
+    // Blade Vortex
+    private void BladeVortexDash()
+    {
+        if (backwardsDashTalentChosen)
+        {
+            dashSpeed = vortexSpeed;
+            dashDuration = vortexDuration;
+        }
+        isUsingSpell = true;
+        isDashing = true;
+        audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+        dashTime = dashDuration;
+
+        StartCoroutine(RotatePlayerCoroutine());
+        StartCoroutine(BladeVortexAttackCoroutine());
+    }
+    private IEnumerator RotatePlayerCoroutine()
+    {
+        bladeVortexParticle.Play();
+        dashTime = bladeVortexDuration;
+        isInBladeVortex = true;
+        float elapsedTime = 0f;
+        float totalRotation = 360f * 3; // Total rotation needed (3 full rotations)
+        float rotationDuration = bladeVortexDuration; // Duration of the rotation
+
+        // Calculate the rotation step based on the duration and speed
+        float rotationStep = totalRotation / rotationDuration;
+
+        // Store the initial rotation
+        Quaternion startRotation = playerTransform.rotation;
+
+        while (elapsedTime < rotationDuration)
+        {
+            // Calculate how much to rotate this frame
+            float step = rotationStep * Time.deltaTime;
+
+            // Rotate the player
+            playerTransform.Rotate(0, step, 0);
+
+            elapsedTime += Time.deltaTime;
+
+            yield return null;
+        }
+
+        // Ensure we end up exactly at the final rotation
+        playerTransform.rotation = startRotation * Quaternion.Euler(0, totalRotation, 0);
+
+        // Optional delay before resetting to the initial rotation
+        yield return new WaitForSeconds(0.1f);
+
+        // Reset to the initial rotation
+        playerTransform.rotation = initialRotation;
+
+        // End dashing
+        isDashing = false;
+        isInBladeVortex = false;
+        isUsingSpell = false;
+        if (backwardsDashTalentChosen)
+        {
+            dashSpeed = 15f;
+            dashDuration = 0.3f;
+        }
+    }
+
+    private IEnumerator BladeVortexAttackCoroutine()
+    {
+        float elapsedTime = 0f;
+
+        while (elapsedTime < bladeVortexDuration)
+        {
+            // Perform attack action
+            Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
+            bool hitEnemy = false; // Track if any enemy was hit
+            bool killed = false;
+
+            foreach (var hitCollider in hitColliders)
+            {
+                if (hitCollider.CompareTag("Enemy") || hitCollider.CompareTag("EnemyRange"))
+                {
+                    Debug.Log("Hit: " + hitCollider.name + " " + attackCount);
+                    attackCount++;
+                    Enemy enemy = hitCollider.GetComponent<Enemy>();
+                    if (enemy != null)
+                    {
+                        if (!damageAttackTalentIsChosen && !enemy.damagedByVortex && !enemy.isUnderDefenceAura)
+                        {
+                            enemy.enemyHealth--;
+                            enemy.StartCoroutine(enemy.BladeVortexDamageCooldown());
+                        }
+                        else if (damageAttackTalentIsChosen && !enemy.damagedByVortex && !enemy.isUnderDefenceAura)
+                        {
+                            enemy.enemyHealth -= 1.5f;
+                            enemy.StartCoroutine(enemy.BladeVortexDamageCooldown());
+                        }
+                        enemy.attacked = true;
+
+
+                        if (enemy.enemyHealth < 1)
+                        {
+                            killed = true;
+                        }
+                        else
+                        {
+                            hitEnemy = true;
+                        }
+                        if (bleedAttackTalentIsChosen && !enemy.enemyIsBleeding)
+                        {
+                            StartCoroutine(BleedTalentEffect(enemy));
+                            enemy.AddMaterial();
+                        }
+                    }
+
+                }
+
+            }
+            if (killed)
+            {
+                if (!hasPlayedKillSound)
+                {
+                    audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+                    StartCoroutine(KillSoundCooldown());
+                }
+            }
+            else if (hitEnemy)
+            {
+                audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            }
+            else
+            {
+                audioSource.PlayOneShot(audioClips[1], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            }
+
+            yield return new WaitForSeconds(0.2f); // Delay between attacks
+            elapsedTime += 0.2f;
+        }
+
+    }
+
+
+    // Lightning
+
+    IEnumerator ChargeWeapon()
+    {
+        isUsingSpell = true;
+        float x = speed;
+        speed *= 0.75f;
+        StartCoroutine(WeaponChargeAnimation());
+        yield return new WaitForSeconds(1f);
+        speed = x;
+        isUsingSpell = false;
+    }
+    IEnumerator WeaponChargeAnimation()
+    {
+        animator.SetBool("isChargingWeapon", true);
+        yield return new WaitForSeconds(0.4f);
+        weaponCharge.SetActive(true);
+        ParticleSystemParticles.Play();
+        weaponIsCharged = true;
+        audioSource.PlayOneShot(audioClips[12], DataPersistence.soundsVolume * 3f * soundAdjustment);
+        yield return new WaitForSeconds(0.4f);
+        animator.SetBool("isChargingWeapon", false);
+    }
+    IEnumerator ChainLightningCoroutine(Enemy initialTarget)
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        if (initialTarget != null && lightningTalentIsChosen && weaponIsCharged)
+        {
+            // Instantiate the lightning particles prefab
+            GameObject lightningInstance = Instantiate(lightningParticles);
+
+            // Get the ChainLightning component from the instantiated prefab
+            ChainLightning chainLightning = lightningInstance.GetComponent<ChainLightning>();
+
+            if (chainLightning != null)
+            {
+                // Set the lightningParticleObject and ParticleSystem for ChainLightning
+                chainLightning.SetLightningParticleObject(lightningInstance);
+
+                // Optionally, attach the instance to the target if needed
+                lightningInstance.transform.parent = initialTarget.transform;
+
+                // Start the chain lightning effect
+                chainLightning.StartChainLightning(initialTarget, this);
+            }
+            else
+            {
+                Debug.LogError("ChainLightning component is missing from the instantiated prefab.");
+            }
+
+            // Reset weapon charge status
+            weaponIsCharged = false;
+
+            // Stop and clear original particle system
+            ParticleSystemParticles.Stop();
+            ParticleSystemParticles.Clear();
+            weaponCharge.SetActive(false);
+        }
+        else
+        {
+            Debug.Log("Chain Lightning not activated. InitialTarget: " + (initialTarget != null) +
+                ", LightningTalentIsChosen: " + lightningTalentIsChosen +
+                ", SpellIsOnCooldown: " + spellIsOnCooldown +
+                ", WeaponIsCharged: " + weaponIsCharged);
+        }
+    }
+    void ChainLightningOnAttack(Enemy initialTarget)
+    {
+        StartCoroutine(ChainLightningCoroutine(initialTarget));
+    }
+
+
+    // Fire
     void FireBreath()
     {
-        if (!isFireBreathing)
-        {
-            isUsingSpell = true;
-            isFireBreathing = true;
-            fireBreathParticle.Play();
-            StartCoroutine(ActivateFireBreath());
-            StartCoroutine(FireBreathCoolDown());
-        }
+        audioSource.PlayOneShot(audioClips[11], DataPersistence.soundsVolume * 1f * soundAdjustment);
+        isUsingSpell = true;
+        fireBreathParticle.Play();
+        StartCoroutine(ActivateFireBreath());
+        StartCoroutine(FireBreathCoolDown());
     }
     IEnumerator FireBreathCoolDown()
     {
@@ -253,10 +503,8 @@ public class Player : MonoBehaviour
     {
         animator.SetBool("isFireBreathing", true);
         yield return new WaitForSeconds(0.75f);
-        animator.SetBool("isFireBreathing", false);
-
-        isFireBreathing = false;
         isUsingSpell = false;
+        animator.SetBool("isFireBreathing", false);
     }
     IEnumerator FireBreathHitCooldown(Enemy x)
     {
@@ -293,7 +541,10 @@ public class Player : MonoBehaviour
                     {
                         enemy.enemyIsHitByFire = true;
                         StartCoroutine(FireBreathHitCooldown(enemy));
-                        enemy.enemyHealth--;
+                        if (!enemy.isUnderDefenceAura)
+                        {
+                            enemy.enemyHealth--;
+                        }
                         enemy.animator.SetTrigger("Attacked");
                     }
                 }
@@ -380,7 +631,7 @@ public class Player : MonoBehaviour
 
         shieldWallPiecesLogic();
 
-        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isFireBreathing)
+        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell)
         {
             ShieldStart();
             audioSource.PlayOneShot(audioClips[4], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
@@ -514,12 +765,23 @@ public class Player : MonoBehaviour
 
     //  ....................................................................SHIELD PART END................................................................
     //  ....................................................................MOVE PART START................................................................
+    void DashSprintCheck()
+    {
+        if (dashSprintIsOn)
+        {
+            speed = 3.25f;
+        }
+        else
+        {
+            speed = 2.5f;
+        }
+    }
     public IEnumerator SprintDashTalent()
     {
         yield return new WaitForSeconds(0.2f);
-        speed = 3.25f;
+        dashSprintIsOn = true;
         yield return new WaitForSeconds(3f);
-        speed = 2.5f;
+        dashSprintIsOn = false;
     }
     private void BackwardsDashLogic()
     {
@@ -607,11 +869,12 @@ public class Player : MonoBehaviour
     private void DashUILogic()
     {
         UpdateDashUI();
-        if (backwardsDashTalentChosen && Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding && !isFireBreathing)
+        DashSprintCheck();
+        if (backwardsDashTalentChosen && Input.GetKeyDown(KeyCode.Space) && !isDashing && !dashIsOnCooldown && !isShielding && !isUsingSpell)
         {
             BackwardsDashLogic();
         }
-        else if (!backwardsDashTalentChosen && !isFireBreathing)
+        else if (!backwardsDashTalentChosen && !isUsingSpell)
         {
             MainAndDoubleDashLogic();
         }
@@ -708,6 +971,7 @@ public class Player : MonoBehaviour
             Vector3 movement = CalculateMovement(input);
             rb.velocity = movement * currentSpeed;
         }
+
     }
 
     private Vector3 CalculateMovement(Vector3 inputDirection)
@@ -728,7 +992,7 @@ public class Player : MonoBehaviour
         Plane playerPlane = new Plane(Vector3.up, transform.position);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if (playerPlane.Raycast(ray, out float hitDist))
+        if (playerPlane.Raycast(ray, out float hitDist) && !isInBladeVortex)
         {
             Vector3 targetPoint = ray.GetPoint(hitDist);
             Quaternion targetRotation = Quaternion.LookRotation(targetPoint - transform.position);
@@ -773,9 +1037,16 @@ public class Player : MonoBehaviour
     //  ..............................................................MOVE PART END..........................................................................
 
     //  ..............................................................ATTACK PART START......................................................................
+
     public void AttackRangeCalculation()
     {
         attackRange = (3 * attackRangeMultiplier) + attackRangeTalentAdd;
+    }
+    public void SwordSizeForAttackRange()
+    {
+        Vector3 newScale = swordTransform.localScale;
+        newScale.y = (swordSizeY * swordSizeMultiplier) + swordSizePushAttackRangeTalentIsOn;
+        swordTransform.localScale = newScale;
     }
     private void Attack()
     {
@@ -803,31 +1074,45 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(3);
         if (x != null)
         {
-            x.enemyHealth--;;
-            x.animator.SetTrigger("Attacked");
-            x.enemyIsBleeding = false;
-            BleedSound(x);
+            if (x.isUnderDefenceAura)
+            {
+                x.enemyHealth--;
+            }
+
+            if (x != null)
+            {
+                x.animator.SetTrigger("Attacked");
+                x.enemyIsBleeding = false;
+                BleedSound(x);
+                x.RemoveMaterial();
+            }
         }
 
     }
     void BleedSound(Enemy x)
     {
-        if (bleedSoundIsPossible && x.enemyHealth <= 0)
+        if (x.enemyHealth <= 0 && !hasPlayedKillSound)
         {
             audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
-            StartCoroutine(DamageSoundCooldown());
+            StartCoroutine(KillSoundCooldown());
         }
-        else if (bleedSoundIsPossible && x.enemyHealth > 0)
+        else if (x.enemyHealth > 0 && !bleedSoundCooldown)
         {
             audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
-            StartCoroutine(DamageSoundCooldown());
+            StartCoroutine(BleedSoundCooldown());
         }
     }
-    IEnumerator DamageSoundCooldown()
+    public IEnumerator KillSoundCooldown()
     {
-        bleedSoundIsPossible = false;
-        yield return new WaitForSeconds(0.5f);
-        bleedSoundIsPossible = true;
+        hasPlayedKillSound = true;
+        yield return new WaitForSeconds(0.8f);
+        hasPlayedKillSound = false;
+    }
+    public IEnumerator BleedSoundCooldown()
+    {
+        bleedSoundCooldown = true;
+        yield return new WaitForSeconds(0.1f);
+        bleedSoundCooldown = false;
     }
 
     IEnumerator AttackCoroutine()
@@ -838,6 +1123,8 @@ public class Player : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
         bool hitEnemy = false; // Track if any enemy was hit
         bool killed = false;
+
+        Enemy initialTarget = null; // Variable to store the first enemy hit
 
         foreach (var hitCollider in hitColliders)
         {
@@ -851,15 +1138,22 @@ public class Player : MonoBehaviour
                     Enemy enemy = hitCollider.GetComponent<Enemy>();
                     if (enemy != null)
                     {
-                        if (!damageAttackTalentIsChosen)
+                        if (!damageAttackTalentIsChosen && !enemy.isUnderDefenceAura)
                         {
                             enemy.enemyHealth--;
                         }
-                        else
+                        else if (damageAttackTalentIsChosen && !enemy.isUnderDefenceAura)
                         {
                             enemy.enemyHealth -= 1.5f;
                         }
                         enemy.attacked = true;
+
+                        // Store the first enemy as the initial target for the lightning
+                        if (initialTarget == null)
+                        {
+                            initialTarget = enemy;
+                        }
+
                         if (enemy.enemyHealth < 1)
                         {
                             killed = true;
@@ -871,10 +1165,19 @@ public class Player : MonoBehaviour
                         if (bleedAttackTalentIsChosen && !enemy.enemyIsBleeding)
                         {
                             StartCoroutine(BleedTalentEffect(enemy));
+                            enemy.AddMaterial();
                         }
                     }
                 }
             }
+        }
+
+        // Call the lightning effect on the first hit enemy, if one was hit
+        if (weaponIsCharged)
+        {
+            ChainLightningOnAttack(initialTarget);
+
+            StartCoroutine(SpellCooldownTimer());
         }
 
         if (isShielding && shieldAttackTalentChosen)
@@ -884,11 +1187,11 @@ public class Player : MonoBehaviour
 
         // Play the appropriate sound once after checking all colliders
         if (killed)
-        { 
-            if (bleedSoundIsPossible)
+        {
+            if (!hasPlayedKillSound)
             {
                 audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
-                StartCoroutine(DamageSoundCooldown());
+                StartCoroutine(KillSoundCooldown());
             }
             if (vampireHealthTalentIsChosen)
             {
@@ -917,7 +1220,6 @@ public class Player : MonoBehaviour
         // Wait for the remaining half of the animation duration
         yield return new WaitForSeconds(0.833f / 2);
 
-
         // Reset attack state
         isAttacking = false;
         animator.SetBool("isAttacking", false);
@@ -925,7 +1227,6 @@ public class Player : MonoBehaviour
         {
             animator.SetBool("isShielding", true);
         }
-
 
         // If an attack was queued, start the next one
         if (isAttackQueued)
@@ -936,6 +1237,7 @@ public class Player : MonoBehaviour
 
         isUsingSpell = false;
     }
+
 
 
 
