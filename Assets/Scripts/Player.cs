@@ -14,6 +14,8 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform model;
     [SerializeField] private Animator animator; // Add a reference to the Animator component
     public AudioSource audioSource;
+    [SerializeField] AudioSource runAudioSource;
+    private bool isPlayingRunningSound = false;
     public AudioClip[] audioClips;
     float soundAdjustment = 0.6f;
     public bool timeIsFrozen;
@@ -183,6 +185,7 @@ public class Player : MonoBehaviour
             HealthLogic();
             DashUILogic();
             ScoreUpdate();
+            RunSound();
             //ChargedWeaponSoundLogic();
 
             if (shieldWall.activeSelf)
@@ -226,6 +229,34 @@ public class Player : MonoBehaviour
             Move();
         }
     }
+    // Additional sounds
+    void RunSound()
+    {
+        bool isMoving = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
+
+        if (isMoving)
+        {
+            if (!isPlayingRunningSound)
+            {
+                runAudioSource.clip = audioClips[16];
+                runAudioSource.loop = true;
+                runAudioSource.volume = DataPersistence.soundAdjustment * 0.5f;
+                //runAudioSource.pitch = 1.75f;
+                runAudioSource.Play();
+                isPlayingRunningSound = true;
+            }
+        }
+        else
+        {
+            if (isPlayingRunningSound)
+            {
+                runAudioSource.Stop();
+                isPlayingRunningSound = false;
+            }
+        }
+    }
+
+
     //  ....................................................................MAIN PART END..................................................................
     //  ....................................................................SKILLS PART START..............................................................
     void UseSpell()
@@ -330,6 +361,7 @@ public class Player : MonoBehaviour
             dashDuration = 0.3f;
         }
     }
+    
 
     private IEnumerator BladeVortexAttackCoroutine()
     {
@@ -942,13 +974,7 @@ public class Player : MonoBehaviour
         isCooldownCoroutineRunning = false;
         dashIsOnCooldown = false;
     }
-    private void GatherInput()
-    {
-        if (!isDashing)
-        {
-            input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
-        }
-    }
+
 
     private void Move()
     {
@@ -1032,7 +1058,13 @@ public class Player : MonoBehaviour
             }
         }
     }
-
+    private void GatherInput()
+    {
+        if (!isDashing)
+        {
+            input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
+        }
+    }
 
     //  ..............................................................MOVE PART END..........................................................................
 
@@ -1173,7 +1205,7 @@ public class Player : MonoBehaviour
         }
 
         // Call the lightning effect on the first hit enemy, if one was hit
-        if (weaponIsCharged)
+        if (weaponIsCharged && initialTarget != null)
         {
             ChainLightningOnAttack(initialTarget);
 

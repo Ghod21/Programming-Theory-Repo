@@ -25,7 +25,7 @@ public class MainManager : MonoBehaviour
     [SerializeField] GameObject wrongNameText;
     [SerializeField] GameObject audioManager;
     [SerializeField] AudioClip[] menuSounds;
-    [SerializeField] AudioSource audioSource;
+    [SerializeField] public AudioSource audioSource;
     private Player playerScript;
 
 

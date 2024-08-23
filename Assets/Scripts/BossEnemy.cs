@@ -1,21 +1,34 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 public class BossEnemy : Enemy
 {
     // Boss enemy child script.
-    private bool bossChargeMethod;
     private bool bossChargeCooldown;
+    bool fireAreasSpellIsActive = false;
+    //bool ChargeSpellIsActive = false;
+    public ParticleSystem explosionBossSpell;
+    SphereCollider explosionBossSpellSphereCollider;
+    AudioSource audioSourceFire;
+    private float radius;
+
 
     [SerializeField] private float chargeSpeed = 20f; // Speed during the charge
     [SerializeField] private float chargeDuration = 1f; // Duration of the charge
     [SerializeField] private float chargeCooldown = 10f; // Time between charges
     [SerializeField] private float chargePause = 2f; // Time to pause before charging
 
+
     protected override void Start()
     {
         base.Start();
+        explosionBossSpell = FindParticleSystemInChildren("ExplosionBossSpell");
+        explosionBossSpellSphereCollider = explosionBossSpell.GetComponent<SphereCollider>();
+        audioSourceFire = spawnManager.fireSpawnAreaObject.GetComponent<AudioSource>();
+        radius = explosionBossSpellSphereCollider.radius;
 
         if (boundaryCollider == null)
         {
@@ -39,13 +52,124 @@ public class BossEnemy : Enemy
         }
 
         enemyHealth = 25;
-        bossChargeMethod = true;
-        StartCoroutine(Charge());
+        StartCoroutine(BossSpellChangeRoutine());
+
+    }
+    int RandomSpellIndex()
+    {
+        return UnityEngine.Random.Range(0, 4);
+    }
+    int RandomSpellCooldown()
+    {
+        int random = UnityEngine.Random.Range(3, 3);
+        return random;
+    }
+
+    IEnumerator BossSpellChangeRoutine()
+    {
+        while (true)
+        {
+            int index;
+            if (fireAreasSpellIsActive)
+            {
+                do
+                {
+                    index = RandomSpellIndex();
+                }
+                while (index == 2);
+            }
+            else
+            {
+                index = RandomSpellIndex();
+            }
+
+            Debug.Log($"Selected spell index: {index}");
+
+            yield return new WaitForSeconds(RandomSpellCooldown());
+
+            if (index == 0)
+            {
+                yield return StartCoroutine(Charge());
+            }
+            else if (index == 1)
+            {
+                yield return StartCoroutine(ExplosionSpell());
+            }
+            else if (index == 2)
+            {
+                StartCoroutine(FireAreasSpawn());
+            } else if (index == 3)
+            {
+                BossSpawnSpell();
+            }
+
+            Debug.Log($"Started spell at index: {index}");
+
+        }
+    }
+
+    void BossSpawnSpell()
+    {
+        Quaternion bossRotation = Quaternion.identity;
+        spawnManager.SpawnEnemiesBossSpell(bossRotation);
+    }
+
+    IEnumerator ExplosionSpell()
+    {
+        isUsingSpell = true;
+        yield return new WaitForSeconds(1f);
+        animator.ResetTrigger("JumpSpell");
+        animator.SetTrigger("JumpSpell");
+        yield return new WaitForSeconds(1f);
+        animator.SetTrigger("Idle");
+        explosionBossSpell.Play();
+        Explosion();
+        isUsingSpell = false;
+    }
+    public void Explosion()
+    {
+        if (explosionBossSpellSphereCollider == null)
+        {
+            Debug.LogWarning("SphereCollider is not assigned.");
+            return;
+        }
+
+        Vector3 center = explosionBossSpellSphereCollider.transform.position + explosionBossSpellSphereCollider.center;
+
+        Collider[] colliders = Physics.OverlapSphere(center, radius);
+
+        foreach (Collider collider in colliders)
+        {
+            if (collider.CompareTag("Player"))
+            {
+                playerScript.playerHealth -= 3;
+                Debug.Log("Explosion damage is done");
+                return;
+            }
+        }
+    }
+    IEnumerator FireAreasSpawn()
+    {
+        fireAreasSpellIsActive = true;
+        audioSourceFire.mute = false;
+        StartCoroutine(FireAreaTimer());
+        while (fireAreasSpellIsActive)
+        {
+            spawnManager.SpawnFireAtRandomPosition();
+            yield return new WaitForSeconds(2);
+        }
+        yield return new WaitForSeconds(5);
+        audioSourceFire.mute = true;
+    }
+    IEnumerator FireAreaTimer()
+    {
+        yield return new WaitForSeconds(30);
+        fireAreasSpellIsActive = false;
     }
 
     public override void MoveTowardsPlayer()
     {
-        if (!attacked && enemyHealth > 0 && bossChargeCooldown)
+        if (!attacked && enemyHealth > 0 && !bossChargeCooldown && !isUsingSpell)
         {
             // Move towards the player with the normal speed if not charging
             Vector3 moveDirection = (player.position - transform.position).normalized;
@@ -55,38 +179,35 @@ public class BossEnemy : Enemy
 
     IEnumerator Charge()
     {
-        while (bossChargeMethod)
+        // Stop moving and wait for pause before charge
+        bossChargeCooldown = true;
+        rb.velocity = Vector3.zero;
+        yield return new WaitForSeconds(chargePause); // Time to pause before charging
+
+        // Perform the charge
+        Vector3 chargeDirection = (player.position - transform.position).normalized;
+        float chargeEndTime = Time.time + chargeDuration;
+
+        while (Time.time < chargeEndTime)
         {
-            // Stop moving and wait for pause before charge
-            bossChargeCooldown = false;
-            rb.velocity = Vector3.zero;
-            yield return new WaitForSeconds(chargePause); // Time to pause before charging
-
-            // Perform the charge
-            Vector3 chargeDirection = (player.position - transform.position).normalized;
-            float chargeEndTime = Time.time + chargeDuration;
-
-            while (Time.time < chargeEndTime)
+            if (isAttacking) // Check if the boss is attacking
             {
-                if (isAttacking) // Check if the boss is attacking
-                {
-                    rb.velocity = Vector3.zero; // Stop movement if attacking
-                    yield return new WaitForSeconds(chargePause); // Wait before next charge
-                    bossChargeCooldown = true;
-                    break; // Exit the inner while loop to stop the current charge
-                }
-
-                rb.velocity = chargeDirection * chargeSpeed;
-                yield return null; // Wait until the next frame
+                rb.velocity = Vector3.zero; // Stop movement if attacking
+                yield return new WaitForSeconds(chargePause); // Wait before next charge
+                bossChargeCooldown = true;
+                break; // Exit the inner while loop to stop the current charge
             }
 
-            // End the charge
-            rb.velocity = Vector3.zero;
-
-            // Wait for the cooldown period
-            bossChargeCooldown = true;
-            yield return new WaitForSeconds(chargeCooldown - chargeDuration); // Adjust wait time
+            rb.velocity = chargeDirection * chargeSpeed;
+            yield return null; // Wait until the next frame
         }
+
+        // End the charge
+        rb.velocity = Vector3.zero;
+
+        // Wait for the cooldown period
+        bossChargeCooldown = false;
+        yield return new WaitForSeconds(chargeCooldown - chargeDuration); // Adjust wait time
     }
     protected override IEnumerator deathAnimation()
     {
@@ -124,6 +245,22 @@ public class BossEnemy : Enemy
             playerScript.audioSource.PlayOneShot(playerScript.audioClips[6], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
             Debug.Log("ShieldHealth: " + playerScript.shieldHealth);
         }
+    }
+
+    private ParticleSystem FindParticleSystemInChildren(string name)
+    {
+        foreach (Transform child in transform)
+        {
+            if (child.gameObject.name == name)
+            {
+                ParticleSystem ps = child.GetComponent<ParticleSystem>();
+                if (ps != null)
+                {
+                    return ps;
+                }
+            }
+        }
+        return null;
     }
 }
 
