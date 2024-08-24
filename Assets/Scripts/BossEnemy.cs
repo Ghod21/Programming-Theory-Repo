@@ -27,7 +27,7 @@ public class BossEnemy : Enemy
         base.Start();
         explosionBossSpell = FindParticleSystemInChildren("ExplosionBossSpell");
         explosionBossSpellSphereCollider = explosionBossSpell.GetComponent<SphereCollider>();
-        audioSourceFire = spawnManager.fireSpawnAreaObject.GetComponent<AudioSource>();
+        audioSourceFire = spawnManager.aoeSpawnAreaObject.GetComponent<AudioSource>();
         radius = explosionBossSpellSphereCollider.radius;
 
         if (boundaryCollider == null)
@@ -72,11 +72,7 @@ public class BossEnemy : Enemy
             int index;
             if (fireAreasSpellIsActive)
             {
-                do
-                {
-                    index = RandomSpellIndex();
-                }
-                while (index == 2);
+                index = UnityEngine.Random.Range(1, 4);
             }
             else
             {
@@ -89,7 +85,7 @@ public class BossEnemy : Enemy
 
             if (index == 0)
             {
-                yield return StartCoroutine(Charge());
+                StartCoroutine(FireAreasSpawn());
             }
             else if (index == 1)
             {
@@ -97,7 +93,7 @@ public class BossEnemy : Enemy
             }
             else if (index == 2)
             {
-                StartCoroutine(FireAreasSpawn());
+                yield return StartCoroutine(Charge());
             } else if (index == 3)
             {
                 BossSpawnSpell();
@@ -121,9 +117,10 @@ public class BossEnemy : Enemy
         animator.ResetTrigger("JumpSpell");
         animator.SetTrigger("JumpSpell");
         yield return new WaitForSeconds(1f);
-        animator.SetTrigger("Idle");
         explosionBossSpell.Play();
         Explosion();
+        yield return new WaitForSeconds(0.5f);
+        animator.SetTrigger("Idle");
         isUsingSpell = false;
     }
     public void Explosion()
@@ -155,7 +152,7 @@ public class BossEnemy : Enemy
         StartCoroutine(FireAreaTimer());
         while (fireAreasSpellIsActive)
         {
-            spawnManager.SpawnFireAtRandomPosition();
+            spawnManager.SpawnAoEAtRandomPosition();
             yield return new WaitForSeconds(2);
         }
         yield return new WaitForSeconds(5);

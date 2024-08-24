@@ -5,13 +5,21 @@ public class FireArea : MonoBehaviour
 {
     bool isFlaming = true;
     bool isDamageCoroutineRunning = false;
-    ParticleSystem fireParticleSystem;
+    ParticleSystem aoeParticleSystem;
+    ParticleSystem distortionParticleSystem;
     SphereCollider sphereCollider;
     Coroutine damageCoroutine;
 
-    void Awake()
+    void Start()
     {
-        fireParticleSystem = GetComponent<ParticleSystem>();
+        aoeParticleSystem = GetComponent<ParticleSystem>();
+        foreach (Transform child in transform)
+        {
+            if (child.name == "Distortion")
+            {
+                distortionParticleSystem = child.GetComponent<ParticleSystem>();
+            }
+        }
         sphereCollider = GetComponent<SphereCollider>();
         StartCoroutine(DeactivateFireArea());
     }
@@ -60,13 +68,11 @@ public class FireArea : MonoBehaviour
 
         while (isFlaming)
         {
-            if (isFlaming)
-            {
+            if (!isFlaming) break;
                 Debug.Log("Applying damage to player.");
                 playerScript.playerHealth--;
                 playerScript.audioSource.PlayOneShot(playerScript.audioClips[14], DataPersistence.soundsVolume * 2f * DataPersistence.soundAdjustment);
                 yield return new WaitForSeconds(1f);
-            }
         }
 
         isDamageCoroutineRunning = false;
@@ -75,13 +81,13 @@ public class FireArea : MonoBehaviour
     IEnumerator DeactivateFireArea()
     {
 
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(7f);
 
-        var main = fireParticleSystem.main;
+        var main = aoeParticleSystem.main;
         main.loop = false;
-
-        yield return new WaitForSeconds(3f);
+        //fireParticleSystem.Stop();
         isFlaming = false;
+        distortionParticleSystem.Stop();
         yield return new WaitForSeconds(2f);
         
         Destroy(gameObject);

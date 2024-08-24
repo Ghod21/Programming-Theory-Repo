@@ -51,7 +51,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4877543831620728468
 Transform:
   m_ObjectHideFlags: 0
@@ -90,7 +90,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.33
+  m_Radius: 0.2
   m_Center: {x: 0, y: 0.25, z: 0}
 --- !u!54 &2365191905095181966
 Rigidbody:
@@ -138,7 +138,7 @@ MonoBehaviour:
   expManager: {fileID: 0}
   expManagerScript: {fileID: 0}
   moveSpeed: 5
-  attackRange: 2
+  attackRange: 2.5
   enemyHealth: 0
   attacked: 0
   enemyIsBleeding: 0
@@ -147,6 +147,7 @@ MonoBehaviour:
   isUnderDefenceAura: 0
   isHardEnemy: 0
   shieldDamageTalentChosen: 0
+  explosionBossSpell: {fileID: 0}
   chargeSpeed: 15
   chargeDuration: 1
   chargeCooldown: 10
