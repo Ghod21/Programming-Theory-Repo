@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
@@ -16,7 +17,7 @@ public class AudioManager : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         audioSource.clip = audioClips[0];
-        audioSource.volume = DataPersistence.musicVolume * 0.75f;
+        audioSource.volume = DataPersistence.musicVolume * DataPersistence.soundAdjustment * 1.2f;
         if (musicSlider != null)
         {
             musicSlider.value = DataPersistence.musicVolume;
@@ -34,6 +35,7 @@ public class AudioManager : MonoBehaviour
         //audioSource.Stop();
         //Debug.Log("Audio source stopped, changing clip");
         audioSource.clip = audioClips[1];
+        audioSource.volume = DataPersistence.musicVolume * DataPersistence.soundAdjustment;
         Debug.Log("Clip changed");
     }
 
@@ -47,6 +49,13 @@ public class AudioManager : MonoBehaviour
         else if (!playMusic && audioSource.isPlaying)
         {
             audioSource.Stop();
+        }
+
+        if (SceneManager.GetActiveScene().name == "Menu")
+        {
+            DataPersistence.musicVolume = musicSlider.value;
+            DataPersistence.soundsVolume = soundsSlider.value;
+            audioSource.volume = DataPersistence.musicVolume * DataPersistence.soundAdjustment;
         }
     }
     public void MusicSliderChange()

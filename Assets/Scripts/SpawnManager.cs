@@ -38,12 +38,13 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] public GameObject aoeSpawnAreaObject;
     [SerializeField] GameObject bossStarParticleObject;
     float bossStarMoveSpeed = 10f;
-    private Vector3 targetPosition = new Vector3(2.750329f, 0f, 2.416487f);
+    private Vector3 targetPosition = new Vector3(2.750329f, 1f, 2.416487f);
     ParticleSystem bossStarParticleSystem;
     [SerializeField] ParticleSystem bossStarFallParticleSystem;
     [SerializeField] BossEnemy bossEnemy;
 
     [SerializeField] AudioManager audioManager;
+    [SerializeField] Player playerScript;
 
     public void ActivateAndMoveBossStar()
     {
@@ -70,13 +71,14 @@ public class SpawnManager : MonoBehaviour
         bossStarFallParticleSystem.Play();
 
         
-        yield return new WaitForSeconds(0.1f);
+        //yield return new WaitForSeconds(0.1f);
         spawnBoss();
         mainManagerScript.BossFightUIEnable();
         bossStarParticleSystem.Stop();
         bossStarParticleSystem.Clear();
         bossStarParticleObject.SetActive(false);
         audioManager.BossMusicChangeStop();
+        playerScript.audioSource.PlayOneShot(playerScript.audioClips[18], DataPersistence.soundsVolume * 0.7f * DataPersistence.soundAdjustment);
     }
 
     private void Start()

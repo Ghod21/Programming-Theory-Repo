@@ -7,7 +7,7 @@ public class Projectile : MonoBehaviour
     private Vector3 direction;
     private float speed;
     private Player playerScript;
-    private float soundAdjustment;
+    float soundAdjustment = DataPersistence.soundAdjustment;
     private float rotationSpeed = 60f;
     GameObject expManager;
     ExpManager expManagerScript;

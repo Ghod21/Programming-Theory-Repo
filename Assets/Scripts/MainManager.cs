@@ -184,19 +184,19 @@ public class MainManager : MonoBehaviour
     {
         if (correctNameToStart)
         {
-            audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 4f * soundAdjustment);
+            audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 10f * soundAdjustment);
             DataPersistence.Instance.SaveData();
             SceneManager.LoadScene("MainScene");
         }
         else
         {
-            audioSource.PlayOneShot(menuSounds[1], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
+            audioSource.PlayOneShot(menuSounds[1], DataPersistence.soundsVolume * 4f * soundAdjustment);
             StartCoroutine(NameFieldColorChange());
         }
     }
     public void ExitButtonClick()
     {
-        audioSource.PlayOneShot(menuSounds[1], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
+        audioSource.PlayOneShot(menuSounds[1], DataPersistence.soundsVolume * 4f * soundAdjustment);
         DataPersistence.Instance.Exit();
 #if UNITY_EDITOR
         EditorApplication.isPlaying = false;
@@ -206,7 +206,7 @@ public class MainManager : MonoBehaviour
     }
     public void InfoButtonClick()
     {
-        audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 4f * soundAdjustment);
+        audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 10f * soundAdjustment);
         if (!infoIsOn)
         {
             uiToggle[5].SetActive(false);

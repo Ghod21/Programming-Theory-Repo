@@ -2867,8 +2867,19 @@ MonoBehaviour:
   - {fileID: 182665493590272817, guid: 1b42ee39549bf4f4d8565e9f9713c491, type: 3}
   spawnArea: {fileID: 713906771}
   exclusionZone: {fileID: 1885716653}
-  mainManager: {fileID: 1839713936}
+  experiencePrefabs: []
+  bossObject: {fileID: 0}
+  bossSpawnSpellObjectPositions: []
+  mainManagerScript: {fileID: 1839713937}
   waveDifficulty: 0
+  aoeSpawnArea: {fileID: 0}
+  aoeAreasObjects: {fileID: 0}
+  aoeSpawnAreaObject: {fileID: 0}
+  bossStarParticleObject: {fileID: 0}
+  bossStarFallParticleSystem: {fileID: 0}
+  bossEnemy: {fileID: 0}
+  audioManager: {fileID: 0}
+  playerScript: {fileID: 0}
 --- !u!4 &633954694
 Transform:
   m_ObjectHideFlags: 0
@@ -6407,6 +6418,9 @@ MonoBehaviour:
   musicSlider: {fileID: 1916606248}
   soundsSlider: {fileID: 718029870}
   playMusic: 1
+  audioClips:
+  - {fileID: 8300000, guid: 9c923889afff749439c896b4b0ecd10b, type: 3}
+  targetLight: {fileID: 0}
 --- !u!82 &1177333152
 AudioSource:
   m_ObjectHideFlags: 0
@@ -7081,6 +7095,72 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1001 &1348156503
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1885716651}
+    m_Modifications:
+    - target: {fileID: 2418289459275558805, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+      propertyPath: m_Name
+      value: FireBreath
+      objectReference: {fileID: 0}
+    - target: {fileID: 2418289459275558805, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6261201744506211730, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6261201744506211730, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.18
+      objectReference: {fileID: 0}
+    - target: {fileID: 6261201744506211730, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6261201744506211730, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6261201744506211730, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6261201744506211730, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6261201744506211730, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6261201744506211730, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6261201744506211730, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6261201744506211730, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+--- !u!4 &1348156504 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6261201744506211730, guid: 5767da55fb84cda41b950d46f4041d92, type: 3}
+  m_PrefabInstance: {fileID: 1348156503}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1372870753
 GameObject:
   m_ObjectHideFlags: 0
@@ -9900,6 +9980,12 @@ MonoBehaviour:
   - {fileID: 8300000, guid: fcf77559b4c484b4bb499c9a95c32e21, type: 3}
   audioSource: {fileID: 1177333152}
   difficultyMeter: 0
+  bossHealthSlider: {fileID: 0}
+  expUIToMoveOnBossSpawn: {fileID: 0}
+  bossHPUIBar: {fileID: 0}
+  fillSliderAreaToOffAtBossZeroHP: {fileID: 0}
+  bossEnemy: {fileID: 0}
+  bossFightIsActive: 0
 --- !u!4 &1839713938
 Transform:
   m_ObjectHideFlags: 0
@@ -10552,6 +10638,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2066896392038131574, guid: 45288819fde2143449a96207b14db0bb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 634177880}
+    - targetCorrespondingSourceObject: {fileID: 2066896392038131574, guid: 45288819fde2143449a96207b14db0bb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1348156504}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2066896392038628118, guid: 45288819fde2143449a96207b14db0bb, type: 3}
       insertIndex: -1
@@ -10650,6 +10739,7 @@ MonoBehaviour:
   model: {fileID: 1885716651}
   animator: {fileID: 1885716650}
   audioSource: {fileID: 0}
+  runAudioSource: {fileID: 0}
   audioClips:
   - {fileID: 8300000, guid: 3df9bbbc130ccb344af5f3fc793a630f, type: 3}
   - {fileID: 8300000, guid: c266e86e5ec11e344bf66dede26cbc46, type: 3}
@@ -10659,12 +10749,16 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 81652031b64c342cc8dbc59c138d77c5, type: 3}
   - {fileID: 8300000, guid: cd13436b01a4b5b4082c89e180d10dc3, type: 3}
   - {fileID: 8300000, guid: 4b4dd7245f6104c8c8eb07ccf6b386ed, type: 3}
+  timeIsFrozen: 0
   dashFillArea: {fileID: 1554523609}
   dashFillImage: {fileID: 1554523611}
   speed: 2.5
   verticalSpeedMultiplier: 1.5
   dashSpeed: 8
   dashDuration: 0.2
+  dashIsOnCooldown: 0
+  dashCooldownSeconds: 10
+  isCooldownCoroutineRunning: 0
   isDashing: 0
   targetTags:
   - Enemy
@@ -10676,6 +10770,8 @@ MonoBehaviour:
   shieldWallPieceThree: {fileID: 611393770}
   shieldFillArea: {fileID: 3402831817934471391}
   shieldSlider: {fileID: 8251958868807645646}
+  isShielding: 0
+  shieldIsOnCooldown: 0
   isBlockingDamage: 0
   shieldHealth: 5
   shieldWallRotationSpeed: 90
@@ -10686,6 +10782,37 @@ MonoBehaviour:
   gameOver: 0
   scoreMultiplier: 1
   scoreMultiplierBase: 0
+  playerExperience: 0
+  shieldAttackTalentChosen: 0
+  doubleDashTalentChosen: 0
+  backwardsDashTalentChosen: 0
+  remainingDashes: 0
+  dashCountText: {fileID: 0}
+  currentVectorForBackwardDash: {x: 0, y: 0, z: 0}
+  currentFloatForBackwardDash: 0
+  sprintDashTalentChosen: 0
+  vampireHealthTalentIsChosen: 0
+  damageAttackTalentIsChosen: 0
+  attackRangeTalentAdd: 0
+  swordTransform: {fileID: 0}
+  swordSizeY: 1
+  swordSizeMultiplier: 1
+  swordSizePushAttackRangeTalentIsOn: 0
+  bleedAttackTalentIsChosen: 0
+  fireBreathTalentIsChosen: 0
+  skillFillImage: {fileID: 0}
+  skillImage: {fileID: 0}
+  skillImageObject: {fileID: 0}
+  fireBreathInitialConeRadius: 1
+  fireBreathConeAngle: 30
+  fireBreathConeDurationIncrease: 1
+  lightningParticles: {fileID: 0}
+  weaponCharge: {fileID: 6774806433459277184, guid: daba618ff0e70fe4ead7255ef7a4ebf5, type: 3}
+  lightningTalentIsChosen: 0
+  bladeVortexSkillTalentIsChosen: 0
+  playerTransform: {fileID: 0}
+  bladeVortexParticle: {fileID: 0}
+  bladeVortexParticleObject: {fileID: 0}
 --- !u!135 &1885716653
 SphereCollider:
   m_ObjectHideFlags: 0

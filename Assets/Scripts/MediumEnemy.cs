@@ -55,6 +55,7 @@ public class MediumEnemy : Enemy
             // Perform the charge
             Vector3 chargeDirection = (player.position - transform.position).normalized;
             float chargeEndTime = Time.time + chargeDuration;
+            playerScript.audioSource.PlayOneShot(playerScript.audioClips[19], DataPersistence.soundsVolume * 2.5f * DataPersistence.soundAdjustment);
 
             while (Time.time < chargeEndTime)
             {

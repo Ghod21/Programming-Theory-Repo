@@ -9,7 +9,7 @@ public class Experience : MonoBehaviour
     AudioClip experienceSound;
     private Player playerScript;
     [SerializeField] private float rotationSpeed = 50f;
-    float soundAdjustment = 0.6f;
+    float soundAdjustment = DataPersistence.soundAdjustment;
     GameObject playerExpGainObject;
     public Transform playerExpGainPoint;
     float initialSpeed = 1.0f;

@@ -23,7 +23,7 @@ public class Enemy : MonoBehaviour
     public float enemyHealth;
     public bool attacked;
     bool deathAnimationDone = false;
-    protected float soundAdjustment = 0.6f;
+    protected float soundAdjustment = DataPersistence.soundAdjustment;
     int prefabIndex;
     public bool enemyIsBleeding;
     public bool enemyIsHitByFire;

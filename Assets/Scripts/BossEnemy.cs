@@ -61,7 +61,7 @@ public class BossEnemy : Enemy
     }
     int RandomSpellCooldown()
     {
-        int random = UnityEngine.Random.Range(3, 3);
+        int random = UnityEngine.Random.Range(2, 5);
         return random;
     }
 
@@ -112,16 +112,21 @@ public class BossEnemy : Enemy
 
     IEnumerator ExplosionSpell()
     {
-        isUsingSpell = true;
-        yield return new WaitForSeconds(1f);
-        animator.ResetTrigger("JumpSpell");
-        animator.SetTrigger("JumpSpell");
-        yield return new WaitForSeconds(1f);
-        explosionBossSpell.Play();
-        Explosion();
-        yield return new WaitForSeconds(0.5f);
-        animator.SetTrigger("Idle");
-        isUsingSpell = false;
+        if (!isAttacking)
+        {
+            isUsingSpell = true;
+            yield return new WaitForSeconds(1f);
+            animator.ResetTrigger("JumpSpell");
+            animator.SetTrigger("JumpSpell");
+            yield return new WaitForSeconds(1f);
+            explosionBossSpell.Play();
+            Explosion();
+            playerScript.audioSource.PlayOneShot(playerScript.audioClips[17], DataPersistence.soundsVolume * 3.5f * DataPersistence.soundAdjustment);
+            yield return new WaitForSeconds(0.5f);
+            animator.SetTrigger("Idle");
+            isUsingSpell = false;
+        }
+
     }
     public void Explosion()
     {
@@ -148,7 +153,7 @@ public class BossEnemy : Enemy
     IEnumerator FireAreasSpawn()
     {
         fireAreasSpellIsActive = true;
-        audioSourceFire.mute = false;
+        //audioSourceFire.mute = false;
         StartCoroutine(FireAreaTimer());
         while (fireAreasSpellIsActive)
         {
@@ -156,7 +161,7 @@ public class BossEnemy : Enemy
             yield return new WaitForSeconds(2);
         }
         yield return new WaitForSeconds(5);
-        audioSourceFire.mute = true;
+        //audioSourceFire.mute = true;
     }
     IEnumerator FireAreaTimer()
     {
@@ -184,6 +189,7 @@ public class BossEnemy : Enemy
         // Perform the charge
         Vector3 chargeDirection = (player.position - transform.position).normalized;
         float chargeEndTime = Time.time + chargeDuration;
+        playerScript.audioSource.PlayOneShot(playerScript.audioClips[19], DataPersistence.soundsVolume * 1f * DataPersistence.soundAdjustment);
 
         while (Time.time < chargeEndTime)
         {
