@@ -11,6 +11,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected SphereCollider exclusionZone; // Collider defining where enemies should not spawn
     [SerializeField] public Animator animator;
     [SerializeField] protected Player playerScript;
+    protected MainManager mainManager;
     public GameObject expManager;
     public ExpManager expManagerScript;
     private float desiredY = 1.4f; // Desired height for the position
@@ -22,13 +23,14 @@ public class Enemy : MonoBehaviour
     public float enemyHealth;
     public bool attacked;
     bool deathAnimationDone = false;
-    protected float soundAdjustment = 0.6f;
+    protected float soundAdjustment = DataPersistence.soundAdjustment;
     int prefabIndex;
     public bool enemyIsBleeding;
     public bool enemyIsHitByFire;
     private SkinnedMeshRenderer skinnedMeshRenderer;
     private UnityEngine.Color originalColor;
     private UnityEngine.Color newColor;
+    protected bool isUsingSpell;
 
     public bool damagedByVortex = false;
 
@@ -44,6 +46,7 @@ public class Enemy : MonoBehaviour
 
     protected virtual void Start()
     {
+        mainManager = GameObject.Find("MainManager").GetComponent<MainManager>();
         expManager = GameObject.Find("Exp_Bar");
         expManagerScript = expManager.GetComponent<ExpManager>();
         // Find and assign the BoxCollider with the "MapBox" tag

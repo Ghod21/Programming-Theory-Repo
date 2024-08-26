@@ -8,7 +8,7 @@ public class HealthBottle : MonoBehaviour
     AudioSource audioSource;
     AudioClip healthPotionSound;
     private Player playerScript;
-    float soundAdjustment = 0.6f;
+    float soundAdjustment = DataPersistence.soundAdjustment;
 
     private void Start()
     {

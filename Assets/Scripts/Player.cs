@@ -14,8 +14,10 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform model;
     [SerializeField] private Animator animator; // Add a reference to the Animator component
     public AudioSource audioSource;
+    [SerializeField] AudioSource runAudioSource;
+    private bool isPlayingRunningSound = false;
     public AudioClip[] audioClips;
-    float soundAdjustment = 0.6f;
+    float soundAdjustment = DataPersistence.soundAdjustment;
     public bool timeIsFrozen;
 
     // Move variables
@@ -183,6 +185,7 @@ public class Player : MonoBehaviour
             HealthLogic();
             DashUILogic();
             ScoreUpdate();
+            //RunSound();
             //ChargedWeaponSoundLogic();
 
             if (shieldWall.activeSelf)
@@ -226,6 +229,34 @@ public class Player : MonoBehaviour
             Move();
         }
     }
+    // Additional sounds
+    void RunSound()
+    {
+        bool isMoving = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
+
+        if (isMoving)
+        {
+            if (!isPlayingRunningSound)
+            {
+                runAudioSource.clip = audioClips[16];
+                runAudioSource.loop = true;
+                runAudioSource.volume = DataPersistence.soundAdjustment * 0.5f;
+                //runAudioSource.pitch = 1.75f;
+                runAudioSource.Play();
+                isPlayingRunningSound = true;
+            }
+        }
+        else
+        {
+            if (isPlayingRunningSound)
+            {
+                runAudioSource.Stop();
+                isPlayingRunningSound = false;
+            }
+        }
+    }
+
+
     //  ....................................................................MAIN PART END..................................................................
     //  ....................................................................SKILLS PART START..............................................................
     void UseSpell()
@@ -277,7 +308,7 @@ public class Player : MonoBehaviour
         }
         isUsingSpell = true;
         isDashing = true;
-        audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+        //audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
         dashTime = dashDuration;
 
         StartCoroutine(RotatePlayerCoroutine());
@@ -330,6 +361,7 @@ public class Player : MonoBehaviour
             dashDuration = 0.3f;
         }
     }
+    
 
     private IEnumerator BladeVortexAttackCoroutine()
     {
@@ -386,17 +418,17 @@ public class Player : MonoBehaviour
             {
                 if (!hasPlayedKillSound)
                 {
-                    audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+                    audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.7f * soundAdjustment);
                     StartCoroutine(KillSoundCooldown());
                 }
             }
             else if (hitEnemy)
             {
-                audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+                audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.7f * soundAdjustment);
             }
             else
             {
-                audioSource.PlayOneShot(audioClips[1], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+                audioSource.PlayOneShot(audioClips[1], DataPersistence.soundsVolume * 0.7f * soundAdjustment);
             }
 
             yield return new WaitForSeconds(0.2f); // Delay between attacks
@@ -615,7 +647,10 @@ public class Player : MonoBehaviour
     {
         gameOver = true;
         animator.SetBool("isGameOver", true);
+        runAudioSource.Stop();
+        isPlayingRunningSound = false;
         Time.timeScale = 0f;
+
     }
 
 
@@ -785,7 +820,7 @@ public class Player : MonoBehaviour
     }
     private void BackwardsDashLogic()
     {
-        audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+        audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 1.5f * soundAdjustment);
         isDashing = true;
 
         Vector3 targetPosition = GetPositionFrom3SecondsAgo();
@@ -942,13 +977,7 @@ public class Player : MonoBehaviour
         isCooldownCoroutineRunning = false;
         dashIsOnCooldown = false;
     }
-    private void GatherInput()
-    {
-        if (!isDashing)
-        {
-            input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
-        }
-    }
+
 
     private void Move()
     {
@@ -1009,7 +1038,7 @@ public class Player : MonoBehaviour
     private void Dash()
     {
         isDashing = true;
-        audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+        audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 1.5f * soundAdjustment);
         dashTime = dashDuration;
     }
 
@@ -1032,7 +1061,13 @@ public class Player : MonoBehaviour
             }
         }
     }
-
+    private void GatherInput()
+    {
+        if (!isDashing)
+        {
+            input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
+        }
+    }
 
     //  ..............................................................MOVE PART END..........................................................................
 
@@ -1093,12 +1128,12 @@ public class Player : MonoBehaviour
     {
         if (x.enemyHealth <= 0 && !hasPlayedKillSound)
         {
-            audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.7f * soundAdjustment);
             StartCoroutine(KillSoundCooldown());
         }
         else if (x.enemyHealth > 0 && !bleedSoundCooldown)
         {
-            audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.7f * soundAdjustment);
             StartCoroutine(BleedSoundCooldown());
         }
     }
@@ -1173,7 +1208,7 @@ public class Player : MonoBehaviour
         }
 
         // Call the lightning effect on the first hit enemy, if one was hit
-        if (weaponIsCharged)
+        if (weaponIsCharged && initialTarget != null)
         {
             ChainLightningOnAttack(initialTarget);
 
@@ -1190,7 +1225,7 @@ public class Player : MonoBehaviour
         {
             if (!hasPlayedKillSound)
             {
-                audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+                audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.7f * soundAdjustment);
                 StartCoroutine(KillSoundCooldown());
             }
             if (vampireHealthTalentIsChosen)
@@ -1209,11 +1244,11 @@ public class Player : MonoBehaviour
         }
         else if (hitEnemy)
         {
-            audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            audioSource.PlayOneShot(audioClips[0], DataPersistence.soundsVolume * 0.7f * soundAdjustment);
         }
         else
         {
-            audioSource.PlayOneShot(audioClips[1], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
+            audioSource.PlayOneShot(audioClips[1], DataPersistence.soundsVolume * 0.7f * soundAdjustment);
         }
 
         isAttackQueued = false;

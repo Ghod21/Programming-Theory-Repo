@@ -1,4 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,12 +10,18 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private GameObject[] enemies; // Array to hold the enemy prefabs
     [SerializeField] private BoxCollider spawnArea; // The BoxCollider that defines the spawn area
     [SerializeField] private SphereCollider exclusionZone; // The SphereCollider where enemies should not spawn
-    [SerializeField] private GameObject mainManager;
+    //[SerializeField] private GameObject mainManagerScript;
     private GameObject healthPotionPrefab; // Prefab for health potion
     [SerializeField] private GameObject[] experiencePrefabs;
+    private List<Vector3> recentPositions = new List<Vector3>();
+    private const int maxRecentPositions = 3;
+    private const float exclusionRadius = 5f;
+    [SerializeField] GameObject bossObject;
+
+    [SerializeField] GameObject[] bossSpawnSpellObjectPositions;
 
 
-    private MainManager mainManagerScript;
+    [SerializeField] MainManager mainManagerScript;
     private int numberOfEnemies; // Number of enemies to spawn
     private float spawnHeight = 1.4f; // Desired spawn height
     public int waveDifficulty;
@@ -24,16 +33,66 @@ public class SpawnManager : MonoBehaviour
 
     int spawnCases = 21;
 
+    [SerializeField] BoxCollider aoeSpawnArea;
+    [SerializeField] GameObject aoeAreasObjects;
+    [SerializeField] public GameObject aoeSpawnAreaObject;
+    [SerializeField] GameObject bossStarParticleObject;
+    float bossStarMoveSpeed = 10f;
+    private Vector3 targetPosition = new Vector3(2.750329f, 1f, 2.416487f);
+    ParticleSystem bossStarParticleSystem;
+    [SerializeField] ParticleSystem bossStarFallParticleSystem;
+    [SerializeField] BossEnemy bossEnemy;
+
+    [SerializeField] AudioManager audioManager;
+    [SerializeField] Player playerScript;
+
+    public void ActivateAndMoveBossStar()
+    {
+        bossStarParticleObject.SetActive(true);
+        startSpawn = false;
+
+        StartCoroutine(MoveBossStar());
+    }
+
+    IEnumerator MoveBossStar()
+    {
+        Vector3 startPosition = new Vector3(2.750329f, 9f, 2.416487f);
+
+        while (bossStarParticleObject.transform.position.y > targetPosition.y)
+        {
+            bossStarParticleObject.transform.position = Vector3.MoveTowards(
+                bossStarParticleObject.transform.position,
+                targetPosition,
+                bossStarMoveSpeed * Time.deltaTime
+            );
+
+            yield return null;
+        }
+        bossStarFallParticleSystem.Play();
+
+        
+        //yield return new WaitForSeconds(0.1f);
+        spawnBoss();
+        mainManagerScript.BossFightUIEnable();
+        bossStarParticleSystem.Stop();
+        bossStarParticleSystem.Clear();
+        bossStarParticleObject.SetActive(false);
+        audioManager.BossMusicChangeStop();
+        playerScript.audioSource.PlayOneShot(playerScript.audioClips[18], DataPersistence.soundsVolume * 0.7f * DataPersistence.soundAdjustment);
+    }
+
     private void Start()
     {
+
         if (SceneManager.GetActiveScene().name == "MainScene")
         {
+            bossStarParticleSystem = bossStarParticleObject.GetComponent<ParticleSystem>();
             startSpawn = true;
-            StartCoroutine(Spawner());
+            //StartCoroutine(Spawner());
             numberOfEnemies = 1;
-            // spawnBoss(); // Test for boss in the beginning
+
+            ActivateAndMoveBossStar();
         }
-        mainManagerScript = mainManager.GetComponent<MainManager>();
         healthPotionPrefab = Resources.Load<GameObject>("Prefabs/HealthPotion");
     }
 
@@ -54,11 +113,11 @@ public class SpawnManager : MonoBehaviour
             difficultyMeter = spawnCases;
         }
         waveDifficulty = Mathf.Clamp(difficultyMeter, 1, spawnCases); // Adjust waveDifficulty based on difficultyMeter
-        if (waveDifficulty == spawnCases && !bossSpawned)
-        {
-            spawnBoss();
-            bossSpawned = true;
-        }
+        //if (waveDifficulty == spawnCases && !bossSpawned)
+        //{
+        //    spawnBoss();
+        //    bossSpawned = true;
+        //}
     }
 
     IEnumerator Spawner()
@@ -81,12 +140,28 @@ public class SpawnManager : MonoBehaviour
         }
     }
 
+    public void SpawnEnemiesBossSpell(Quaternion bossRotation)
+    {
+        for (int i = 0; i < bossSpawnSpellObjectPositions.Length; i++)
+        {
+
+            Vector3 spawnPosition = bossSpawnSpellObjectPositions[i].transform.position;
+            GameObject enemy = enemies[0];
+            GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, bossRotation);
+            instantiatedEnemy.transform.position = new Vector3(instantiatedEnemy.transform.position.x, spawnHeight, instantiatedEnemy.transform.position.z);
+        }
+    }
+
     private void spawnBoss()
     {
-        Vector3 spawnPosition = GetRandomPointInBounds(spawnArea.bounds, exclusionZone);
-        GameObject enemy = enemies[5];
-        GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, Quaternion.identity);
-        instantiatedEnemy.transform.position = new Vector3(instantiatedEnemy.transform.position.x, spawnHeight, instantiatedEnemy.transform.position.z);
+        bossObject.SetActive(true);
+
+
+        // Old version
+        //Vector3 spawnPosition = GetRandomPointInBounds(spawnArea.bounds, exclusionZone);
+        //GameObject enemy = enemies[5];
+        //GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, Quaternion.identity);
+        //instantiatedEnemy.transform.position = new Vector3(instantiatedEnemy.transform.position.x, spawnHeight, instantiatedEnemy.transform.position.z);
     }
 
     private GameObject ChooseEnemyBasedOnDifficulty()
@@ -229,5 +304,80 @@ public class SpawnManager : MonoBehaviour
         Instantiate(experiencePrefabs[prefabIndex], spawnPosition, rotation);
     }
 
+    public void SpawnAoEAtRandomPosition()
+    {
+        if (aoeAreasObjects != null && aoeSpawnArea != null)
+        {
+            Vector3 spawnPosition;
+            bool positionFound = false;
+            int maxAttempts = 100;
+            int attempt = 0;
 
+            Quaternion spawnRotation = Quaternion.Euler(98.375f, 9.302002f, -19.33398f);
+
+            while (!positionFound && attempt < maxAttempts)
+            {
+                spawnPosition = GetRandomPositionInAreaForAoE(aoeSpawnArea);
+
+                if (IsPositionOutsideSphereColliders(spawnPosition) && IsPositionFarFromRecent(spawnPosition))
+                {
+                    Instantiate(aoeAreasObjects, spawnPosition, spawnRotation);
+                    AddToRecentPositions(spawnPosition);
+                    positionFound = true;
+                }
+                else
+                {
+                    attempt++;
+                }
+            }
+
+            if (!positionFound)
+            {
+                Debug.LogWarning("Failed to find a suitable position outside all SphereColliders.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Prefab or fireSpawnArea is null");
+        }
+    }
+
+
+    private Vector3 GetRandomPositionInAreaForAoE(BoxCollider area)
+    {
+        Vector3 center = area.transform.position + area.center;
+        Vector3 size = area.size;
+
+        float randomX = Random.Range(center.x - size.x / 2, center.x + size.x / 2);
+        float randomY = 1f;
+        float randomZ = Random.Range(center.z - size.z / 2, center.z + size.z / 2);
+
+        return new Vector3(randomX, randomY, randomZ);
+    }
+    private bool IsPositionOutsideSphereColliders(Vector3 position)
+    {
+        bool outsideSphere1 = !exclusionZone.bounds.Contains(position);
+
+        return outsideSphere1;
+    }
+    private bool IsPositionFarFromRecent(Vector3 position)
+    {
+        foreach (Vector3 recentPosition in recentPositions)
+        {
+            if (Vector3.Distance(position, recentPosition) < exclusionRadius)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void AddToRecentPositions(Vector3 position)
+    {
+        if (recentPositions.Count >= maxRecentPositions)
+        {
+            recentPositions.RemoveAt(0);
+        }
+        recentPositions.Add(position);
+    }
 }

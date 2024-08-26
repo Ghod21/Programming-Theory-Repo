@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
@@ -8,10 +9,15 @@ public class AudioManager : MonoBehaviour
     [SerializeField] UnityEngine.UI.Slider musicSlider;
     [SerializeField] UnityEngine.UI.Slider soundsSlider;
     public bool playMusic = true;
+    [SerializeField] AudioClip[] audioClips;
+
+    [SerializeField] private Light targetLight;
 
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
+        audioSource.clip = audioClips[0];
+        audioSource.volume = DataPersistence.musicVolume * DataPersistence.soundAdjustment * 1.2f;
         if (musicSlider != null)
         {
             musicSlider.value = DataPersistence.musicVolume;
@@ -20,15 +26,22 @@ public class AudioManager : MonoBehaviour
         {
             soundsSlider.value = DataPersistence.soundsVolume;
         }
-        if (playMusic)
-        {
-            audioSource.Play();
-        }
+        audioSource.Play();
     }
+    public void BossMusicChangeStop()
+    {
+        //playMusic = false;
+        //Debug.Log("Stopping audio source");
+        //audioSource.Stop();
+        //Debug.Log("Audio source stopped, changing clip");
+        audioSource.clip = audioClips[1];
+        audioSource.volume = DataPersistence.musicVolume * DataPersistence.soundAdjustment;
+        Debug.Log("Clip changed");
+    }
+
 
     void Update()
     {
-        audioSource.volume = DataPersistence.musicVolume * 0.75f;
         if (playMusic && !audioSource.isPlaying)
         {
             audioSource.Play();
@@ -36,6 +49,13 @@ public class AudioManager : MonoBehaviour
         else if (!playMusic && audioSource.isPlaying)
         {
             audioSource.Stop();
+        }
+
+        if (SceneManager.GetActiveScene().name == "Menu")
+        {
+            DataPersistence.musicVolume = musicSlider.value;
+            DataPersistence.soundsVolume = soundsSlider.value;
+            audioSource.volume = DataPersistence.musicVolume * DataPersistence.soundAdjustment;
         }
     }
     public void MusicSliderChange()

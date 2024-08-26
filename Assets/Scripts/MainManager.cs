@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.Text.RegularExpressions;
+using UnityEngine.UIElements;
 
 public class MainManager : MonoBehaviour
 {
@@ -19,13 +20,13 @@ public class MainManager : MonoBehaviour
     [SerializeField] GameObject[] gameOverUI;
     [SerializeField] TextMeshProUGUI[] gameOverUIText;
     [SerializeField] TextMeshProUGUI nameText;
-    [SerializeField] Toggle startInfoToggle;
+    [SerializeField] UnityEngine.UI.Toggle startInfoToggle;
     [SerializeField] TMP_InputField nameInputField;
-    [SerializeField] Image nameFieldImage;
+    [SerializeField] UnityEngine.UI.Image nameFieldImage;
     [SerializeField] GameObject wrongNameText;
     [SerializeField] GameObject audioManager;
     [SerializeField] AudioClip[] menuSounds;
-    [SerializeField] AudioSource audioSource;
+    [SerializeField] public AudioSource audioSource;
     private Player playerScript;
 
 
@@ -39,7 +40,16 @@ public class MainManager : MonoBehaviour
     bool deathSoundsPlayed;
     private bool correctNameToStart;
     bool leaderBoardUpdated;
-    float soundAdjustment = 0.6f;
+    float soundAdjustment = DataPersistence.soundAdjustment;
+
+
+    [SerializeField] UnityEngine.UI.Slider bossHealthSlider;
+    [SerializeField] GameObject expUIToMoveOnBossSpawn;
+    [SerializeField] GameObject bossHPUIBar;
+    [SerializeField] GameObject fillSliderAreaToOffAtBossZeroHP;
+    [SerializeField] BossEnemy bossEnemy;
+    Vector2 rectExpTransformDefault = new Vector2(-60, 31);
+    public bool bossFightIsActive;
 
     public string PlayerName
     {
@@ -59,6 +69,29 @@ public class MainManager : MonoBehaviour
             }
         }
     }
+
+    public void BossFightUIEnable()
+    {
+        RectTransform rectTransform = expUIToMoveOnBossSpawn.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = new Vector2(-100, -100);
+        bossFightIsActive = true;
+        //expUIToMoveOnBossSpawn.SetActive(false);
+        bossHPUIBar.SetActive(true);
+        bossHealthSlider.minValue = 0;
+        bossHealthSlider.maxValue = 25;
+    }
+    void BossFightUIUpdate()
+    {
+        if (bossEnemy.enemyHealth > 1)
+        {
+            bossHealthSlider.value = bossEnemy.enemyHealth;
+        } else
+        {
+            fillSliderAreaToOffAtBossZeroHP.SetActive(false);
+        }
+    }
+
+
 
     private void Start()
     {
@@ -140,6 +173,10 @@ public class MainManager : MonoBehaviour
                 SceneManager.LoadScene("Menu");
             }
             nameText.text = DataPersistence.currentPlayerName + ": " + DataPersistence.currentPlayerScore.ToString();
+            if (bossFightIsActive)
+            {
+                BossFightUIUpdate();
+            }
         }
     }
     //  ....................................................................MENU UI PART START..............................................................
@@ -147,19 +184,19 @@ public class MainManager : MonoBehaviour
     {
         if (correctNameToStart)
         {
-            audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 4f * soundAdjustment);
+            audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 10f * soundAdjustment);
             DataPersistence.Instance.SaveData();
             SceneManager.LoadScene("MainScene");
         }
         else
         {
-            audioSource.PlayOneShot(menuSounds[1], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
+            audioSource.PlayOneShot(menuSounds[1], DataPersistence.soundsVolume * 4f * soundAdjustment);
             StartCoroutine(NameFieldColorChange());
         }
     }
     public void ExitButtonClick()
     {
-        audioSource.PlayOneShot(menuSounds[1], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
+        audioSource.PlayOneShot(menuSounds[1], DataPersistence.soundsVolume * 4f * soundAdjustment);
         DataPersistence.Instance.Exit();
 #if UNITY_EDITOR
         EditorApplication.isPlaying = false;
@@ -169,7 +206,7 @@ public class MainManager : MonoBehaviour
     }
     public void InfoButtonClick()
     {
-        audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 4f * soundAdjustment);
+        audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 10f * soundAdjustment);
         if (!infoIsOn)
         {
             uiToggle[5].SetActive(false);
