@@ -70,9 +70,10 @@ public class SpawnManager : MonoBehaviour
         }
         bossStarFallParticleSystem.Play();
 
-        
+
         //yield return new WaitForSeconds(0.1f);
-        spawnBoss();
+        bossObject.SetActive(true);
+        bossEnemy.StartCoroutine(bossEnemy.BossHPRegen());
         mainManagerScript.BossFightUIEnable();
         bossStarParticleSystem.Stop();
         bossStarParticleSystem.Clear();
@@ -88,10 +89,10 @@ public class SpawnManager : MonoBehaviour
         {
             bossStarParticleSystem = bossStarParticleObject.GetComponent<ParticleSystem>();
             startSpawn = true;
-            //StartCoroutine(Spawner());
+            StartCoroutine(Spawner());
             numberOfEnemies = 1;
 
-            ActivateAndMoveBossStar();
+            //ActivateAndMoveBossStar();
         }
         healthPotionPrefab = Resources.Load<GameObject>("Prefabs/HealthPotion");
     }
@@ -113,17 +114,18 @@ public class SpawnManager : MonoBehaviour
             difficultyMeter = spawnCases;
         }
         waveDifficulty = Mathf.Clamp(difficultyMeter, 1, spawnCases); // Adjust waveDifficulty based on difficultyMeter
-        //if (waveDifficulty == spawnCases && !bossSpawned)
-        //{
-        //    spawnBoss();
-        //    bossSpawned = true;
-        //}
+        spawnBoss();
     }
 
     IEnumerator Spawner()
     {
         while (startSpawn)
         {
+            if (bossSpawned)
+            {
+                yield break;
+            }
+
             yield return new WaitForSeconds(spawnTime);
             SpawnEnemies();
         }
@@ -142,11 +144,22 @@ public class SpawnManager : MonoBehaviour
 
     public void SpawnEnemiesBossSpell(Quaternion bossRotation)
     {
+        int fixedPositionIndex = bossSpawnSpellObjectPositions.Length - 1;
+
         for (int i = 0; i < bossSpawnSpellObjectPositions.Length; i++)
         {
-
             Vector3 spawnPosition = bossSpawnSpellObjectPositions[i].transform.position;
-            GameObject enemy = enemies[0];
+            GameObject enemy;
+
+            if (i == fixedPositionIndex)
+            {
+                enemy = enemies[1];
+            }
+            else
+            {
+                enemy = enemies[0];
+            }
+
             GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, bossRotation);
             instantiatedEnemy.transform.position = new Vector3(instantiatedEnemy.transform.position.x, spawnHeight, instantiatedEnemy.transform.position.z);
         }
@@ -154,14 +167,16 @@ public class SpawnManager : MonoBehaviour
 
     private void spawnBoss()
     {
-        bossObject.SetActive(true);
-
-
-        // Old version
-        //Vector3 spawnPosition = GetRandomPointInBounds(spawnArea.bounds, exclusionZone);
-        //GameObject enemy = enemies[5];
-        //GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, Quaternion.identity);
-        //instantiatedEnemy.transform.position = new Vector3(instantiatedEnemy.transform.position.x, spawnHeight, instantiatedEnemy.transform.position.z);
+        if (waveDifficulty == spawnCases && startSpawn)
+        {
+            StopCoroutine(Spawner());
+            startSpawn = false;
+        }
+        if (!startSpawn && AreNoEnemiesExceptBoss() && !bossSpawned)
+        {
+            ActivateAndMoveBossStar();
+            bossSpawned = true;
+        }
     }
 
     private GameObject ChooseEnemyBasedOnDifficulty()
@@ -379,5 +394,19 @@ public class SpawnManager : MonoBehaviour
             recentPositions.RemoveAt(0);
         }
         recentPositions.Add(position);
+    }
+    private bool AreNoEnemiesExceptBoss()
+    {
+        Enemy[] enemies = FindObjectsOfType<Enemy>();
+
+        foreach (Enemy enemy in enemies)
+        {
+            if (enemy.gameObject.name == "EnemyBoss")
+            {
+                return false;
+            }
+        }
+
+        return enemies.Length == 0;
     }
 }

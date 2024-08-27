@@ -26,11 +26,12 @@ public class EnemyRangeMedium : Enemy
     {
         DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
         playerScript.scoreMultiplierBase += 2;
-        if (Random.value < 0.05f)
+        if (Random.value < 0.07f)
         {
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
         }
+        vampireTalentRegen();
         return base.deathAnimation();
     }
 

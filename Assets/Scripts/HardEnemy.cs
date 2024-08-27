@@ -39,6 +39,7 @@ public class HardEnemy : Enemy
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
         }
+        vampireTalentRegen();
         return base.deathAnimation();
     }
     protected override void EnemyAttack()

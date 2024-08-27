@@ -36,11 +36,12 @@ public class MediumEnemy : Enemy
     {
         DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
         playerScript.scoreMultiplierBase += 2;
-        if (Random.value < 0.02f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
+        if (Random.value < 0.05f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
         {
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
         }
+        vampireTalentRegen();
         return base.deathAnimation();
     }
         IEnumerator Charge()
@@ -55,7 +56,7 @@ public class MediumEnemy : Enemy
             // Perform the charge
             Vector3 chargeDirection = (player.position - transform.position).normalized;
             float chargeEndTime = Time.time + chargeDuration;
-            playerScript.audioSource.PlayOneShot(playerScript.audioClips[19], DataPersistence.soundsVolume * 2.5f * DataPersistence.soundAdjustment);
+            playerScript.audioSource.PlayOneShot(playerScript.audioClips[19], DataPersistence.soundsVolume * 1f * DataPersistence.soundAdjustment);
 
             while (Time.time < chargeEndTime)
             {

@@ -26,11 +26,12 @@ public class EnemyRangeEasy : Enemy
     {
         DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
         playerScript.scoreMultiplierBase += 2;
-        if (Random.value < 0.01f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
+        if (Random.value < 0.05f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
         {
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
         }
+        vampireTalentRegen();
         return base.deathAnimation();
     }
 

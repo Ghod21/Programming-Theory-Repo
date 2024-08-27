@@ -18,7 +18,11 @@ public class ExpManager : MonoBehaviour
     AudioSource audioSource;
     AudioClip levelUpSound;
 
-    int[] experienceThresholds = new int[] { 100, 180, 270, 390, 550 };
+    //int[] experienceThresholds = new int[] { 100, 180, 270, 390, 550 };
+    int[] experienceThresholds = new int[] { 25, 40, 60, 85, 110, 140, 175, 215, 260, 310, 365, 425, 495 };
+
+
+
 
     private int currentThresholdIndex; // Index to track current threshold
 
@@ -34,6 +38,7 @@ public class ExpManager : MonoBehaviour
     public bool shieldDamageTalentChosenExpManager;
 
     public bool HealthPotionsTalentIsChosenExpManager;
+    bool talentIsChosen = false;
 
     void Start()
     {
@@ -51,27 +56,51 @@ public class ExpManager : MonoBehaviour
         fillSlider.value = 0;
         audioSource = player.GetComponent<AudioSource>();
         levelUpSound = Resources.Load<AudioClip>("Audio/LevelUpSound");
-        ShowSkillsTalentsUI();
+        //ShowSkillsTalentsUI();
     }
 
     void Update()
     {
-        if (level < 6)
+        if (level < experienceThresholds.Length - 1)
         {
             UpdateFillAmount();
             CheckLevelUp();
+            LevelUpTalents();
         }
         else
         {
             fillSlider.value = 1;
         }
-        if(fillSlider.value == 0)
+        if (fillSlider.value == 0)
         {
             fillArea.SetActive(false);
         }
         else
         {
             fillArea.SetActive(true);
+        }
+    }
+    void LevelUpTalents()
+    {
+        if (level == 3 || level == 5 || level == 9 || level == 12)
+        {
+            if (!talentIsChosen)
+            {
+                InvokeRandomFunction();
+                talentIsChosen = true;
+            }
+        }
+        else if (level == 7)
+        {
+            if (!talentIsChosen)
+            {
+                ShowSkillsTalentsUI();
+                talentIsChosen = true;
+            }
+        }
+        else
+        {
+            talentIsChosen = false;
         }
     }
     public void SetTalentFunctions()
@@ -247,7 +276,7 @@ public class ExpManager : MonoBehaviour
     void ShowHealthTalentsUI()
     {
         talentsUI.SetActive(true);
-        for (int i = 0; i <healthTalentsUI.Length; i++)
+        for (int i = 0; i < healthTalentsUI.Length; i++)
         {
             healthTalentsUI[i].SetActive(true);
         }
@@ -445,7 +474,7 @@ public class ExpManager : MonoBehaviour
         {
             audioSource.PlayOneShot(levelUpSound, DataPersistence.soundsVolume * 0.8f * DataPersistence.soundAdjustment);
             level++;
-            InvokeRandomFunction();
+            //InvokeRandomFunction();
             playerScript.playerExperience -= experienceThresholds[currentThresholdIndex];
 
             // Move to the next threshold or loop back to the first one

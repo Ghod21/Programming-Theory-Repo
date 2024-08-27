@@ -23,7 +23,8 @@ public class Player : MonoBehaviour
     // Move variables
     [SerializeField] GameObject dashFillArea;
     [SerializeField] public UnityEngine.UI.Image dashFillImage;
-    [SerializeField] private float speed = 5;
+    [SerializeField] public float speed = 5;
+    public float currentSpeed;
     [SerializeField] private float verticalSpeedMultiplier = 1f; // Adjust this multiplier for vertical speed
     [SerializeField] public float dashSpeed = 10; // Speed during dash
     [SerializeField] public float dashDuration = 0.2f; // Duration of the dash
@@ -97,7 +98,7 @@ public class Player : MonoBehaviour
     bool dashSprintIsOn = false;
 
     public bool vampireHealthTalentIsChosen = false;
-    int killsToVampire = 7;
+    public int killsToVampire = 7;
 
     public bool damageAttackTalentIsChosen = false;
     public float attackRangeTalentAdd = 0f;
@@ -121,7 +122,7 @@ public class Player : MonoBehaviour
     public float fireBreathConeAngle = 30f;
     public float fireBreathConeDurationIncrease = 1f;
     bool isUsingSpell;
-    float spellCooldown = 3f;
+    float spellCooldown = 10f;
     bool spellIsOnCooldown = false;
 
     [SerializeField] GameObject lightningParticles;
@@ -141,6 +142,9 @@ public class Player : MonoBehaviour
     [SerializeField] GameObject bladeVortexParticleObject;
     float vortexSpeed;
     float vortexDuration;
+    bool isNotTakingInput = false;
+    public bool isTakingAoeDamage = false;
+
 
 
 
@@ -266,7 +270,7 @@ public class Player : MonoBehaviour
             FireBreath();
             StartCoroutine(SpellCooldownTimer());
         }
-        else if (!isAttacking && !isDashing && !isShielding && !spellIsOnCooldown && lightningTalentIsChosen && !isUsingSpell)
+        else if (!isAttacking && !isDashing && !isShielding && !spellIsOnCooldown && lightningTalentIsChosen && !isUsingSpell && !weaponIsCharged)
         {
             StartCoroutine(ChargeWeapon());
 
@@ -308,20 +312,25 @@ public class Player : MonoBehaviour
         }
         isUsingSpell = true;
         isDashing = true;
+        isNotTakingInput = true;
         //audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
         dashTime = dashDuration;
 
         StartCoroutine(RotatePlayerCoroutine());
         StartCoroutine(BladeVortexAttackCoroutine());
     }
+
     private IEnumerator RotatePlayerCoroutine()
     {
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
         bladeVortexParticle.Play();
         dashTime = bladeVortexDuration;
         isInBladeVortex = true;
         float elapsedTime = 0f;
         float totalRotation = 360f * 3; // Total rotation needed (3 full rotations)
         float rotationDuration = bladeVortexDuration; // Duration of the rotation
+        float dashVortexSpeed = 25f;
 
         // Calculate the rotation step based on the duration and speed
         float rotationStep = totalRotation / rotationDuration;
@@ -329,8 +338,14 @@ public class Player : MonoBehaviour
         // Store the initial rotation
         Quaternion startRotation = playerTransform.rotation;
 
+        // ¬ычисл€ем направление рывка в сторону взгл€да игрока
+        Vector3 dashDirection = playerTransform.forward;
+
         while (elapsedTime < rotationDuration)
         {
+            // ѕеремещаем игрока в направлении взгл€да
+            rb.MovePosition(rb.position + dashDirection * dashVortexSpeed * Time.deltaTime);
+
             // Calculate how much to rotate this frame
             float step = rotationStep * Time.deltaTime;
 
@@ -349,19 +364,21 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
 
         // Reset to the initial rotation
-        playerTransform.rotation = initialRotation;
+        playerTransform.rotation = startRotation;
 
         // End dashing
-        isDashing = false;
         isInBladeVortex = false;
         isUsingSpell = false;
+        isNotTakingInput = false;
+        isDashing = false;
         if (backwardsDashTalentChosen)
         {
             dashSpeed = 15f;
             dashDuration = 0.3f;
         }
     }
-    
+
+
 
     private IEnumerator BladeVortexAttackCoroutine()
     {
@@ -454,6 +471,7 @@ public class Player : MonoBehaviour
     {
         animator.SetBool("isChargingWeapon", true);
         yield return new WaitForSeconds(0.4f);
+        StartCoroutine(SpellCooldownTimer());
         weaponCharge.SetActive(true);
         ParticleSystemParticles.Play();
         weaponIsCharged = true;
@@ -981,11 +999,24 @@ public class Player : MonoBehaviour
 
     private void Move()
     {
-        float currentSpeed = isShielding ? speed / 2 : speed;
-        if (isDashing)
+        currentSpeed = speed;
+
+        if (isTakingAoeDamage && isShielding)
         {
-            // Calculate movement direction in isometric space
-            Vector3 movement = CalculateMovement(input) * dashSpeed; // Adjust speed for dash
+            currentSpeed = speed * 0.3f;
+        }
+        else if (isTakingAoeDamage)
+        {
+            currentSpeed = speed * 0.7f;
+        }
+        else if (isShielding)
+        {
+            currentSpeed = speed / 2;
+        }
+
+        if (isDashing && !isNotTakingInput)
+        {
+            Vector3 movement = CalculateMovement(input) * dashSpeed;
             rb.velocity = movement;
 
             dashTime -= Time.deltaTime;
@@ -994,14 +1025,13 @@ public class Player : MonoBehaviour
                 isDashing = false;
             }
         }
-        else
+        else if (!isNotTakingInput)
         {
-            // Calculate movement direction in isometric space
             Vector3 movement = CalculateMovement(input);
             rb.velocity = movement * currentSpeed;
         }
-
     }
+
 
     private Vector3 CalculateMovement(Vector3 inputDirection)
     {
@@ -1063,7 +1093,7 @@ public class Player : MonoBehaviour
     }
     private void GatherInput()
     {
-        if (!isDashing)
+        if (!isDashing && !isNotTakingInput)
         {
             input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
         }
@@ -1109,7 +1139,7 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(3);
         if (x != null)
         {
-            if (x.isUnderDefenceAura)
+            if (!x.isUnderDefenceAura)
             {
                 x.enemyHealth--;
             }
@@ -1212,7 +1242,7 @@ public class Player : MonoBehaviour
         {
             ChainLightningOnAttack(initialTarget);
 
-            StartCoroutine(SpellCooldownTimer());
+            //StartCoroutine(SpellCooldownTimer());
         }
 
         if (isShielding && shieldAttackTalentChosen)
@@ -1227,19 +1257,6 @@ public class Player : MonoBehaviour
             {
                 audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.7f * soundAdjustment);
                 StartCoroutine(KillSoundCooldown());
-            }
-            if (vampireHealthTalentIsChosen)
-            {
-                killsToVampire--;
-                if (killsToVampire <= 0)
-                {
-                    playerHealth++;
-                    if (playerHealth > 30)
-                    {
-                        playerHealth = 30;
-                    }
-                    killsToVampire = 7;
-                }
             }
         }
         else if (hitEnemy)

@@ -1415,7 +1415,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &108101339
 Transform:
   m_ObjectHideFlags: 0
@@ -6859,8 +6859,8 @@ MonoBehaviour:
   - {fileID: 1487558802}
   - {fileID: 1487558801}
   - {fileID: 1487558800}
-  - {fileID: 1487558799}
   - {fileID: 1487558798}
+  - {fileID: 1487558799}
   mainManagerScript: {fileID: 1839713937}
   waveDifficulty: 0
   aoeSpawnArea: {fileID: 1855892071}
@@ -15003,6 +15003,18 @@ PrefabInstance:
       propertyPath: moveSpeed
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: -4584267028718481098, guid: 1b42ee39549bf4f4d8565e9f9713c491, type: 3}
+      propertyPath: chargePause
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4584267028718481098, guid: 1b42ee39549bf4f4d8565e9f9713c491, type: 3}
+      propertyPath: chargeSpeed
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: -4584267028718481098, guid: 1b42ee39549bf4f4d8565e9f9713c491, type: 3}
+      propertyPath: chargeDuration
+      value: 0.7
+      objectReference: {fileID: 0}
     - target: {fileID: 182665493590272817, guid: 1b42ee39549bf4f4d8565e9f9713c491, type: 3}
       propertyPath: m_Name
       value: EnemyBoss
@@ -20015,6 +20027,7 @@ MonoBehaviour:
   dashFillArea: {fileID: 1554523609}
   dashFillImage: {fileID: 1554523611}
   speed: 2.5
+  currentSpeed: 0
   verticalSpeedMultiplier: 1.5
   dashSpeed: 8
   dashDuration: 0.2
@@ -20054,6 +20067,7 @@ MonoBehaviour:
   currentFloatForBackwardDash: 0
   sprintDashTalentChosen: 0
   vampireHealthTalentIsChosen: 0
+  killsToVampire: 7
   damageAttackTalentIsChosen: 0
   attackRangeTalentAdd: 0
   swordTransform: {fileID: 312126971}
@@ -20075,6 +20089,7 @@ MonoBehaviour:
   playerTransform: {fileID: 1885716651}
   bladeVortexParticle: {fileID: 8106805775259349055}
   bladeVortexParticleObject: {fileID: 8233647608402386453}
+  isTakingAoeDamage: 0
 --- !u!135 &1885716653
 SphereCollider:
   m_ObjectHideFlags: 0

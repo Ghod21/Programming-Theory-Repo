@@ -70,27 +70,6 @@ public class MainManager : MonoBehaviour
         }
     }
 
-    public void BossFightUIEnable()
-    {
-        RectTransform rectTransform = expUIToMoveOnBossSpawn.GetComponent<RectTransform>();
-        rectTransform.anchoredPosition = new Vector2(-100, -100);
-        bossFightIsActive = true;
-        //expUIToMoveOnBossSpawn.SetActive(false);
-        bossHPUIBar.SetActive(true);
-        bossHealthSlider.minValue = 0;
-        bossHealthSlider.maxValue = 25;
-    }
-    void BossFightUIUpdate()
-    {
-        if (bossEnemy.enemyHealth > 1)
-        {
-            bossHealthSlider.value = bossEnemy.enemyHealth;
-        } else
-        {
-            fillSliderAreaToOffAtBossZeroHP.SetActive(false);
-        }
-    }
-
 
 
     private void Start()
@@ -406,6 +385,28 @@ public class MainManager : MonoBehaviour
     {
         string currentSceneName = SceneManager.GetActiveScene().name;
         SceneManager.LoadScene(currentSceneName);
+    }
+
+    public void BossFightUIEnable()
+    {
+        RectTransform rectTransform = expUIToMoveOnBossSpawn.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = new Vector2(-100, -100);
+        bossFightIsActive = true;
+        //expUIToMoveOnBossSpawn.SetActive(false);
+        bossHPUIBar.SetActive(true);
+        bossHealthSlider.minValue = 0;
+        bossHealthSlider.maxValue = 50;
+    }
+    void BossFightUIUpdate()
+    {
+        if (bossEnemy.enemyHealth > 0)
+        {
+            bossHealthSlider.value = bossEnemy.enemyHealth;
+        }
+        else
+        {
+            fillSliderAreaToOffAtBossZeroHP.SetActive(false);
+        }
     }
     private void UpdateLeaderboard()
     {
