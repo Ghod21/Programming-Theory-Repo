@@ -16,8 +16,8 @@ public class EasyEnemy : Enemy
     }
     protected override IEnumerator deathAnimation()
     {
-        DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;
-        playerScript.scoreMultiplierBase++;
+        //DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;
+        //playerScript.scoreMultiplierBase++;
         if (Random.value < 0.03f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
         {
             Vector3 currentPosition = transform.position;

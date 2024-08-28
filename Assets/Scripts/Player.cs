@@ -85,6 +85,7 @@ public class Player : MonoBehaviour
     bool isDoubleDashTalentChosenActivated = false;
     bool isDoubleDashTalentChosenCanBeActivatedAgain = true;
     public bool backwardsDashTalentChosen = false;
+    bool backwardDashIsActive;
     public int remainingDashes = 0; // New variable to track the remaining dashes
     public TextMeshProUGUI dashCountText; // TextMeshProUGUI to display dash count
 
@@ -218,6 +219,11 @@ public class Player : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.E))
             {
                 UseSpell();
+            }
+
+            if (backwardDashIsActive)
+            {
+                isDashing = true;
             }
         }
         if (playerHealth <= 0f)
@@ -839,7 +845,9 @@ public class Player : MonoBehaviour
     private void BackwardsDashLogic()
     {
         audioSource.PlayOneShot(audioClips[2], DataPersistence.soundsVolume * 0.8f * 1.5f * soundAdjustment);
+
         isDashing = true;
+        backwardDashIsActive = true;
 
         Vector3 targetPosition = GetPositionFrom3SecondsAgo();
 
@@ -861,6 +869,8 @@ public class Player : MonoBehaviour
         transform.position = targetPosition;
         dashIsOnCooldown = true;
         playerHealth = GetHealthFrom3SecondsAgo();
+
+        backwardDashIsActive = false;
         yield return new WaitForSeconds(2f);
         isDashing = false;
     }

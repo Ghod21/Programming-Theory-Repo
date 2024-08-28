@@ -32,8 +32,8 @@ public class HardEnemy : Enemy
     }
     protected override IEnumerator deathAnimation()
     {
-        DataPersistence.currentPlayerScore += 20 * playerScript.scoreMultiplier;
-        playerScript.scoreMultiplierBase += 3;
+        //DataPersistence.currentPlayerScore += 20 * playerScript.scoreMultiplier;
+        //playerScript.scoreMultiplierBase += 3;
         if (Random.value < 0.1f)
         {
             Vector3 currentPosition = transform.position;
