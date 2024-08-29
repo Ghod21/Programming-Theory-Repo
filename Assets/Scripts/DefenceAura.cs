@@ -6,11 +6,17 @@ public class DefenceAura : MonoBehaviour
 {
     public bool auraIsOn = true;
     SphereCollider sphereCollider;
+    private Quaternion initialRotation;
 
     private void Start()
     {
         sphereCollider = GetComponent<SphereCollider>();
         auraIsOn = true;
+        initialRotation = transform.rotation;
+    }
+    private void Update()
+    {
+        transform.rotation = initialRotation;
     }
 
     private void OnTriggerStay(Collider other)
@@ -43,7 +49,7 @@ public class DefenceAura : MonoBehaviour
     {
         if (sphereCollider == null)
         {
-            Debug.LogError("SphereCollider component is missing.");
+            //Debug.LogError("SphereCollider component is missing.");
             return;
         }
 

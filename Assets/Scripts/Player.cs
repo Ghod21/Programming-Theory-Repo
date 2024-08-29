@@ -19,18 +19,21 @@ public class Player : MonoBehaviour
     public AudioClip[] audioClips;
     float soundAdjustment = DataPersistence.soundAdjustment;
     public bool timeIsFrozen;
+    MainManager mainManager;
 
     // Move variables
     [SerializeField] GameObject dashFillArea;
     [SerializeField] public UnityEngine.UI.Image dashFillImage;
-    [SerializeField] public float speed = 5;
+    [SerializeField] public float speed = 2.5f;
+    public float speedAddFromMinorTalent = 0f;
     public float currentSpeed;
     [SerializeField] private float verticalSpeedMultiplier = 1f; // Adjust this multiplier for vertical speed
     [SerializeField] public float dashSpeed = 10; // Speed during dash
     [SerializeField] public float dashDuration = 0.2f; // Duration of the dash
     public bool dashIsOnCooldown = false;
     private float dashTime; // Track the dash time
-    public float dashCooldownSeconds = 10f;
+    public float dashCooldownSeconds = 0.1f; // 0.1 is 10 seconds
+    public float dashCooldownMinorAdd = 1f;
     public bool isCooldownCoroutineRunning = false;
 
     private Vector3 input;
@@ -45,7 +48,7 @@ public class Player : MonoBehaviour
     private float attackCooldown = 0f; // Cooldown for attack
     private const float attackCooldownDuration = 0.833f; // Duration of the attack cooldown
     private int attackCount;
-    private bool isAttackQueued = false; // Flag to queue attacksW
+    private bool isAttackQueued = false; // Flag to queue attacks
 
     // Shield variables
     [SerializeField] GameObject shieldWall;
@@ -113,6 +116,7 @@ public class Player : MonoBehaviour
     bool bleedSoundCooldown = false;
 
     // Skills variables
+    public float updateSpellInterval = 0.1f;
     public bool fireBreathTalentIsChosen = false;
     private ParticleSystem fireBreathParticle;
     public UnityEngine.UI.Image skillFillImage;
@@ -124,7 +128,7 @@ public class Player : MonoBehaviour
     public float fireBreathConeAngle = 30f;
     public float fireBreathConeDurationIncrease = 1f;
     bool isUsingSpell;
-    float spellCooldown = 10f;
+    public float spellCooldown = 10f;
     bool spellIsOnCooldown = false;
 
     [SerializeField] GameObject lightningParticles;
@@ -151,6 +155,7 @@ public class Player : MonoBehaviour
     public AnimationClip attackAnimation;
     public float attackSpeedMinorTalentAdaptation = 1f;
     public float attackAddFromMinorTalents = 0f;
+    public float shieldIncrementAdd = 0f;
 
 
 
@@ -159,6 +164,7 @@ public class Player : MonoBehaviour
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
+        mainManager = FindObjectOfType<MainManager>();
         vortexSpeed = dashSpeed;
         vortexDuration = dashDuration;
         initialRotation = gameObject.transform.rotation;
@@ -189,7 +195,10 @@ public class Player : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "MainScene" && !gameOver && !timeIsFrozen)
         {
             GatherInput();
-            LookAtMouse();
+            if (!mainManager.paused)
+            {
+                LookAtMouse();
+            }
             HandleAnimations(); // Call the method to handle animations
             isNotAttackingCheck(); // Check if not attacking
             ShieldLogic();
@@ -299,14 +308,13 @@ public class Player : MonoBehaviour
     {
         spellIsOnCooldown = true;
         skillFillImage.fillAmount = 0f; // Start fill from 0
-        float updateInterval = 0.1f; // Interval between updates
-        int updateCount = Mathf.CeilToInt(spellCooldown / updateInterval); // Number of updates needed
+        int updateCount = Mathf.CeilToInt(spellCooldown / updateSpellInterval); // Number of updates needed
         float fillStep = 1f / updateCount; // Amount to increase fillAmount per update
 
         while (skillFillImage.fillAmount < 1f)
         {
             skillFillImage.fillAmount += fillStep; // Increase fillAmount value
-            yield return new WaitForSeconds(updateInterval); // Wait before the next update
+            yield return new WaitForSeconds(updateSpellInterval); // Wait before the next update
         }
 
         skillFillImage.fillAmount = 1f; // Ensure the value is 1 at the end
@@ -791,7 +799,7 @@ public class Player : MonoBehaviour
 
         while (shieldHealth < x && shieldIsOnCooldown)
         {
-            shieldHealth += healthIncrement;
+            shieldHealth += healthIncrement + shieldIncrementAdd;
             if (shieldHealth >= x)
             {
                 shieldHealth = x;
@@ -832,11 +840,11 @@ public class Player : MonoBehaviour
     {
         if (dashSprintIsOn)
         {
-            speed = 3.25f;
+            speed = 2.5f + 0.75f + speedAddFromMinorTalent;
         }
         else
         {
-            speed = 2.5f;
+            speed = 2.5f + speedAddFromMinorTalent;
         }
     }
     public IEnumerator SprintDashTalent()
@@ -984,7 +992,7 @@ public class Player : MonoBehaviour
                     isDoubleDashTalentChosenCanBeActivatedAgain = false;
                     yield break;
                 }
-                dashFillImage.fillAmount += x * 0.1f; // Increase fillAmount value
+                dashFillImage.fillAmount += x * (dashCooldownSeconds * dashCooldownMinorAdd); // Increase fillAmount value
                 yield return new WaitForSeconds(x); // Wait before the next update
             }
         }
@@ -1000,7 +1008,7 @@ public class Player : MonoBehaviour
                     isDoubleDashTalentChosenCanBeActivatedAgain = false;
                     yield break;
                 }
-                dashFillImage.fillAmount += x * 0.2f; // Increase fillAmount value
+                dashFillImage.fillAmount += x * (dashCooldownSeconds * (((dashCooldownMinorAdd - 1) / 2) + 1)); // Increase fillAmount value
                 yield return new WaitForSeconds(x); // Wait before the next update
             }
             remainingDashes++;
@@ -1013,19 +1021,19 @@ public class Player : MonoBehaviour
 
     private void Move()
     {
-        currentSpeed = speed;
+        currentSpeed = speed + speedAddFromMinorTalent;
 
         if (isTakingAoeDamage && isShielding)
         {
-            currentSpeed = speed * 0.3f;
+            currentSpeed = (speed + speedAddFromMinorTalent) * 0.3f;
         }
         else if (isTakingAoeDamage)
         {
-            currentSpeed = speed * 0.7f;
+            currentSpeed = (speed + speedAddFromMinorTalent) * 0.7f;
         }
         else if (isShielding)
         {
-            currentSpeed = speed / 2;
+            currentSpeed = (speed + speedAddFromMinorTalent) / 2;
         }
 
         if (isDashing && !isNotTakingInput)
@@ -1053,7 +1061,7 @@ public class Player : MonoBehaviour
         Vector3 isoDirection = inputDirection.ToIso();
 
         // Adjust speed based on the isometric view
-        float adjustedSpeed = (inputDirection.z != 0) ? speed * verticalSpeedMultiplier : speed; // Increase vertical speed
+        float adjustedSpeed = (inputDirection.z != 0) ? (speed + speedAddFromMinorTalent) * verticalSpeedMultiplier : (speed + speedAddFromMinorTalent); // Increase vertical speed
 
         return isoDirection * adjustedSpeed;
     }
@@ -1191,7 +1199,7 @@ public class Player : MonoBehaviour
     public IEnumerator KillSoundCooldown()
     {
         hasPlayedKillSound = true;
-        yield return new WaitForSeconds(0.8f);
+        yield return new WaitForSeconds(0.7f);
         hasPlayedKillSound = false;
     }
     public IEnumerator BleedSoundCooldown()
@@ -1274,10 +1282,16 @@ public class Player : MonoBehaviour
         // Play the appropriate sound once after checking all colliders
         if (killed)
         {
-            if (!hasPlayedKillSound)
+            if (bleedAttackTalentIsChosen)
+            {
+                if (!hasPlayedKillSound)
+                {
+                    audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.7f * soundAdjustment);
+                    StartCoroutine(KillSoundCooldown());
+                }
+            } else
             {
                 audioSource.PlayOneShot(audioClips[3], DataPersistence.soundsVolume * 0.7f * soundAdjustment);
-                StartCoroutine(KillSoundCooldown());
             }
         }
         else if (hitEnemy)

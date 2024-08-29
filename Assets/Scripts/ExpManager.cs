@@ -36,7 +36,7 @@ public class ExpManager : MonoBehaviour
     [SerializeField] GameObject[] attackTalentsUI;
     [SerializeField] GameObject[] skillsTalentsUI;
     [SerializeField] GameObject[] minorTalentsUI;
-    [SerializeField] GameObject talentsUI;
+    [SerializeField] GameObject[] talentsUI;
     private List<Action> talentFunctions = new List<Action>();
     public bool reflectionTalentIsChosenExpManager;
     public bool shieldDamageTalentChosenExpManager;
@@ -52,12 +52,25 @@ public class ExpManager : MonoBehaviour
     private List<Action<int>> availableTalentFunctions;
     private int currentTalentIndex = 0;
     private float currentAnimationSpeedMultiplier = 1.0f;
+    public float expRangePickUp = 7;
 
-    
+
     [SerializeField] UnityEngine.UI.Button[] minorTalentsButtons;
     bool minorTalentIsChosen = false;
+
+    [SerializeField] private UnityEngine.UI.Image[] minorTalentSlots; // Слоты для отображения иконок талантов
+    [SerializeField] private TextMeshProUGUI[] minorTalentCountTexts; // Тексты для отображения счетчика талантов
+    private Dictionary<string, int> selectedTalents = new Dictionary<string, int>(); // Хранит таланты и количество их выборов
+    [SerializeField] private Talent[] talents; // Массив или список всех талантов
+    private Dictionary<string, int> talentSlotIndices = new Dictionary<string, int>(); // Словарь для хранения индексов слотов для каждого таланта
+
+
+
+
     void Start()
     {
+        MinorTalentsSet();
+        expRangePickUp = 7;
         SetTalentFunctions();
         player = GameObject.Find("Player");
         if (player != null)
@@ -103,13 +116,14 @@ public class ExpManager : MonoBehaviour
     {
         minorTalentFunctions = new List<Action<int>>
     {
-        minorAttackRange,
         minorAttackSpeed,
-        //minorAttackDamage,
-        //minorMoveSpeed,
-        //minorExpPickUpRange,
-        //minorDashCooldownMinus,
-        //minorSpellCooldownMinus
+        minorAttackDamage,
+        minorAttackRange,
+        minorMoveSpeed,
+        minorExpPickUpRange,
+        minorDashCooldownMinus,
+        minorSpellCooldownMinus,
+        minorShieldRegenTime
     };
     }
 
@@ -185,7 +199,7 @@ public class ExpManager : MonoBehaviour
 
     void ShowMinorTalentsUI()
     {
-        talentsUI.SetActive(true);
+        talentsUI[0].SetActive(true);
         for (int i = 0; i < minorTalentsUI.Length; i++)
         {
             minorTalentsUI[i].SetActive(true);
@@ -205,7 +219,7 @@ public class ExpManager : MonoBehaviour
     void HideMinorTalentsUI()
     {
         Time.timeScale = 1f;
-        talentsUI.SetActive(false);
+        talentsUI[0].SetActive(false);
         for (int i = 0; i < minorTalentsUI.Length; i++)
         {
             minorTalentsUI[i].SetActive(false);
@@ -228,86 +242,151 @@ public class ExpManager : MonoBehaviour
     void minorAttackRange(int index)
     {
         minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/attackRangeMinor");
-        minorTalentText[index].text = "Increase attack range";
+        minorTalentText[index].text = "Slight increase in attack range";
         minorTalentsButtons[index].onClick.AddListener(() => minorAttackRangeButton());
     }
     public void minorAttackRangeButton()
     {
         HideMinorTalentsUI();
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
         playerScript.attackRangeAdd += 0.2f;
         playerScript.swordSizeMultiplier += 0.1f;
         playerScript.SwordSizeForAttackRange();
         playerScript.AttackRangeCalculation();
+        SelectTalent(0);
     }
     void minorAttackSpeed(int index)
     {
         minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/attackSpeedMinor");
-        minorTalentText[index].text = "Increase attack speed";
+        minorTalentText[index].text = "Slight increase in attack speed";
         minorTalentsButtons[index].onClick.AddListener(() => minorAttackSpeedButton());
     }
     public void minorAttackSpeedButton()
     {
         HideMinorTalentsUI();
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
         currentAnimationSpeedMultiplier += 0.05f;
 
         playerScript.animator.SetFloat("AttackAnimationSpeed", currentAnimationSpeedMultiplier);
         playerScript.attackSpeedMinorTalentAdaptation -= 0.05f;
+        SelectTalent(1);
     }
     void minorAttackDamage(int index)
     {
-        //minorTalentImages[index].sprite = /* Укажите sprite для другого таланта */;
-        minorTalentText[index].text = "Текст для другого таланта";
+        minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/attackDamageMinor");
+        minorTalentText[index].text = "Slight increase in attack damage";
+        minorTalentsButtons[index].onClick.AddListener(() => minorAttackDamageButton());
+    }
+    public void minorAttackDamageButton()
+    {
         HideMinorTalentsUI();
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
         playerScript.attackAddFromMinorTalents += 0.17f;
+        SelectTalent(2);
     }
+
     void minorMoveSpeed(int index)
     {
-        //minorTalentImages[index].sprite = /* Укажите sprite для другого таланта */;
-        minorTalentText[index].text = "Текст для другого таланта";
+        minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/moveSpeedMinor");
+        minorTalentText[index].text = "Slight increase in move speed";
+        minorTalentsButtons[index].onClick.AddListener(() => minorMoveSpeedButton());
+    }
+    public void minorMoveSpeedButton()
+    {
         HideMinorTalentsUI();
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-
+        playerScript.speedAddFromMinorTalent += 0.1f;
+        SelectTalent(3);
     }
     void minorExpPickUpRange(int index)
     {
-        //minorTalentImages[index].sprite = /* Укажите sprite для другого таланта */;
-        minorTalentText[index].text = "Текст для другого таланта";
+        minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/expRangeMinor");
+        minorTalentText[index].text = "Increase exp pickup range";
+        minorTalentsButtons[index].onClick.AddListener(() => minorExpPickUpRangeButton());
+    }
+    public void minorExpPickUpRangeButton()
+    {
         HideMinorTalentsUI();
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-
+        expRangePickUp += 4;
+        ExpRadiusSet();
+        SelectTalent(4);
     }
+    void ExpRadiusSet()
+    {
+        Experience[] experienceObjects = FindObjectsOfType<Experience>();
+
+        foreach (Experience experience in experienceObjects)
+        {
+            SphereCollider sphereCollider = experience.GetComponent<SphereCollider>();
+            if (sphereCollider != null)
+            {
+                sphereCollider.radius = expRangePickUp;
+            }
+        }
+    }
+
     void minorDashCooldownMinus(int index)
     {
-        //minorTalentImages[index].sprite = /* Укажите sprite для другого таланта */;
-        minorTalentText[index].text = "Текст для другого таланта";
+        minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/cooldownTimerMinor");
+        minorTalentText[index].text = "Decrease dash cooldown";
+        minorTalentsButtons[index].onClick.AddListener(() => minorDashCooldownMinusButton());
+    }
+    public void minorDashCooldownMinusButton()
+    {
         HideMinorTalentsUI();
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-
+        playerScript.dashCooldownMinorAdd += 0.1f;
+        SelectTalent(5);
     }
     void minorSpellCooldownMinus(int index)
     {
-        //minorTalentImages[index].sprite = /* Укажите sprite для другого таланта */;
-        minorTalentText[index].text = "Текст для другого таланта";
+        minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/cooldownTimerSpellMinor");
+        minorTalentText[index].text = "Decrease spell cooldown";
+        minorTalentsButtons[index].onClick.AddListener(() => minorSpellCooldownMinusButton());
+    }
+    public void minorSpellCooldownMinusButton()
+    {
         HideMinorTalentsUI();
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
+        playerScript.spellCooldown--;
+        SelectTalent(6);
+    }
+    void minorShieldRegenTime(int index)
+    {
+        minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/shieldRegenTimerMinor");
+        minorTalentText[index].text = "Decrease shield regen time";
+        minorTalentsButtons[index].onClick.AddListener(() => minorShieldRegenTimeButton());
+    }
+    public void minorShieldRegenTimeButton()
+    {
+        HideMinorTalentsUI();
+        audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
+        // Functionality
+        playerScript.shieldIncrementAdd += 0.25f;
+        SelectTalent(7);
     }
 
     // ----------------------------------------------------------------------------- Minor talents part end
 
     void ShowSkillsTalentsUI()
     {
-        talentsUI.SetActive(true);
+        talentsUI[2].SetActive(true);
         for (int i = 0; i < skillsTalentsUI.Length; i++)
         {
             skillsTalentsUI[i].SetActive(true);
@@ -318,7 +397,7 @@ public class ExpManager : MonoBehaviour
     void HideSkillsTalentsUI()
     {
         Time.timeScale = 1f;
-        talentsUI.SetActive(false);
+        talentsUI[2].SetActive(false);
         for (int i = 0; i < skillsTalentsUI.Length; i++)
         {
             skillsTalentsUI[i].SetActive(false);
@@ -376,7 +455,7 @@ public class ExpManager : MonoBehaviour
 
     void ShowAttackTalentsUI()
     {
-        talentsUI.SetActive(true);
+        talentsUI[1].SetActive(true);
         for (int i = 0; i < attackTalentsUI.Length; i++)
         {
             attackTalentsUI[i].SetActive(true);
@@ -387,7 +466,7 @@ public class ExpManager : MonoBehaviour
     void HideAttackTalentsUI()
     {
         Time.timeScale = 1f;
-        talentsUI.SetActive(false);
+        talentsUI[1].SetActive(false);
         for (int i = 0; i < attackTalentsUI.Length; i++)
         {
             attackTalentsUI[i].SetActive(false);
@@ -435,7 +514,7 @@ public class ExpManager : MonoBehaviour
 
     void ShowHealthTalentsUI()
     {
-        talentsUI.SetActive(true);
+        talentsUI[1].SetActive(true);
         for (int i = 0; i < healthTalentsUI.Length; i++)
         {
             healthTalentsUI[i].SetActive(true);
@@ -446,7 +525,7 @@ public class ExpManager : MonoBehaviour
     void HideHealthTalentsUI()
     {
         Time.timeScale = 1f;
-        talentsUI.SetActive(false);
+        talentsUI[1].SetActive(false);
         for (int i = 0; i < healthTalentsUI.Length; i++)
         {
             healthTalentsUI[i].SetActive(false);
@@ -486,7 +565,7 @@ public class ExpManager : MonoBehaviour
 
     void ShowDashTalentsUI()
     {
-        talentsUI.SetActive(true);
+        talentsUI[1].SetActive(true);
         for (int i = 0; i < dashTalentsUI.Length; i++)
         {
             dashTalentsUI[i].SetActive(true);
@@ -497,7 +576,7 @@ public class ExpManager : MonoBehaviour
     void HideDashTalentsUI()
     {
         Time.timeScale = 1f;
-        talentsUI.SetActive(false);
+        talentsUI[1].SetActive(false);
         for (int i = 0; i < dashTalentsUI.Length; i++)
         {
             dashTalentsUI[i].SetActive(false);
@@ -509,7 +588,7 @@ public class ExpManager : MonoBehaviour
         Time.timeScale = 1f;
         HideDashTalentsUI();
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
-        playerScript.dashCooldownSeconds = 5f;
+        playerScript.dashCooldownSeconds = 0.2f;
         playerScript.dashCountText.text = playerScript.remainingDashes.ToString();
         playerScript.doubleDashTalentChosen = true;
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Dash/doubleDash");
@@ -548,7 +627,7 @@ public class ExpManager : MonoBehaviour
 
     private void ShowShieldTalentsUI()
     {
-        talentsUI.SetActive(true);
+        talentsUI[1].SetActive(true);
         for (int i = 0; i < shieldTalentsUI.Length; i++)
         {
             shieldTalentsUI[i].SetActive(true);
@@ -559,7 +638,7 @@ public class ExpManager : MonoBehaviour
     private void HideShieldTalentsUI()
     {
         Time.timeScale = 1f;
-        talentsUI.SetActive(false);
+        talentsUI[1].SetActive(false);
         for (int i = 0; i < shieldTalentsUI.Length; i++)
         {
             shieldTalentsUI[i].SetActive(false);
@@ -643,5 +722,93 @@ public class ExpManager : MonoBehaviour
             // Update the experience threshold for the next level
             UpdateLevelText();
         }
+    }
+
+    // Minor Talents UI Functionality ---------------------------------------------------------------------
+    void MinorTalentsSet()
+    {
+        talents = new Talent[]
+        {
+        new Talent { talentName = "minorAttackRange", talentSprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/attackRangeMinor")},
+        new Talent { talentName = "minorAttackSpeed", talentSprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/attackSpeedMinor")},
+        new Talent { talentName = "minorAttackDamage", talentSprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/attackDamageMinor")},
+        new Talent { talentName = "minorMoveSpeed", talentSprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/moveSpeedMinor")},
+        new Talent { talentName = "minorExpPickUpRange", talentSprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/expRangeMinor")},
+        new Talent { talentName = "minorDashCooldownMinus", talentSprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/cooldownTimerMinor")},
+        new Talent { talentName = "minorSpellCooldownMinus", talentSprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/cooldownTimerSpellMinor")},
+        new Talent { talentName = "minorShieldRegenTime", talentSprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/shieldRegenTimerMinor")}
+        };
+    }
+
+
+    public void SelectTalent(int index)
+    {
+        if (index >= 0 && index < talents.Length)
+        {
+            Talent selectedTalent = talents[index];
+            AddTalent(selectedTalent.talentName, selectedTalent.talentSprite);
+        }
+    }
+
+    public void AddTalent(string talentName, Sprite talentSprite)
+    {
+        if (selectedTalents.ContainsKey(talentName))
+        {
+            // Если талант уже был выбран, увеличиваем его счетчик
+            selectedTalents[talentName]++;
+            UpdateTalentUI(talentName);
+        }
+        else
+        {
+            // Если талант еще не был выбран, добавляем его в список и UI
+            selectedTalents[talentName] = 1;
+            AddTalentToUI(talentName, talentSprite);
+        }
+    }
+
+    // Функция для добавления таланта в UI
+    private void AddTalentToUI(string talentName, Sprite talentSprite)
+    {
+        for (int i = 0; i < minorTalentSlots.Length; i++)
+        {
+            if (minorTalentSlots[i].sprite == null) // Находим первый свободный слот
+            {
+                minorTalentSlots[i].sprite = talentSprite;
+                minorTalentCountTexts[i].text = "";
+                minorTalentSlots[i].gameObject.SetActive(true);
+
+                // Сохраняем индекс слота для данного таланта
+                talentSlotIndices[talentName] = i;
+
+                break;
+            }
+        }
+    }
+
+    // Функция для обновления UI при увеличении счетчика таланта
+    private void UpdateTalentUI(string talentName)
+    {
+        if (talentSlotIndices.TryGetValue(talentName, out int slotIndex))
+        {
+            if (slotIndex >= 0 && slotIndex < minorTalentCountTexts.Length)
+            {
+                // Проверяем, что спрайт в слоте соответствует ожидаемому
+                if (minorTalentSlots[slotIndex].sprite == talents[GetTalentIndex(talentName)].talentSprite)
+                {
+                    minorTalentCountTexts[slotIndex].text = "x" + selectedTalents[talentName].ToString(); // Обновляем счетчик
+                }
+            }
+        }
+    }
+
+    // Функция для получения индекса таланта по его имени
+    private int GetTalentIndex(string talentName)
+    {
+        for (int i = 0; i < talents.Length; i++)
+        {
+            if (talents[i].talentName == talentName)
+                return i;
+        }
+        return -1; // Если не найдено
     }
 }

@@ -50,6 +50,8 @@ public class MainManager : MonoBehaviour
     [SerializeField] BossEnemy bossEnemy;
     Vector2 rectExpTransformDefault = new Vector2(-60, 31);
     public bool bossFightIsActive;
+    [SerializeField] GameObject pauseUIText;
+    public bool paused;
 
     public string PlayerName
     {
@@ -139,6 +141,20 @@ public class MainManager : MonoBehaviour
 
                 // Check if the name is valid
                 correctNameToStart = IsValidName(nameInputField.text);
+            }
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                if (!paused)
+                {
+                    Time.timeScale = 0f;
+                    pauseUIText.SetActive(true);
+                    paused = true;
+                } else
+                {
+                    Time.timeScale = 1f;
+                    pauseUIText.SetActive(false);
+                    paused = false;
+                }
             }
         }
         else

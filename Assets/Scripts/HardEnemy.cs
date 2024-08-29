@@ -21,7 +21,6 @@ public class HardEnemy : Enemy
         if (enemyHealth < 1)
         {
             defenceAuraScript.auraIsOn = false;
-            defenceAuraScript.DisableDefenceAuraForAllEnemies();
             Destroy(defenceAuraObject, 0.5f);
         }
     }
@@ -39,6 +38,8 @@ public class HardEnemy : Enemy
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
         }
+
+        defenceAuraScript.DisableDefenceAuraForAllEnemies();
         vampireTalentRegen();
         return base.deathAnimation();
     }

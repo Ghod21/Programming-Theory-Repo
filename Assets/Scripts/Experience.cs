@@ -14,6 +14,8 @@ public class Experience : MonoBehaviour
     public Transform playerExpGainPoint;
     float initialSpeed = 1.0f;
     float acceleration = 50.0f;
+    SphereCollider sphereCollider;
+    ExpManager expManager;
 
     bool goToPlayer;
 
@@ -21,6 +23,9 @@ public class Experience : MonoBehaviour
 
     void Start()
     {
+        expManager = FindObjectOfType<ExpManager>();
+        sphereCollider = GetComponent<SphereCollider>();
+        sphereCollider.radius = expManager.expRangePickUp;
         player = GameObject.Find("Player");
         playerExpGainObject = GameObject.FindWithTag("ExperienceGainPosition");
         playerExpGainPoint = playerExpGainObject.GetComponent<Transform>();
