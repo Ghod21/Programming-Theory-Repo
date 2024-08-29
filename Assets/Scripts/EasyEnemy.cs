@@ -16,13 +16,14 @@ public class EasyEnemy : Enemy
     }
     protected override IEnumerator deathAnimation()
     {
-        DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;
-        playerScript.scoreMultiplierBase++;
-        if (Random.value < 0.01f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
+        //DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;
+        //playerScript.scoreMultiplierBase++;
+        if (Random.value < 0.03f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
         {
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
         }
+        vampireTalentRegen();
         return base.deathAnimation();
     }
 }

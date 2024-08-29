@@ -339,7 +339,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.37
+  m_Radius: 0.3
   m_Center: {x: 0, y: 0.25, z: 0}
 --- !u!54 &5383173684095323130
 Rigidbody:
@@ -387,7 +387,7 @@ MonoBehaviour:
   expManager: {fileID: 0}
   expManagerScript: {fileID: 0}
   moveSpeed: 3
-  attackRange: 1.5
+  attackRange: 2
   enemyHealth: 0
   attacked: 0
   enemyIsBleeding: 0

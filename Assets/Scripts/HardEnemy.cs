@@ -21,7 +21,6 @@ public class HardEnemy : Enemy
         if (enemyHealth < 1)
         {
             defenceAuraScript.auraIsOn = false;
-            defenceAuraScript.DisableDefenceAuraForAllEnemies();
             Destroy(defenceAuraObject, 0.5f);
         }
     }
@@ -32,13 +31,16 @@ public class HardEnemy : Enemy
     }
     protected override IEnumerator deathAnimation()
     {
-        DataPersistence.currentPlayerScore += 20 * playerScript.scoreMultiplier;
-        playerScript.scoreMultiplierBase += 3;
+        //DataPersistence.currentPlayerScore += 20 * playerScript.scoreMultiplier;
+        //playerScript.scoreMultiplierBase += 3;
         if (Random.value < 0.1f)
         {
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
         }
+
+        defenceAuraScript.DisableDefenceAuraForAllEnemies();
+        vampireTalentRegen();
         return base.deathAnimation();
     }
     protected override void EnemyAttack()

@@ -21,6 +21,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected float attackRange = 2.0f; // Distance within which the enemy will attack
     protected bool isAttacking = false; // To prevent multiple attack calls
     public float enemyHealth;
+    protected float enemyHealthMax;
     public bool attacked;
     bool deathAnimationDone = false;
     protected float soundAdjustment = DataPersistence.soundAdjustment;
@@ -194,7 +195,8 @@ public class Enemy : MonoBehaviour
             playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
             Debug.Log("Health: " + playerScript.playerHealth);
 
-        } else if (playerScript.isDashing == false && playerScript.isBlockingDamage)
+        }
+        else if (playerScript.isDashing == false && playerScript.isBlockingDamage)
         {
             playerScript.shieldHealth--;
             if (shieldDamageTalentChosen)
@@ -206,11 +208,13 @@ public class Enemy : MonoBehaviour
                 if (enemyHealth > 0)
                 {
                     playerScript.audioSource.PlayOneShot(playerScript.audioClips[0], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
-                } else
+                }
+                else
                 {
                     playerScript.audioSource.PlayOneShot(playerScript.audioClips[3], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
                 }
-            } else
+            }
+            else
             {
                 playerScript.audioSource.PlayOneShot(playerScript.audioClips[6], DataPersistence.soundsVolume * 1.2f * soundAdjustment);
             }
@@ -244,10 +248,12 @@ public class Enemy : MonoBehaviour
             if (prefabIdentifier.prefabName == "EnemyEasy" || prefabIdentifier.prefabName == "EnemyRangeEasy")
             {
                 prefabIndex = 0;
-            } else if (prefabIdentifier.prefabName == "EnemyMedium" || prefabIdentifier.prefabName == "EnemyRangeMedium")
+            }
+            else if (prefabIdentifier.prefabName == "EnemyMedium" || prefabIdentifier.prefabName == "EnemyRangeMedium")
             {
                 prefabIndex = 1;
-            } else if (prefabIdentifier.prefabName == "EnemyHard")
+            }
+            else if (prefabIdentifier.prefabName == "EnemyHard")
             {
                 prefabIndex = 2;
             }
@@ -296,4 +302,20 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    protected void vampireTalentRegen()
+    {
+        if (playerScript.vampireHealthTalentIsChosen)
+        {
+            playerScript.killsToVampire--;
+            if (playerScript.killsToVampire <= 0)
+            {
+                playerScript.playerHealth++;
+                if (playerScript.playerHealth > 30)
+                {
+                    playerScript.playerHealth = 30;
+                }
+                playerScript.killsToVampire = 7;
+            }
+        }
+    }
 }

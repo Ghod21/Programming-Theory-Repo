@@ -1,4 +1,6 @@
 using System.Collections;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 public class FireArea : MonoBehaviour
@@ -9,9 +11,12 @@ public class FireArea : MonoBehaviour
     ParticleSystem distortionParticleSystem;
     SphereCollider sphereCollider;
     Coroutine damageCoroutine;
+    Player playerScript;
 
     void Start()
     {
+        GameObject player = GameObject.FindWithTag("Player");
+        playerScript = player.GetComponent<Player>();
         aoeParticleSystem = GetComponent<ParticleSystem>();
         foreach (Transform child in transform)
         {
@@ -28,7 +33,6 @@ public class FireArea : MonoBehaviour
     {
         if (isFlaming && other.CompareTag("Player"))
         {
-            Player playerScript = other.GetComponent<Player>();
 
             if (playerScript != null)
             {
@@ -53,6 +57,7 @@ public class FireArea : MonoBehaviour
             {
                 StopCoroutine(damageCoroutine);
                 isDamageCoroutineRunning = false;
+                playerScript.isTakingAoeDamage = false;
             }
         }
     }
@@ -65,16 +70,19 @@ public class FireArea : MonoBehaviour
     IEnumerator DamagePlayer(Player playerScript)
     {
         isDamageCoroutineRunning = true;
+        playerScript.isTakingAoeDamage = true;
 
         while (isFlaming)
         {
-            if (!isFlaming) break;
-                Debug.Log("Applying damage to player.");
-                playerScript.playerHealth--;
-                playerScript.audioSource.PlayOneShot(playerScript.audioClips[14], DataPersistence.soundsVolume * 2f * DataPersistence.soundAdjustment);
-                yield return new WaitForSeconds(1f);
+            if (!isFlaming)
+            {
+                break;
+            }
+            Debug.Log("Applying damage to player.");
+            playerScript.playerHealth--;
+            playerScript.audioSource.PlayOneShot(playerScript.audioClips[14], DataPersistence.soundsVolume * 2f * DataPersistence.soundAdjustment);
+            yield return new WaitForSeconds(1f);
         }
-
         isDamageCoroutineRunning = false;
     }
 
@@ -89,7 +97,7 @@ public class FireArea : MonoBehaviour
         isFlaming = false;
         distortionParticleSystem.Stop();
         yield return new WaitForSeconds(2f);
-        
+
         Destroy(gameObject);
     }
 }

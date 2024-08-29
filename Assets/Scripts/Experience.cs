@@ -14,6 +14,8 @@ public class Experience : MonoBehaviour
     public Transform playerExpGainPoint;
     float initialSpeed = 1.0f;
     float acceleration = 50.0f;
+    SphereCollider sphereCollider;
+    ExpManager expManager;
 
     bool goToPlayer;
 
@@ -21,6 +23,9 @@ public class Experience : MonoBehaviour
 
     void Start()
     {
+        expManager = FindObjectOfType<ExpManager>();
+        sphereCollider = GetComponent<SphereCollider>();
+        sphereCollider.radius = expManager.expRangePickUp;
         player = GameObject.Find("Player");
         playerExpGainObject = GameObject.FindWithTag("ExperienceGainPosition");
         playerExpGainPoint = playerExpGainObject.GetComponent<Transform>();
@@ -54,6 +59,7 @@ public class Experience : MonoBehaviour
             if (prefabIdentifier.prefabName == "ExperienceSmall")
             {
                 experiencePlus = 5;
+
             } else if (prefabIdentifier.prefabName == "ExperienceMedium")
             {
                 experiencePlus = 10;
@@ -73,6 +79,20 @@ public class Experience : MonoBehaviour
         if (other.CompareTag("ExperienceGainPosition"))
         {
             playerScript.playerExperience += experiencePlus;
+            if (experiencePlus == 5)
+            {
+                DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;
+                playerScript.scoreMultiplierBase++;
+            } else if (experiencePlus == 10)
+            {
+                DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
+                playerScript.scoreMultiplierBase += 2;
+            } else
+            {
+                DataPersistence.currentPlayerScore += 20 * playerScript.scoreMultiplier;
+                playerScript.scoreMultiplierBase += 3;
+            }
+
             audioSource.PlayOneShot(experienceSound, DataPersistence.soundsVolume * 0.5f * soundAdjustment);
             Destroy(gameObject);
         }

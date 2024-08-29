@@ -12,14 +12,16 @@ public class BossEnemy : Enemy
     //bool ChargeSpellIsActive = false;
     public ParticleSystem explosionBossSpell;
     SphereCollider explosionBossSpellSphereCollider;
+    float distanceThreshold = 10;
+    bool closeEnoughToExplode;
+    bool farEnoughToCharge;
     AudioSource audioSourceFire;
     private float radius;
 
 
-    [SerializeField] private float chargeSpeed = 20f; // Speed during the charge
-    [SerializeField] private float chargeDuration = 1f; // Duration of the charge
-    [SerializeField] private float chargeCooldown = 10f; // Time between charges
-    [SerializeField] private float chargePause = 2f; // Time to pause before charging
+    [SerializeField] private float chargeSpeed = 40f; // Speed during the charge
+    [SerializeField] private float chargeDuration = 0.5f; // Duration of the charge
+    [SerializeField] private float chargePause = 1f; // Time to pause before charging
 
 
     protected override void Start()
@@ -51,9 +53,16 @@ public class BossEnemy : Enemy
             Debug.LogError("Player Script is not set.");
         }
 
-        enemyHealth = 25;
+        enemyHealth = 50;
+        enemyHealthMax = enemyHealth;
         StartCoroutine(BossSpellChangeRoutine());
 
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+        CheckDistanceToPlayer();
     }
     int RandomSpellIndex()
     {
@@ -61,7 +70,7 @@ public class BossEnemy : Enemy
     }
     int RandomSpellCooldown()
     {
-        int random = UnityEngine.Random.Range(2, 5);
+        int random = UnityEngine.Random.Range(4, 7);
         return random;
     }
 
@@ -70,14 +79,11 @@ public class BossEnemy : Enemy
         while (true)
         {
             int index;
-            if (fireAreasSpellIsActive)
-            {
-                index = UnityEngine.Random.Range(1, 4);
-            }
-            else
+            do
             {
                 index = RandomSpellIndex();
             }
+            while ((fireAreasSpellIsActive && index == 0) || (!closeEnoughToExplode && index == 1) || (!farEnoughToCharge && index == 2));
 
             Debug.Log($"Selected spell index: {index}");
 
@@ -89,12 +95,13 @@ public class BossEnemy : Enemy
             }
             else if (index == 1)
             {
-                yield return StartCoroutine(ExplosionSpell());
+                 StartCoroutine(ExplosionSpell());
             }
             else if (index == 2)
             {
-                yield return StartCoroutine(Charge());
-            } else if (index == 3)
+                StartCoroutine(Charge());
+            } 
+            else if (index == 3)
             {
                 BossSpawnSpell();
             }
@@ -115,7 +122,7 @@ public class BossEnemy : Enemy
         if (!isAttacking)
         {
             isUsingSpell = true;
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.5f);
             animator.ResetTrigger("JumpSpell");
             animator.SetTrigger("JumpSpell");
             yield return new WaitForSeconds(1f);
@@ -144,10 +151,29 @@ public class BossEnemy : Enemy
         {
             if (collider.CompareTag("Player"))
             {
-                playerScript.playerHealth -= 3;
+                playerScript.playerHealth -= 5;
                 Debug.Log("Explosion damage is done");
                 return;
             }
+        }
+    }
+    private void CheckDistanceToPlayer()
+    {
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+        if (distanceToPlayer < distanceThreshold)
+        {
+            closeEnoughToExplode = true;
+        } else
+        {
+            closeEnoughToExplode = false;
+        }
+        if (distanceToPlayer > distanceThreshold)
+        {
+            farEnoughToCharge = true;
+        } else
+        {
+            farEnoughToCharge = false;
         }
     }
     IEnumerator FireAreasSpawn()
@@ -210,7 +236,6 @@ public class BossEnemy : Enemy
 
         // Wait for the cooldown period
         bossChargeCooldown = false;
-        yield return new WaitForSeconds(chargeCooldown - chargeDuration); // Adjust wait time
     }
     protected override IEnumerator deathAnimation()
     {
@@ -224,6 +249,7 @@ public class BossEnemy : Enemy
         }
         DataPersistence.currentPlayerScore = newScore;
 
+        vampireTalentRegen();
         return base.deathAnimation();
     }
     protected override void EnemyAttack()
@@ -232,7 +258,7 @@ public class BossEnemy : Enemy
         animator.SetBool("isAttacking", true);
         if (playerScript.isDashing == false && !playerScript.isBlockingDamage)
         {
-            playerScript.playerHealth -= 5;
+            playerScript.playerHealth -= 4;
             playerScript.scoreMultiplierBase -= 10;
             playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
             Debug.Log("Health: " + playerScript.playerHealth);
@@ -240,7 +266,7 @@ public class BossEnemy : Enemy
         }
         else if (playerScript.isDashing == false && playerScript.isBlockingDamage)
         {
-            playerScript.shieldHealth -= 5;
+            playerScript.shieldHealth -= 4;
             if (shieldDamageTalentChosen)
             {
                 enemyHealth--;
@@ -264,6 +290,17 @@ public class BossEnemy : Enemy
             }
         }
         return null;
+    }
+    public IEnumerator BossHPRegen()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(15);
+            if (enemyHealth < enemyHealthMax)
+            {
+                enemyHealth++;
+            }
+        }
     }
 }
 

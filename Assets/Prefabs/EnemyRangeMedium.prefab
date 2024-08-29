@@ -271,10 +271,17 @@ MonoBehaviour:
   exclusionZone: {fileID: 0}
   animator: {fileID: 8976618242682331791}
   playerScript: {fileID: 0}
+  expManager: {fileID: 0}
+  expManagerScript: {fileID: 0}
   moveSpeed: 2
   attackRange: 20
   enemyHealth: 4
   attacked: 0
+  enemyIsBleeding: 0
+  enemyIsHitByFire: 0
+  damagedByVortex: 0
+  isUnderDefenceAura: 0
+  isHardEnemy: 0
   shieldDamageTalentChosen: 0
   escapeDistance: 5
 --- !u!135 &6558751153971004517
@@ -296,7 +303,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.4
+  m_Radius: 0.3
   m_Center: {x: 0, y: 0.3, z: 0}
 --- !u!54 &5048373858234759715
 Rigidbody:

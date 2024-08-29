@@ -8,9 +8,10 @@ public class MediumEnemy : Enemy
     private bool chargeCooldownBool;
 
     private readonly float chargeSpeed = 12f; // Speed during the charge
-    private readonly float chargeDuration = 0.7f; // Duration of the charge
-    private readonly float chargeCooldown = 15f; // Time between charges
+    private readonly float chargeDuration = 0.8f; // Duration of the charge
+    private readonly float chargeMaxCooldown = 8f; // Time between charges
     private readonly float chargePause = 1f; // Time to pause before charging
+    bool isAbleToWalkBeforeFirstCharge = true;
 
     protected override void Start()
     {
@@ -18,13 +19,20 @@ public class MediumEnemy : Enemy
 
         // Additional initialization code for MediumEnemy
         enemyHealth = 5;
+        StartCoroutine(StartChargeDelay());
+    }
+
+    IEnumerator StartChargeDelay()
+    {
+        yield return new WaitForSeconds(3);
         StartCoroutine(Charge());
+        isAbleToWalkBeforeFirstCharge = false;
     }
 
     public override void MoveTowardsPlayer()
     {
         moveSpeed = 4f;
-        if (!attacked && enemyHealth > 0 && chargeCooldownBool)
+        if (!attacked && enemyHealth > 0 && chargeCooldownBool || !attacked && enemyHealth > 0 && isAbleToWalkBeforeFirstCharge)
         {
             // Move towards the player with the normal speed if not charging
             Vector3 moveDirection = (player.position - transform.position).normalized;
@@ -34,13 +42,14 @@ public class MediumEnemy : Enemy
 
     protected override IEnumerator deathAnimation()
     {
-        DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
-        playerScript.scoreMultiplierBase += 2;
-        if (Random.value < 0.02f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
+        //DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
+        //playerScript.scoreMultiplierBase += 2;
+        if (Random.value < 0.05f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
         {
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
         }
+        vampireTalentRegen();
         return base.deathAnimation();
     }
         IEnumerator Charge()
@@ -55,7 +64,7 @@ public class MediumEnemy : Enemy
             // Perform the charge
             Vector3 chargeDirection = (player.position - transform.position).normalized;
             float chargeEndTime = Time.time + chargeDuration;
-            playerScript.audioSource.PlayOneShot(playerScript.audioClips[19], DataPersistence.soundsVolume * 2.5f * DataPersistence.soundAdjustment);
+            playerScript.audioSource.PlayOneShot(playerScript.audioClips[19], DataPersistence.soundsVolume * 1f * DataPersistence.soundAdjustment);
 
             while (Time.time < chargeEndTime)
             {
@@ -76,7 +85,7 @@ public class MediumEnemy : Enemy
 
             // Wait for the cooldown period
             chargeCooldownBool = true;
-            yield return new WaitForSeconds(chargeCooldown - chargeDuration); // Adjust wait time
+            yield return new WaitForSeconds(UnityEngine.Random.Range(2, chargeMaxCooldown) - chargeDuration); // Adjust wait time
         }
     }
 

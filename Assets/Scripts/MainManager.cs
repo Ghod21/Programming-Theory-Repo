@@ -50,6 +50,8 @@ public class MainManager : MonoBehaviour
     [SerializeField] BossEnemy bossEnemy;
     Vector2 rectExpTransformDefault = new Vector2(-60, 31);
     public bool bossFightIsActive;
+    [SerializeField] GameObject pauseUIText;
+    public bool paused;
 
     public string PlayerName
     {
@@ -67,27 +69,6 @@ public class MainManager : MonoBehaviour
             {
                 Debug.LogWarning("Invalid name. Name must be between 3 and 10 characters and contain only English letters.");
             }
-        }
-    }
-
-    public void BossFightUIEnable()
-    {
-        RectTransform rectTransform = expUIToMoveOnBossSpawn.GetComponent<RectTransform>();
-        rectTransform.anchoredPosition = new Vector2(-100, -100);
-        bossFightIsActive = true;
-        //expUIToMoveOnBossSpawn.SetActive(false);
-        bossHPUIBar.SetActive(true);
-        bossHealthSlider.minValue = 0;
-        bossHealthSlider.maxValue = 25;
-    }
-    void BossFightUIUpdate()
-    {
-        if (bossEnemy.enemyHealth > 1)
-        {
-            bossHealthSlider.value = bossEnemy.enemyHealth;
-        } else
-        {
-            fillSliderAreaToOffAtBossZeroHP.SetActive(false);
         }
     }
 
@@ -160,6 +141,20 @@ public class MainManager : MonoBehaviour
 
                 // Check if the name is valid
                 correctNameToStart = IsValidName(nameInputField.text);
+            }
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                if (!paused)
+                {
+                    Time.timeScale = 0f;
+                    pauseUIText.SetActive(true);
+                    paused = true;
+                } else
+                {
+                    Time.timeScale = 1f;
+                    pauseUIText.SetActive(false);
+                    paused = false;
+                }
             }
         }
         else
@@ -406,6 +401,28 @@ public class MainManager : MonoBehaviour
     {
         string currentSceneName = SceneManager.GetActiveScene().name;
         SceneManager.LoadScene(currentSceneName);
+    }
+
+    public void BossFightUIEnable()
+    {
+        RectTransform rectTransform = expUIToMoveOnBossSpawn.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = new Vector2(-100, -100);
+        bossFightIsActive = true;
+        //expUIToMoveOnBossSpawn.SetActive(false);
+        bossHPUIBar.SetActive(true);
+        bossHealthSlider.minValue = 0;
+        bossHealthSlider.maxValue = 50;
+    }
+    void BossFightUIUpdate()
+    {
+        if (bossEnemy.enemyHealth > 0)
+        {
+            bossHealthSlider.value = bossEnemy.enemyHealth;
+        }
+        else
+        {
+            fillSliderAreaToOffAtBossZeroHP.SetActive(false);
+        }
     }
     private void UpdateLeaderboard()
     {
