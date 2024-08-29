@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UIElements;
+using System.Collections;
+using UnityEngine.UI;
 
 public class ExpManager : MonoBehaviour
 {
@@ -32,6 +35,7 @@ public class ExpManager : MonoBehaviour
     [SerializeField] GameObject[] healthTalentsUI;
     [SerializeField] GameObject[] attackTalentsUI;
     [SerializeField] GameObject[] skillsTalentsUI;
+    [SerializeField] GameObject[] minorTalentsUI;
     [SerializeField] GameObject talentsUI;
     private List<Action> talentFunctions = new List<Action>();
     public bool reflectionTalentIsChosenExpManager;
@@ -40,6 +44,18 @@ public class ExpManager : MonoBehaviour
     public bool HealthPotionsTalentIsChosenExpManager;
     bool talentIsChosen = false;
 
+    //bool minorTalentOneIsChosen = false;
+    //bool minorTalentTwoIsChosen = false;
+    [SerializeField] UnityEngine.UI.Image[] minorTalentImages;
+    [SerializeField] TextMeshProUGUI[] minorTalentText;
+    private List<Action<int>> minorTalentFunctions;
+    private List<Action<int>> availableTalentFunctions;
+    private int currentTalentIndex = 0;
+    private float currentAnimationSpeedMultiplier = 1.0f;
+
+    
+    [SerializeField] UnityEngine.UI.Button[] minorTalentsButtons;
+    bool minorTalentIsChosen = false;
     void Start()
     {
         SetTalentFunctions();
@@ -56,7 +72,10 @@ public class ExpManager : MonoBehaviour
         fillSlider.value = 0;
         audioSource = player.GetComponent<AudioSource>();
         levelUpSound = Resources.Load<AudioClip>("Audio/LevelUpSound");
+        SetMinorTalentFunctions();
+        availableTalentFunctions = new List<Action<int>>(minorTalentFunctions);
         //ShowSkillsTalentsUI();
+        //ShowMinorTalentsUI(); // Minor talents test
     }
 
     void Update()
@@ -80,6 +99,20 @@ public class ExpManager : MonoBehaviour
             fillArea.SetActive(true);
         }
     }
+    void SetMinorTalentFunctions()
+    {
+        minorTalentFunctions = new List<Action<int>>
+    {
+        minorAttackRange,
+        minorAttackSpeed,
+        //minorAttackDamage,
+        //minorMoveSpeed,
+        //minorExpPickUpRange,
+        //minorDashCooldownMinus,
+        //minorSpellCooldownMinus
+    };
+    }
+
     void LevelUpTalents()
     {
         if (level == 3 || level == 5 || level == 9 || level == 12)
@@ -88,6 +121,7 @@ public class ExpManager : MonoBehaviour
             {
                 InvokeRandomFunction();
                 talentIsChosen = true;
+                minorTalentIsChosen = false;
             }
         }
         else if (level == 7)
@@ -96,10 +130,13 @@ public class ExpManager : MonoBehaviour
             {
                 ShowSkillsTalentsUI();
                 talentIsChosen = true;
+                minorTalentIsChosen = false;
             }
         }
-        else
+        else if (!minorTalentIsChosen && level != 1)
         {
+            ShowMinorTalentsUI();
+            minorTalentIsChosen = true;
             talentIsChosen = false;
         }
     }
@@ -144,7 +181,129 @@ public class ExpManager : MonoBehaviour
     // Talents UI showcase part end
 
     // --------------------------------------------------------------------------- TALENTS SECTION START --------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------- Skills part start
+    // ----------------------------------------------------------------------------- Minor talents part start
+
+    void ShowMinorTalentsUI()
+    {
+        talentsUI.SetActive(true);
+        for (int i = 0; i < minorTalentsUI.Length; i++)
+        {
+            minorTalentsUI[i].SetActive(true);
+        }
+        playerScript.timeIsFrozen = true;
+        Time.timeScale = 0f;
+        minorTalentsButtons[0].onClick.RemoveAllListeners();
+        minorTalentsButtons[1].onClick.RemoveAllListeners();
+
+        availableTalentFunctions = new List<Action<int>>(minorTalentFunctions);
+
+        AssignRandomTalent();
+        AssignRandomTalent();
+
+        currentTalentIndex = 0;
+    }
+    void HideMinorTalentsUI()
+    {
+        Time.timeScale = 1f;
+        talentsUI.SetActive(false);
+        for (int i = 0; i < minorTalentsUI.Length; i++)
+        {
+            minorTalentsUI[i].SetActive(false);
+        }
+        playerScript.timeIsFrozen = false;
+    }
+    void AssignRandomTalent()
+    {
+        if (currentTalentIndex >= minorTalentImages.Length || availableTalentFunctions.Count == 0)
+            return;
+
+        int randomIndex = UnityEngine.Random.Range(0, availableTalentFunctions.Count);
+        availableTalentFunctions[randomIndex].Invoke(currentTalentIndex);
+
+        availableTalentFunctions.RemoveAt(randomIndex);
+
+        currentTalentIndex++;
+    }
+
+    void minorAttackRange(int index)
+    {
+        minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/attackRangeMinor");
+        minorTalentText[index].text = "Increase attack range";
+        minorTalentsButtons[index].onClick.AddListener(() => minorAttackRangeButton());
+    }
+    public void minorAttackRangeButton()
+    {
+        HideMinorTalentsUI();
+
+        // Functionality
+        playerScript.attackRangeAdd += 0.2f;
+        playerScript.swordSizeMultiplier += 0.1f;
+        playerScript.SwordSizeForAttackRange();
+        playerScript.AttackRangeCalculation();
+    }
+    void minorAttackSpeed(int index)
+    {
+        minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/attackSpeedMinor");
+        minorTalentText[index].text = "Increase attack speed";
+        minorTalentsButtons[index].onClick.AddListener(() => minorAttackSpeedButton());
+    }
+    public void minorAttackSpeedButton()
+    {
+        HideMinorTalentsUI();
+
+        // Functionality
+        currentAnimationSpeedMultiplier += 0.05f;
+
+        playerScript.animator.SetFloat("AttackAnimationSpeed", currentAnimationSpeedMultiplier);
+        playerScript.attackSpeedMinorTalentAdaptation -= 0.05f;
+    }
+    void minorAttackDamage(int index)
+    {
+        //minorTalentImages[index].sprite = /* Укажите sprite для другого таланта */;
+        minorTalentText[index].text = "Текст для другого таланта";
+        HideMinorTalentsUI();
+
+        // Functionality
+        playerScript.attackAddFromMinorTalents += 0.17f;
+    }
+    void minorMoveSpeed(int index)
+    {
+        //minorTalentImages[index].sprite = /* Укажите sprite для другого таланта */;
+        minorTalentText[index].text = "Текст для другого таланта";
+        HideMinorTalentsUI();
+
+        // Functionality
+
+    }
+    void minorExpPickUpRange(int index)
+    {
+        //minorTalentImages[index].sprite = /* Укажите sprite для другого таланта */;
+        minorTalentText[index].text = "Текст для другого таланта";
+        HideMinorTalentsUI();
+
+        // Functionality
+
+    }
+    void minorDashCooldownMinus(int index)
+    {
+        //minorTalentImages[index].sprite = /* Укажите sprite для другого таланта */;
+        minorTalentText[index].text = "Текст для другого таланта";
+        HideMinorTalentsUI();
+
+        // Functionality
+
+    }
+    void minorSpellCooldownMinus(int index)
+    {
+        //minorTalentImages[index].sprite = /* Укажите sprite для другого таланта */;
+        minorTalentText[index].text = "Текст для другого таланта";
+        HideMinorTalentsUI();
+
+        // Functionality
+
+    }
+
+    // ----------------------------------------------------------------------------- Minor talents part end
 
     void ShowSkillsTalentsUI()
     {
@@ -255,6 +414,7 @@ public class ExpManager : MonoBehaviour
 
         playerScript.attackRangeTalentAdd = 1f;
         playerScript.swordSizePushAttackRangeTalentIsOn = 0.5f;
+        playerScript.attackRangeTalentIsChosen = true;
         playerScript.SwordSizeForAttackRange();
         playerScript.AttackRangeCalculation();
     }

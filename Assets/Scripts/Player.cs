@@ -12,7 +12,7 @@ public class Player : MonoBehaviour
     // Main variables
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform model;
-    [SerializeField] private Animator animator; // Add a reference to the Animator component
+    [SerializeField] public Animator animator; // Add a reference to the Animator component
     public AudioSource audioSource;
     [SerializeField] AudioSource runAudioSource;
     private bool isPlayingRunningSound = false;
@@ -39,9 +39,9 @@ public class Player : MonoBehaviour
     // Attack variables
     [SerializeField] private string[] targetTags; // Tags of the targets
     public float attackRange = 3f; // Range of the attack
-    float attackRangeMultiplier = 1f;
+    public float attackRangeAdd = 0f;
     [SerializeField] private float attackAngle = 180f; // Angle of the attack cone
-    private bool isAttacking = false;
+    private bool isAttacking = false; 
     private float attackCooldown = 0f; // Cooldown for attack
     private const float attackCooldownDuration = 0.833f; // Duration of the attack cooldown
     private int attackCount;
@@ -101,6 +101,7 @@ public class Player : MonoBehaviour
     public bool vampireHealthTalentIsChosen = false;
     public int killsToVampire = 7;
 
+    public bool attackRangeTalentIsChosen = false;
     public bool damageAttackTalentIsChosen = false;
     public float attackRangeTalentAdd = 0f;
     [SerializeField] Transform swordTransform;
@@ -145,6 +146,11 @@ public class Player : MonoBehaviour
     float vortexDuration;
     bool isNotTakingInput = false;
     public bool isTakingAoeDamage = false;
+
+    // Minor Talents
+    public AnimationClip attackAnimation;
+    public float attackSpeedMinorTalentAdaptation = 1f;
+    public float attackAddFromMinorTalents = 0f;
 
 
 
@@ -344,12 +350,10 @@ public class Player : MonoBehaviour
         // Store the initial rotation
         Quaternion startRotation = playerTransform.rotation;
 
-        // ¬ычисл€ем направление рывка в сторону взгл€да игрока
         Vector3 dashDirection = playerTransform.forward;
 
         while (elapsedTime < rotationDuration)
         {
-            // ѕеремещаем игрока в направлении взгл€да
             rb.MovePosition(rb.position + dashDirection * dashVortexSpeed * Time.deltaTime);
 
             // Calculate how much to rotate this frame
@@ -408,12 +412,12 @@ public class Player : MonoBehaviour
                     {
                         if (!damageAttackTalentIsChosen && !enemy.damagedByVortex && !enemy.isUnderDefenceAura)
                         {
-                            enemy.enemyHealth--;
+                            enemy.enemyHealth -= 1 + attackAddFromMinorTalents;
                             enemy.StartCoroutine(enemy.BladeVortexDamageCooldown());
                         }
                         else if (damageAttackTalentIsChosen && !enemy.damagedByVortex && !enemy.isUnderDefenceAura)
                         {
-                            enemy.enemyHealth -= 1.5f;
+                            enemy.enemyHealth -= 1.5f + attackAddFromMinorTalents;
                             enemy.StartCoroutine(enemy.BladeVortexDamageCooldown());
                         }
                         enemy.attacked = true;
@@ -1115,7 +1119,14 @@ public class Player : MonoBehaviour
 
     public void AttackRangeCalculation()
     {
-        attackRange = (3 * attackRangeMultiplier) + attackRangeTalentAdd;
+        if (!attackRangeTalentIsChosen)
+        {
+            attackRangeTalentAdd = 0;
+        } else
+        {
+            attackRangeTalentAdd = 1;
+        }
+        attackRange = (3 + attackRangeAdd) + attackRangeTalentAdd;
     }
     public void SwordSizeForAttackRange()
     {
@@ -1192,7 +1203,7 @@ public class Player : MonoBehaviour
 
     IEnumerator AttackCoroutine()
     {
-        yield return new WaitForSeconds(0.833f / 2); // Half of the attack animation duration
+        yield return new WaitForSeconds((0.833f / 2) * attackSpeedMinorTalentAdaptation); // Half of the attack animation duration
 
         // Perform attack action at halfway through the animation
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
@@ -1215,11 +1226,11 @@ public class Player : MonoBehaviour
                     {
                         if (!damageAttackTalentIsChosen && !enemy.isUnderDefenceAura)
                         {
-                            enemy.enemyHealth--;
+                            enemy.enemyHealth -= 1 + attackAddFromMinorTalents;
                         }
                         else if (damageAttackTalentIsChosen && !enemy.isUnderDefenceAura)
                         {
-                            enemy.enemyHealth -= 1.5f;
+                            enemy.enemyHealth -= 1.5f + attackAddFromMinorTalents;
                         }
                         enemy.attacked = true;
 
@@ -1280,7 +1291,7 @@ public class Player : MonoBehaviour
 
         isAttackQueued = false;
         // Wait for the remaining half of the animation duration
-        yield return new WaitForSeconds(0.833f / 2);
+        yield return new WaitForSeconds((0.833f / 2) * attackSpeedMinorTalentAdaptation);
 
         // Reset attack state
         isAttacking = false;
