@@ -226,11 +226,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6118174221721670358}
-  - component: {fileID: 5849045177887950860}
   - component: {fileID: 6558751153971004517}
   - component: {fileID: 5048373858234759715}
   - component: {fileID: 8976618242682331791}
   - component: {fileID: -9087102231802117959}
+  - component: {fileID: 183846000957389614}
   m_Layer: 7
   m_Name: EnemyRangeMedium
   m_TagString: Enemy
@@ -255,35 +255,6 @@ Transform:
   - {fileID: 592038533539604657}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5849045177887950860
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6891580169314388076}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae3643d55ba788244ad8d3e87c7fc30a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  boundaryCollider: {fileID: 0}
-  exclusionZone: {fileID: 0}
-  animator: {fileID: 8976618242682331791}
-  playerScript: {fileID: 0}
-  expManager: {fileID: 0}
-  expManagerScript: {fileID: 0}
-  moveSpeed: 2
-  attackRange: 20
-  enemyHealth: 4
-  attacked: 0
-  enemyIsBleeding: 0
-  enemyIsHitByFire: 0
-  damagedByVortex: 0
-  isUnderDefenceAura: 0
-  isHardEnemy: 0
-  shieldDamageTalentChosen: 0
-  escapeDistance: 5
 --- !u!135 &6558751153971004517
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -366,6 +337,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabName: EnemyRangeMedium
+--- !u!114 &183846000957389614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6891580169314388076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae3643d55ba788244ad8d3e87c7fc30a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boundaryCollider: {fileID: 0}
+  exclusionZone: {fileID: 0}
+  animator: {fileID: 8976618242682331791}
+  playerScript: {fileID: 0}
+  expManager: {fileID: 0}
+  expManagerScript: {fileID: 0}
+  moveSpeed: 1.5
+  attackRange: 15
+  enemyHealth: 4
+  attacked: 0
+  enemyIsBleeding: 0
+  enemyIsHitByFire: 0
+  damagedByVortex: 0
+  isUnderDefenceAura: 0
+  isHardEnemy: 0
+  shieldDamageTalentChosen: 0
+  escapeDistance: 5
 --- !u!1 &7647819984296596885
 GameObject:
   m_ObjectHideFlags: 0

@@ -88,12 +88,14 @@ public class Player : MonoBehaviour
     bool isDoubleDashTalentChosenActivated = false;
     bool isDoubleDashTalentChosenCanBeActivatedAgain = true;
     public bool backwardsDashTalentChosen = false;
-    bool backwardDashIsActive;
+    public bool backwardDashIsActive;
     public int remainingDashes = 0; // New variable to track the remaining dashes
     public TextMeshProUGUI dashCountText; // TextMeshProUGUI to display dash count
 
     private List<Vector3> positionBackwardDashList = new List<Vector3>();
     private List<float> healthBackwardDashList = new List<float>();
+    private List<float> shieldHealthBackwardDashList = new List<float>();
+
     float updateInterval = 0.5f;
     int maxValues = 7;
     public Vector3 currentVectorForBackwardDash;
@@ -234,11 +236,6 @@ public class Player : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.E))
             {
                 UseSpell();
-            }
-
-            if (backwardDashIsActive)
-            {
-                isDashing = true;
             }
         }
         if (playerHealth <= 0f)
@@ -420,12 +417,12 @@ public class Player : MonoBehaviour
                     {
                         if (!damageAttackTalentIsChosen && !enemy.damagedByVortex && !enemy.isUnderDefenceAura)
                         {
-                            enemy.enemyHealth -= 1 + attackAddFromMinorTalents;
+                            enemy.enemyHealth -= 2 + attackAddFromMinorTalents;
                             enemy.StartCoroutine(enemy.BladeVortexDamageCooldown());
                         }
                         else if (damageAttackTalentIsChosen && !enemy.damagedByVortex && !enemy.isUnderDefenceAura)
                         {
-                            enemy.enemyHealth -= 1.5f + attackAddFromMinorTalents;
+                            enemy.enemyHealth -= 3f + attackAddFromMinorTalents;
                             enemy.StartCoroutine(enemy.BladeVortexDamageCooldown());
                         }
                         enemy.attacked = true;
@@ -611,7 +608,7 @@ public class Player : MonoBehaviour
                         StartCoroutine(FireBreathHitCooldown(enemy));
                         if (!enemy.isUnderDefenceAura)
                         {
-                            enemy.enemyHealth--;
+                            enemy.enemyHealth -= 3;
                         }
                         enemy.animator.SetTrigger("Attacked");
                     }
@@ -810,6 +807,7 @@ public class Player : MonoBehaviour
 
         // Once cooldown is complete, mark it as inactive
         isShieldCooldownActive = false;
+        shieldIsOnCooldown = false;
     }
     private void shieldWallPiecesLogic()
     {
@@ -840,7 +838,7 @@ public class Player : MonoBehaviour
     {
         if (dashSprintIsOn)
         {
-            speed = 2.5f + 0.75f + speedAddFromMinorTalent;
+            speed = 2.5f + 0.5f + speedAddFromMinorTalent;
         }
         else
         {
@@ -881,10 +879,16 @@ public class Player : MonoBehaviour
         transform.position = targetPosition;
         dashIsOnCooldown = true;
         playerHealth = GetHealthFrom3SecondsAgo();
+        shieldHealth = GetShieldHealthFrom3SecondsAgo();
+        if (shieldAttackTalentChosen && shieldHealth > 5)
+        {
+            shieldHealth = 5;
+        }
+
+        isDashing = false;
+        yield return new WaitForSeconds(1f);
 
         backwardDashIsActive = false;
-        yield return new WaitForSeconds(2f);
-        isDashing = false;
     }
     public IEnumerator TrackBackwardsDashState()
     {
@@ -892,6 +896,8 @@ public class Player : MonoBehaviour
         {
             currentVectorForBackwardDash = transform.position;
             currentFloatForBackwardDash = playerHealth;
+            float currentShieldForBackwardDash = shieldHealth;
+
             if (positionBackwardDashList.Count >= maxValues)
             {
                 positionBackwardDashList.RemoveAt(0);
@@ -900,10 +906,24 @@ public class Player : MonoBehaviour
             {
                 healthBackwardDashList.RemoveAt(0);
             }
+            if (shieldHealthBackwardDashList.Count >= maxValues)
+            {
+                shieldHealthBackwardDashList.RemoveAt(0);
+            }
+
             positionBackwardDashList.Add(currentVectorForBackwardDash);
             healthBackwardDashList.Add(currentFloatForBackwardDash);
+            shieldHealthBackwardDashList.Add(currentShieldForBackwardDash);
+
+
             yield return new WaitForSeconds(updateInterval);
         }
+    }
+    float GetShieldHealthFrom3SecondsAgo()
+    {
+        if (shieldHealthBackwardDashList.Count == 0) return shieldHealth;
+        int index = Mathf.Max(0, shieldHealthBackwardDashList.Count - maxValues);
+        return shieldHealthBackwardDashList[index];
     }
 
     float GetHealthFrom3SecondsAgo()
@@ -1170,7 +1190,7 @@ public class Player : MonoBehaviour
         {
             if (!x.isUnderDefenceAura)
             {
-                x.enemyHealth--;
+                x.enemyHealth -= 2;
             }
 
             if (x != null)
@@ -1230,7 +1250,7 @@ public class Player : MonoBehaviour
                     Debug.Log("Hit: " + hitCollider.name + " " + attackCount);
                     attackCount++;
                     Enemy enemy = hitCollider.GetComponent<Enemy>();
-                    if (enemy != null)
+                    if (enemy != null && !enemy.isDying)
                     {
                         if (!damageAttackTalentIsChosen && !enemy.isUnderDefenceAura)
                         {
@@ -1251,6 +1271,7 @@ public class Player : MonoBehaviour
                         if (enemy.enemyHealth < 1)
                         {
                             killed = true;
+                            enemy.isDying = true;
                         }
                         else
                         {

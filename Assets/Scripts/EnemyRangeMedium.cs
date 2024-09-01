@@ -24,9 +24,18 @@ public class EnemyRangeMedium : Enemy
 
     protected override IEnumerator deathAnimation()
     {
+        isDying = true;
         //DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
         //playerScript.scoreMultiplierBase += 2;
-        if (Random.value < 0.07f)
+        if (expManagerScript.HealthPotionsTalentIsChosenExpManager)
+        {
+            if (Random.value < 0.3f)
+            {
+                Vector3 currentPosition = transform.position;
+                spawnManager.CreateHealthPotionIfNotExists(currentPosition);
+            }
+        }
+        else if (Random.value < 0.15f)
         {
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
@@ -130,22 +139,25 @@ public class EnemyRangeMedium : Enemy
         {
             Vector3 moveDirection;
 
-            // Move towards the player if not in escape mode
             if (!isEscaping && !isInAttackRange)
             {
                 moveDirection = (player.position - transform.position).normalized;
             }
-            // Move away from the player if in escape mode
             else if (isEscaping)
             {
                 moveDirection = (transform.position - player.position).normalized;
             }
             else
             {
+                rb.velocity = Vector3.zero;
                 return;
             }
 
             rb.velocity = moveDirection * moveSpeed;
+        }
+        else
+        {
+            rb.velocity = Vector3.zero;
         }
     }
 }

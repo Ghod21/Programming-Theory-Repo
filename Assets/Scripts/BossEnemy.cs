@@ -151,7 +151,10 @@ public class BossEnemy : Enemy
         {
             if (collider.CompareTag("Player"))
             {
-                playerScript.playerHealth -= 5;
+                if (!playerScript.backwardDashIsActive)
+                {
+                    playerScript.playerHealth -= 5;
+                }
                 Debug.Log("Explosion damage is done");
                 return;
             }
@@ -239,6 +242,7 @@ public class BossEnemy : Enemy
     }
     protected override IEnumerator deathAnimation()
     {
+        isDying = true;
         // Code to prevent 0.5 ending result when adding bonus points for killing the boss.
         float newScore = DataPersistence.currentPlayerScore * 1.5f;
         string scoreString = DataPersistence.currentPlayerScore.ToString();
@@ -258,9 +262,12 @@ public class BossEnemy : Enemy
         animator.SetBool("isAttacking", true);
         if (playerScript.isDashing == false && !playerScript.isBlockingDamage)
         {
-            playerScript.playerHealth -= 4;
-            playerScript.scoreMultiplierBase -= 10;
-            playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+            if (!playerScript.backwardDashIsActive)
+            {
+                playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+                playerScript.playerHealth -= 4;
+                playerScript.scoreMultiplierBase -= 10;
+            }
             Debug.Log("Health: " + playerScript.playerHealth);
 
         }

@@ -31,9 +31,18 @@ public class HardEnemy : Enemy
     }
     protected override IEnumerator deathAnimation()
     {
+        isDying = true;
         //DataPersistence.currentPlayerScore += 20 * playerScript.scoreMultiplier;
         //playerScript.scoreMultiplierBase += 3;
-        if (Random.value < 0.1f)
+        if (expManagerScript.HealthPotionsTalentIsChosenExpManager)
+        {
+            if (Random.value < 0.5f)
+            {
+                Vector3 currentPosition = transform.position;
+                spawnManager.CreateHealthPotionIfNotExists(currentPosition);
+            }
+        }
+        else if (Random.value < 0.2f)
         {
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
@@ -49,9 +58,12 @@ public class HardEnemy : Enemy
         animator.SetBool("isAttacking", true);
         if (playerScript.isDashing == false && !playerScript.isBlockingDamage)
         {
-            playerScript.playerHealth -= 3;
-            playerScript.scoreMultiplierBase -= 10;
-            playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+            if (!playerScript.backwardDashIsActive)
+            {
+                playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+                playerScript.playerHealth -= 3;
+                playerScript.scoreMultiplierBase -= 10;
+            }
             Debug.Log("Health: " + playerScript.playerHealth);
 
         }

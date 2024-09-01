@@ -48,10 +48,13 @@ public class SpawnManager : MonoBehaviour
 
     public void ActivateAndMoveBossStar()
     {
-        bossStarParticleObject.SetActive(true);
-        startSpawn = false;
+        if (SceneManager.GetActiveScene().name == "MainScene")
+        {
+            bossStarParticleObject.SetActive(true);
+            startSpawn = false;
 
-        StartCoroutine(MoveBossStar());
+            StartCoroutine(MoveBossStar());
+        }
     }
 
     IEnumerator MoveBossStar()

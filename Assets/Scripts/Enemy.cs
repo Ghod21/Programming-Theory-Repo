@@ -44,6 +44,7 @@ public class Enemy : MonoBehaviour
 
     // Talents variables
     public bool shieldDamageTalentChosen = false;
+    public bool isDying = false;
 
     protected virtual void Start()
     {
@@ -190,9 +191,12 @@ public class Enemy : MonoBehaviour
         animator.SetBool("isAttacking", true);
         if (playerScript.isDashing == false && !playerScript.isBlockingDamage)
         {
-            playerScript.playerHealth--;
-            playerScript.scoreMultiplierBase -= 10;
-            playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+            if (!playerScript.backwardDashIsActive)
+            {
+                playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+                playerScript.playerHealth--;
+                playerScript.scoreMultiplierBase -= 10;
+            }
             Debug.Log("Health: " + playerScript.playerHealth);
 
         }

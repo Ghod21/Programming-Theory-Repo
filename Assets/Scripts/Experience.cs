@@ -58,14 +58,14 @@ public class Experience : MonoBehaviour
         {
             if (prefabIdentifier.prefabName == "ExperienceSmall")
             {
-                experiencePlus = 5;
+                experiencePlus = 10;
 
             } else if (prefabIdentifier.prefabName == "ExperienceMedium")
             {
-                experiencePlus = 10;
+                experiencePlus = 25;
             } else
             {
-                experiencePlus = 15;
+                experiencePlus = 50;
             }
         }
     }
@@ -79,11 +79,11 @@ public class Experience : MonoBehaviour
         if (other.CompareTag("ExperienceGainPosition"))
         {
             playerScript.playerExperience += experiencePlus;
-            if (experiencePlus == 5)
+            if (experiencePlus == 10)
             {
                 DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;
                 playerScript.scoreMultiplierBase++;
-            } else if (experiencePlus == 10)
+            } else if (experiencePlus == 25)
             {
                 DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
                 playerScript.scoreMultiplierBase += 2;

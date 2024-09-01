@@ -21,8 +21,11 @@ public class ExpManager : MonoBehaviour
     AudioSource audioSource;
     AudioClip levelUpSound;
 
-    //int[] experienceThresholds = new int[] { 100, 180, 270, 390, 550 };
-    int[] experienceThresholds = new int[] { 25, 40, 60, 85, 110, 140, 175, 215, 260, 310, 365, 425, 495 };
+    int[] experienceThresholds = new int[] {
+    50, 58, 67, 78, 90, 105, 122, 141, 163, 187, 213, 242,
+    274, 308, 345, 384, 425, 468, 514, 561, 611, 662, 715,
+    770
+};
 
 
 
@@ -70,7 +73,6 @@ public class ExpManager : MonoBehaviour
     void Start()
     {
         MinorTalentsSet();
-        expRangePickUp = 7;
         SetTalentFunctions();
         player = GameObject.Find("Player");
         if (player != null)
@@ -93,7 +95,7 @@ public class ExpManager : MonoBehaviour
 
     void Update()
     {
-        if (level < experienceThresholds.Length - 1)
+        if (level < experienceThresholds.Length + 1)
         {
             UpdateFillAmount();
             CheckLevelUp();
@@ -120,7 +122,7 @@ public class ExpManager : MonoBehaviour
         minorAttackDamage,
         minorAttackRange,
         minorMoveSpeed,
-        minorExpPickUpRange,
+        //minorExpPickUpRange,
         minorDashCooldownMinus,
         minorSpellCooldownMinus,
         minorShieldRegenTime
@@ -129,22 +131,20 @@ public class ExpManager : MonoBehaviour
 
     void LevelUpTalents()
     {
-        if (level == 3 || level == 5 || level == 9 || level == 12)
+        if (level == 3 || level == 6 || level == 9 || level == 15)
         {
             if (!talentIsChosen)
             {
                 InvokeRandomFunction();
                 talentIsChosen = true;
-                minorTalentIsChosen = false;
             }
         }
-        else if (level == 7)
+        else if (level == 12)
         {
             if (!talentIsChosen)
             {
                 ShowSkillsTalentsUI();
                 talentIsChosen = true;
-                minorTalentIsChosen = false;
             }
         }
         else if (!minorTalentIsChosen && level != 1)
@@ -251,7 +251,7 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        playerScript.attackRangeAdd += 0.2f;
+        playerScript.attackRangeAdd += 0.1f;
         playerScript.swordSizeMultiplier += 0.1f;
         playerScript.SwordSizeForAttackRange();
         playerScript.AttackRangeCalculation();
@@ -287,7 +287,7 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        playerScript.attackAddFromMinorTalents += 0.17f;
+        playerScript.attackAddFromMinorTalents += 0.25f;
         SelectTalent(2);
     }
 
@@ -303,7 +303,7 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        playerScript.speedAddFromMinorTalent += 0.1f;
+        playerScript.speedAddFromMinorTalent += 0.07f;
         SelectTalent(3);
     }
     void minorExpPickUpRange(int index)
@@ -491,8 +491,8 @@ public class ExpManager : MonoBehaviour
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Attack/rangeAttack");
         AssignTalentImage(x);
 
-        playerScript.attackRangeTalentAdd = 1f;
-        playerScript.swordSizePushAttackRangeTalentIsOn = 0.5f;
+        playerScript.attackRangeTalentAdd = 0.4f;
+        playerScript.swordSizePushAttackRangeTalentIsOn = 0.4f;
         playerScript.attackRangeTalentIsChosen = true;
         playerScript.SwordSizeForAttackRange();
         playerScript.AttackRangeCalculation();
@@ -721,6 +721,7 @@ public class ExpManager : MonoBehaviour
 
             // Update the experience threshold for the next level
             UpdateLevelText();
+            minorTalentIsChosen = false;
         }
     }
 

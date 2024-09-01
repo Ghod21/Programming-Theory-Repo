@@ -16,14 +16,22 @@ public class EasyEnemy : Enemy
     }
     protected override IEnumerator deathAnimation()
     {
+        isDying = true;
         //DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;
         //playerScript.scoreMultiplierBase++;
-        if (Random.value < 0.03f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
+        if (expManagerScript.HealthPotionsTalentIsChosenExpManager)
+        {
+            if (Random.value < 0.15f)
+            {
+                Vector3 currentPosition = transform.position;
+                spawnManager.CreateHealthPotionIfNotExists(currentPosition);
+            }
+        } else if (Random.value < 0.06f)
         {
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
         }
-        vampireTalentRegen();
+        vampireTalentRegen(); 
         return base.deathAnimation();
     }
 }
