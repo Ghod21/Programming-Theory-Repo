@@ -29,7 +29,13 @@ public class HealthBottle : MonoBehaviour
         {
             if (playerScript.playerHealth < 30f)
             {
-                playerScript.playerHealth += 3;
+                if (playerScript.healthAmpTalentMultiply == 1)
+                {
+                    playerScript.playerHealth += 3;
+                } else
+                {
+                    playerScript.playerHealth += 6;
+                }
                 audioSource.PlayOneShot(healthPotionSound, DataPersistence.soundsVolume * 0.6f * soundAdjustment);
                 if (playerScript.playerHealth > 30)
                 {

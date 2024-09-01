@@ -10,7 +10,7 @@ public class EnemyRangeMedium : Enemy
 
     private bool isInAttackRange = false;
     private bool isEscaping = false;
-    private bool attackIsOnCooldown = false;
+    //private bool attackIsOnCooldown = false;
 
     // New variable to define the distance at which the enemy starts to escape
     [SerializeField] private float escapeDistance = 1.0f;
@@ -52,13 +52,13 @@ public class EnemyRangeMedium : Enemy
             if (!isAttacking)
             {
                 isAttacking = true;
-                attackIsOnCooldown = true;
+                //attackIsOnCooldown = true;
                 StartCoroutine(EnemyAttackToAnimation());
                 yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
                 StartCoroutine(EnemySecondAttackToAnimation());
             }
             yield return new WaitForSeconds(attackInterval);
-            attackIsOnCooldown = false;
+            //attackIsOnCooldown = false;
             isAttacking = false;
         }
     }
@@ -68,8 +68,9 @@ public class EnemyRangeMedium : Enemy
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
         // Determine if the enemy should escape or attack
-        if (distanceToPlayer <= escapeDistance && attackIsOnCooldown)
-        {
+        //if (distanceToPlayer <= escapeDistance && attackIsOnCooldown)
+        if (distanceToPlayer <= escapeDistance)
+            {
             isEscaping = true;
             isInAttackRange = false;
         }

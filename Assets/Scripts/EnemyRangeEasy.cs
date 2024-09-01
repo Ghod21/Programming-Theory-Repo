@@ -10,7 +10,7 @@ public class EnemyRangeEasy : Enemy
 
     private bool isInAttackRange = false;
     private bool isEscaping = false;
-    bool attackIsOnCooldown = false;
+    //bool attackIsOnCooldown = false;
 
     // New variable to define the distance at which the enemy starts to escape
     [SerializeField] private float escapeDistance = 1.0f;
@@ -53,9 +53,9 @@ public class EnemyRangeEasy : Enemy
             {
                 isAttacking = true;
                 StartCoroutine(EnemyAttackToAnimation());
-                attackIsOnCooldown = true;
+                //attackIsOnCooldown = true;
                 yield return new WaitForSeconds(attackInterval);
-                attackIsOnCooldown = false;
+                //attackIsOnCooldown = false;
             }
             yield return null;
         }
@@ -66,7 +66,8 @@ public class EnemyRangeEasy : Enemy
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
         // Determine if the enemy should escape or attack
-        if (distanceToPlayer <= escapeDistance && attackIsOnCooldown)
+        //if (distanceToPlayer <= escapeDistance && attackIsOnCooldown)
+        if (distanceToPlayer <= escapeDistance)
         {
             isEscaping = true;
             isInAttackRange = false;

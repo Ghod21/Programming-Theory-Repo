@@ -2,12 +2,23 @@ using System.Collections;
 using UnityEngine;
 public class EasyEnemy : Enemy
 {
+    //Transform objectTransform;
     // Easy enemy child script.
     protected override void Start()
     {
         base.Start(); // Call the Start method from the base class
         // Additional initialization code for EasyEnemy
-        enemyHealth = 3;
+        //objectTransform = GetComponent<Transform>();
+        //if (spawnManager.difficultyMeter >= 3)
+        //{
+        //    objectTransform.localScale = new Vector3(1.25f, 1.25f, 1.25f);
+            enemyHealth = 3;
+        //} else
+        //{
+        //    objectTransform.localScale = new Vector3(1f, 1f, 1f);
+        //    enemyHealth = 2;
+        //}
+
     }
     public override void MoveTowardsPlayer()
     {
@@ -26,7 +37,7 @@ public class EasyEnemy : Enemy
                 Vector3 currentPosition = transform.position;
                 spawnManager.CreateHealthPotionIfNotExists(currentPosition);
             }
-        } else if (Random.value < 0.06f)
+        } else if (Random.value < 0.05f)
         {
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);

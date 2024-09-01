@@ -314,6 +314,9 @@ public class Enemy : MonoBehaviour
             if (playerScript.killsToVampire <= 0)
             {
                 playerScript.playerHealth++;
+                playerScript.healEffect.Stop();
+                playerScript.healEffect.Clear();
+                playerScript.healEffect.Play();
                 if (playerScript.playerHealth > 30)
                 {
                     playerScript.playerHealth = 30;

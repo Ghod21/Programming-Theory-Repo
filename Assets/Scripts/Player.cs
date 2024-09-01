@@ -20,6 +20,8 @@ public class Player : MonoBehaviour
     float soundAdjustment = DataPersistence.soundAdjustment;
     public bool timeIsFrozen;
     MainManager mainManager;
+    public ParticleSystem healEffect;
+    [SerializeField] ParticleSystem sprintEffect;
 
     // Move variables
     [SerializeField] GameObject dashFillArea;
@@ -105,6 +107,7 @@ public class Player : MonoBehaviour
 
     public bool vampireHealthTalentIsChosen = false;
     public int killsToVampire = 7;
+    public float healthAmpTalentMultiply = 1;
 
     public bool attackRangeTalentIsChosen = false;
     public bool damageAttackTalentIsChosen = false;
@@ -158,6 +161,7 @@ public class Player : MonoBehaviour
     public float attackSpeedMinorTalentAdaptation = 1f;
     public float attackAddFromMinorTalents = 0f;
     public float shieldIncrementAdd = 0f;
+    public int healthRegenMinorAdd = 0;
 
 
 
@@ -231,7 +235,6 @@ public class Player : MonoBehaviour
                 shieldHealth = 5;
                 shieldAttackTalentChosenActivated = true;
             }
-
 
             if (Input.GetKeyDown(KeyCode.E))
             {
@@ -657,8 +660,11 @@ public class Player : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(10);
-            playerHealth++;
+            yield return new WaitForSeconds(15);
+            if (playerHealth < 30)
+            {
+                playerHealth += healthRegenMinorAdd * healthAmpTalentMultiply;
+            }
             if (playerHealth > 30)
             {
                 playerHealth = 30;
@@ -699,7 +705,7 @@ public class Player : MonoBehaviour
 
         shieldWallPiecesLogic();
 
-        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell)
+        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell && shieldAttackTalentChosen || Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell && !shieldAttackTalentChosen && !isAttacking)
         {
             ShieldStart();
             audioSource.PlayOneShot(audioClips[4], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
@@ -765,7 +771,7 @@ public class Player : MonoBehaviour
         animator.SetBool("isShielding", true);
     }
 
-    private void ShieldStop()
+    public void ShieldStop()
     {
         if (!isShielding) return;
         if (!shieldIsOnCooldown && !isShieldCooldownActive)
@@ -796,7 +802,7 @@ public class Player : MonoBehaviour
 
         while (shieldHealth < x && shieldIsOnCooldown)
         {
-            shieldHealth += healthIncrement + shieldIncrementAdd;
+            shieldHealth += shieldAttackTalentChosen ? healthIncrement + (shieldIncrementAdd / 2) : healthIncrement + shieldIncrementAdd;
             if (shieldHealth >= x)
             {
                 shieldHealth = x;
@@ -847,6 +853,9 @@ public class Player : MonoBehaviour
     }
     public IEnumerator SprintDashTalent()
     {
+        sprintEffect.Stop();
+        sprintEffect.Clear();
+        sprintEffect.Play();
         yield return new WaitForSeconds(0.2f);
         dashSprintIsOn = true;
         yield return new WaitForSeconds(3f);
@@ -1268,7 +1277,7 @@ public class Player : MonoBehaviour
                             initialTarget = enemy;
                         }
 
-                        if (enemy.enemyHealth < 1)
+                        if (enemy.enemyHealth <= 0)
                         {
                             killed = true;
                             enemy.isDying = true;

@@ -49,8 +49,10 @@ public class ChainLightning : MonoBehaviour
         {
             if (currentTarget == null)
             {
-                Debug.LogError("Current target is null.");
-                yield break; // Exit the coroutine if the target is null
+                //Debug.LogError("Current target is null.");
+                //yield break; // Exit the coroutine if the target is null
+                Enemy nextTargetX = FindNearestEnemy(currentTarget.transform.position);
+                currentTarget = nextTargetX;
             }
 
             // Set the lightning position to the current enemy
