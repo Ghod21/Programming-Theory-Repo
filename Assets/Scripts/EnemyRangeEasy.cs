@@ -10,13 +10,13 @@ public class EnemyRangeEasy : Enemy
 
     private bool isInAttackRange = false;
     private bool isEscaping = false;
-    bool attackIsOnCooldown = false;
+    //bool attackIsOnCooldown = false;
 
     // New variable to define the distance at which the enemy starts to escape
     [SerializeField] private float escapeDistance = 1.0f;
 
     protected override void Start()
-    {
+    { 
         projectilePrefab = Resources.Load<GameObject>("Prefabs/ProjectileRangeEnemy");
         base.Start();
         StartCoroutine(AttackRoutine());
@@ -24,9 +24,18 @@ public class EnemyRangeEasy : Enemy
 
     protected override IEnumerator deathAnimation()
     {
+        isDying = true;
         //DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
         //playerScript.scoreMultiplierBase += 2;
-        if (Random.value < 0.05f && expManagerScript.HealthPotionsTalentIsChosenExpManager)
+        if (expManagerScript.HealthPotionsTalentIsChosenExpManager)
+        {
+            if (Random.value < 0.15f)
+            {
+                Vector3 currentPosition = transform.position;
+                spawnManager.CreateHealthPotionIfNotExists(currentPosition);
+            }
+        }
+        else if (Random.value < 0.1f)
         {
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
@@ -44,9 +53,9 @@ public class EnemyRangeEasy : Enemy
             {
                 isAttacking = true;
                 StartCoroutine(EnemyAttackToAnimation());
-                attackIsOnCooldown = true;
+                //attackIsOnCooldown = true;
                 yield return new WaitForSeconds(attackInterval);
-                attackIsOnCooldown = false;
+                //attackIsOnCooldown = false;
             }
             yield return null;
         }
@@ -57,7 +66,8 @@ public class EnemyRangeEasy : Enemy
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
         // Determine if the enemy should escape or attack
-        if (distanceToPlayer <= escapeDistance && attackIsOnCooldown)
+        //if (distanceToPlayer <= escapeDistance && attackIsOnCooldown)
+        if (distanceToPlayer <= escapeDistance)
         {
             isEscaping = true;
             isInAttackRange = false;
@@ -118,22 +128,26 @@ public class EnemyRangeEasy : Enemy
         {
             Vector3 moveDirection;
 
-            // Move towards the player if not in escape mode
             if (!isEscaping && !isInAttackRange)
             {
                 moveDirection = (player.position - transform.position).normalized;
             }
-            // Move away from the player if in escape mode
             else if (isEscaping)
             {
                 moveDirection = (transform.position - player.position).normalized;
             }
             else
             {
+                rb.velocity = Vector3.zero;
                 return;
             }
 
             rb.velocity = moveDirection * moveSpeed;
         }
+        else
+        {
+            rb.velocity = Vector3.zero;
+        }
     }
+
 }

@@ -79,7 +79,10 @@ public class FireArea : MonoBehaviour
                 break;
             }
             Debug.Log("Applying damage to player.");
-            playerScript.playerHealth--;
+            if (!playerScript.backwardDashIsActive)
+            {
+                playerScript.playerHealth--;
+            }
             playerScript.audioSource.PlayOneShot(playerScript.audioClips[14], DataPersistence.soundsVolume * 2f * DataPersistence.soundAdjustment);
             yield return new WaitForSeconds(1f);
         }

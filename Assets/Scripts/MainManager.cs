@@ -144,12 +144,12 @@ public class MainManager : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.T))
             {
-                if (!paused)
+                if (!paused && Time.timeScale != 0f)
                 {
                     Time.timeScale = 0f;
                     pauseUIText.SetActive(true);
                     paused = true;
-                } else
+                } else if (paused)
                 {
                     Time.timeScale = 1f;
                     pauseUIText.SetActive(false);

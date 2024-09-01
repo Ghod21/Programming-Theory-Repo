@@ -49,8 +49,10 @@ public class ChainLightning : MonoBehaviour
         {
             if (currentTarget == null)
             {
-                Debug.LogError("Current target is null.");
-                yield break; // Exit the coroutine if the target is null
+                //Debug.LogError("Current target is null.");
+                //yield break; // Exit the coroutine if the target is null
+                Enemy nextTargetX = FindNearestEnemy(currentTarget.transform.position);
+                currentTarget = nextTargetX;
             }
 
             // Set the lightning position to the current enemy
@@ -62,7 +64,7 @@ public class ChainLightning : MonoBehaviour
                 lightningParticles.Play();
                 if (!currentTarget.isUnderDefenceAura)
                 {
-                    currentTarget.enemyHealth--;
+                    currentTarget.enemyHealth -= 2.5f;
                 }
                 playerScript.audioSource.PlayOneShot(playerScript.audioClips[12], DataPersistence.soundsVolume * 2.5f * DataPersistence.soundAdjustment);
                 Debug.Log("Enemy is hit by lightning");

@@ -52,9 +52,12 @@ public class Projectile : MonoBehaviour
             {
                 if (!playerScript.isBlockingDamage && !isReflected)
                 {
-                    playerScript.playerHealth -= 2;
-                    playerScript.scoreMultiplierBase -= 10;
-                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+                    if (!playerScript.backwardDashIsActive)
+                    {
+                        playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
+                        playerScript.playerHealth -= 2;
+                        playerScript.scoreMultiplierBase -= 10;
+                    }
                     Destroy(gameObject);
                 }
                 else if (playerScript.isBlockingDamage && !reflectionTalentIsChosen && !isReflected)

@@ -28,7 +28,7 @@ public class SpawnManager : MonoBehaviour
     private bool startSpawn;
     private float spawnTime = 3;
     private float decreaseRate = 2f / 600f;
-    private int difficultyMeter;
+    public int difficultyMeter;
     bool bossSpawned;
 
     int spawnCases = 21;
@@ -48,10 +48,13 @@ public class SpawnManager : MonoBehaviour
 
     public void ActivateAndMoveBossStar()
     {
-        bossStarParticleObject.SetActive(true);
-        startSpawn = false;
+        if (SceneManager.GetActiveScene().name == "MainScene")
+        {
+            bossStarParticleObject.SetActive(true);
+            startSpawn = false;
 
-        StartCoroutine(MoveBossStar());
+            StartCoroutine(MoveBossStar());
+        }
     }
 
     IEnumerator MoveBossStar()
@@ -232,19 +235,19 @@ public class SpawnManager : MonoBehaviour
             case 14:
                 return new float[] { 0.35f, 0.1f, 0.45f, 0.1f, 0.05f };
             case 15:
-                return new float[] { 0.3f, 0.1f, 0.5f, 0.1f, 0.05f };
+                return new float[] { 0.25f, 0.1f, 0.5f, 0.1f, 0.05f };
             case 16:
-                return new float[] { 0.25f, 0.1f, 0.55f, 0.1f, 0.05f };
+                return new float[] { 0.2f, 0.1f, 0.55f, 0.1f, 0.05f };
             case 17:
-                return new float[] { 0.2f, 0.1f, 0.6f, 0.1f, 0.05f };
+                return new float[] { 0.15f, 0.1f, 0.6f, 0.1f, 0.05f };
             case 18:
-                return new float[] { 0.15f, 0.1f, 0.65f, 0.1f, 0.05f };
+                return new float[] { 0, 0.15f, 0.7f, 0.1f, 0.05f };
             case 19:
-                return new float[] { 0.1f, 0.1f, 0.7f, 0.1f, 0.05f };
+                return new float[] { 0, 0.15f, 0.7f, 0.1f, 0.05f };
             case 20:
-                return new float[] { 0.05f, 0.1f, 0.75f, 0.1f, 0.05f };
+                return new float[] { 0, 0.15f, 0.7f, 0.1f, 0.05f };
             case 21:
-                return new float[] { 0.05f, 0.1f, 0.8f, 0.1f, 0.05f };
+                return new float[] { 0, 0.15f, 0.7f, 0.1f, 0.05f };
             default:
                 // Define fallback probabilities for higher difficulties
                 return new float[] { 0.4f, 0.3f, 0.2f, 0.05f, 0.05f }; // Example: 40%, 30%, 20%, 5%, 5%
@@ -296,7 +299,7 @@ public class SpawnManager : MonoBehaviour
         if (existingPotions.Length == 0)
         {
             // Set the spawn position to the calling object's position with the desired spawn height
-            Vector3 spawnPosition = new Vector3(callingObjectPosition.x, spawnHeight, callingObjectPosition.z);
+            Vector3 spawnPosition = new Vector3(callingObjectPosition.x, 0.3f, callingObjectPosition.z);
             Instantiate(healthPotionPrefab, spawnPosition, Quaternion.identity);
         }
     }

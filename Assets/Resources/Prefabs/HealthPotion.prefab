@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4000010770147514}
   - component: {fileID: 198000014249637824}
   - component: {fileID: 199000013345905904}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: GlowParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4815,7 +4815,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4000013521377066}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: bottle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4850,7 +4850,7 @@ GameObject:
   - component: {fileID: 33000010466942934}
   - component: {fileID: 23000010821985464}
   - component: {fileID: 95000013129880336}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: bottle_red
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4955,7 +4955,7 @@ GameObject:
   - component: {fileID: 4000010533823780}
   - component: {fileID: 198000011865296186}
   - component: {fileID: 199000014210321866}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: StarsParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9761,7 +9761,7 @@ GameObject:
   - component: {fileID: 4000010690109084}
   - component: {fileID: 2325242661799243176}
   - component: {fileID: 3775310083637855724}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: HealthPotion
   m_TagString: HealthPotion
   m_Icon: {fileID: 0}
@@ -9819,6 +9819,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotationSpeed: 30
-  player: {fileID: 0}
-  audioSource: {fileID: 0}
-  healthPotionSound: {fileID: 8300000, guid: 13b481262ca11bc4cbfa819b6dfe28cc, type: 3}
