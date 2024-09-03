@@ -36,16 +36,21 @@ public class HardEnemy : Enemy
         //playerScript.scoreMultiplierBase += 3;
         if (expManagerScript.HealthPotionsTalentIsChosenExpManager)
         {
-            if (Random.value < 0.5f)
+            if (Random.value - healthBottleAdaptiveSpawnChance < 0.5f)
             {
+                healthBottleAdaptiveSpawnChance = 0;
                 Vector3 currentPosition = transform.position;
                 spawnManager.CreateHealthPotionIfNotExists(currentPosition);
             }
         }
-        else if (Random.value < 0.2f)
+        else if (Random.value - healthBottleAdaptiveSpawnChance < 0.2f)
         {
+            healthBottleAdaptiveSpawnChance = 0;
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
+        } else
+        {
+            healthBottleAdaptiveSpawnChance += 0.01f;
         }
 
         defenceAuraScript.DisableDefenceAuraForAllEnemies();

@@ -54,7 +54,7 @@ public class ExpManager : MonoBehaviour
     private List<Action<int>> minorTalentFunctions;
     private List<Action<int>> availableTalentFunctions;
     private int currentTalentIndex = 0;
-    private float currentAnimationSpeedMultiplier = 1.0f;
+    public float currentAnimationSpeedMultiplier = 1.0f;
     public float expRangePickUp = 7;
 
 
@@ -67,8 +67,12 @@ public class ExpManager : MonoBehaviour
     [SerializeField] private Talent[] talents; // Массив или список всех талантов
     private Dictionary<string, int> talentSlotIndices = new Dictionary<string, int>(); // Словарь для хранения индексов слотов для каждого таланта
 
-
     bool healthRegenMinorOnce = false;
+
+    int skillCooldownLimit = 7;
+    int dashCooldownLimit = 7;
+    int healthRegenCooldownLimit = 3;
+    bool healthRegenMajorTalentIsChosen = false;
 
 
 
@@ -252,8 +256,8 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        playerScript.attackRangeAdd += 0.1f;
-        playerScript.swordSizeMultiplier += 0.1f;
+        playerScript.attackRangeAdd += 0.15f;
+        playerScript.swordSizeMultiplier += 0.15f;
         playerScript.SwordSizeForAttackRange();
         playerScript.AttackRangeCalculation();
         SelectTalent(0);
@@ -270,10 +274,10 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        currentAnimationSpeedMultiplier += 0.05f;
+        currentAnimationSpeedMultiplier += 0.1f;
 
         playerScript.animator.SetFloat("AttackAnimationSpeed", currentAnimationSpeedMultiplier);
-        playerScript.attackSpeedMinorTalentAdaptation -= 0.05f;
+        playerScript.attackSpeedMinorTalentAdaptation = currentAnimationSpeedMultiplier;
         SelectTalent(1);
     }
     void minorAttackDamage(int index)
@@ -304,7 +308,7 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        playerScript.speedAddFromMinorTalent += 0.04f;
+        playerScript.speedAddFromMinorTalent += 0.05f;
         SelectTalent(3);
     }
     void minorExpPickUpRange(int index)
@@ -349,8 +353,13 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        playerScript.dashCooldownMinorAdd += 0.06f;
+        playerScript.dashCooldownMinorAdd += 0.3328571428571429f;
         SelectTalent(5);
+        dashCooldownLimit--;
+        if (dashCooldownLimit <= 0)
+        {
+            minorTalentFunctions.Remove(minorDashCooldownMinus);
+        }
     }
     void minorSpellCooldownMinus(int index)
     {
@@ -364,8 +373,13 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        playerScript.spellCooldown -= 0.5f;
+        playerScript.spellCooldown -= 1;
         SelectTalent(6);
+        skillCooldownLimit--;
+        if (skillCooldownLimit <= 0)
+        {
+            minorTalentFunctions.Remove(minorSpellCooldownMinus);
+        }
     }
     void minorShieldRegenTime(int index)
     {
@@ -379,7 +393,7 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        playerScript.shieldIncrementAdd += 0.5f;
+        playerScript.shieldIncrementAdd += 1f;
         SelectTalent(7);
     }
     void minorHealthRegen(int index)
@@ -397,6 +411,22 @@ public class ExpManager : MonoBehaviour
         
         SelectTalent(8);
         playerScript.healthRegenMinorAdd++;
+        if (healthRegenMinorOnce)
+        {
+            if(!healthRegenMajorTalentIsChosen)
+            {
+                playerScript.healthRegenCooldownMinus++;
+            } else
+            {
+                playerScript.healthRegenCooldownMinus += 2;
+            }
+            
+            healthRegenCooldownLimit--;
+            if (healthRegenCooldownLimit <=0)
+            {
+                minorTalentFunctions.Remove(minorHealthRegen);
+            }
+        }
         if (!healthRegenMinorOnce)
         {
             playerScript.StartCoroutine(playerScript.HealthRegenTalent());
@@ -515,8 +545,8 @@ public class ExpManager : MonoBehaviour
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Attack/rangeAttack");
         AssignTalentImage(x);
 
-        playerScript.attackRangeTalentAdd = 0.4f;
-        playerScript.swordSizePushAttackRangeTalentIsOn = 0.4f;
+        playerScript.attackRangeTalentAdd = 0.45f;
+        playerScript.swordSizePushAttackRangeTalentIsOn = 0.45f;
         playerScript.attackRangeTalentIsChosen = true;
         playerScript.SwordSizeForAttackRange();
         playerScript.AttackRangeCalculation();
@@ -564,7 +594,8 @@ public class ExpManager : MonoBehaviour
         HideHealthTalentsUI();
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Health/regenHealth");
         AssignTalentImage(x);
-        playerScript.healthAmpTalentMultiply = 2;
+        playerScript.healthRegenCooldown -= 5;
+        playerScript.healthRegenCooldownMinus *= 2;
     }
     public void PotionsHealthTalent()
     {

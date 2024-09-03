@@ -47,16 +47,22 @@ public class MediumEnemy : Enemy
         //playerScript.scoreMultiplierBase += 2;
         if (expManagerScript.HealthPotionsTalentIsChosenExpManager)
         {
-            if (Random.value < 0.15f)
+            if (Random.value - healthBottleAdaptiveSpawnChance < 0.15f)
             {
+                healthBottleAdaptiveSpawnChance = 0;
                 Vector3 currentPosition = transform.position;
                 spawnManager.CreateHealthPotionIfNotExists(currentPosition);
             }
         }
-        else if (Random.value < 0.1f)
+        else if (Random.value - healthBottleAdaptiveSpawnChance < 0.1f)
         {
+            healthBottleAdaptiveSpawnChance = 0;
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
+        }
+        else
+        {
+            healthBottleAdaptiveSpawnChance += 0.01f;
         }
         vampireTalentRegen();
         return base.deathAnimation();

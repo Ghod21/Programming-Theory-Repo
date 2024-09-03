@@ -64,7 +64,7 @@ public class ChainLightning : MonoBehaviour
                 lightningParticles.Play();
                 if (!currentTarget.isUnderDefenceAura)
                 {
-                    currentTarget.enemyHealth -= 2.5f;
+                    currentTarget.enemyHealth -= 3f;
                 }
                 playerScript.audioSource.PlayOneShot(playerScript.audioClips[12], DataPersistence.soundsVolume * 2.5f * DataPersistence.soundAdjustment);
                 Debug.Log("Enemy is hit by lightning");

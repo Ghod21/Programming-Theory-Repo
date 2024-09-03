@@ -17,6 +17,7 @@ public class SpawnManager : MonoBehaviour
     private const int maxRecentPositions = 3;
     private const float exclusionRadius = 5f;
     [SerializeField] GameObject bossObject;
+    [SerializeField] ExpManager expManager;
 
     [SerializeField] GameObject[] bossSpawnSpellObjectPositions;
 
@@ -130,19 +131,37 @@ public class SpawnManager : MonoBehaviour
             }
 
             yield return new WaitForSeconds(spawnTime);
-            SpawnEnemies();
+            StartCoroutine(SpawnEnemies());
         }
     }
 
-    private void SpawnEnemies()
+    private IEnumerator SpawnEnemies()
     {
+        float y = 0.05f;
+        if (difficultyMeter >=2 && difficultyMeter <= 7 && difficultyMeter >= 13 && difficultyMeter <= 18)
+        {
+            y = 0.1f;
+        } else if (difficultyMeter >= 8 && difficultyMeter <= 12)
+        {
+            y = 0.15f;
+        }
+        int x = Random.Range(3, 6);
+        if (Random.value < y)
+        {
+            numberOfEnemies = x;
+        }
         for (int i = 0; i < numberOfEnemies; i++)
         {
             Vector3 spawnPosition = GetRandomPointInBounds(spawnArea.bounds, exclusionZone);
             GameObject enemy = ChooseEnemyBasedOnDifficulty();
             GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, Quaternion.identity);
             instantiatedEnemy.transform.position = new Vector3(instantiatedEnemy.transform.position.x, spawnHeight, instantiatedEnemy.transform.position.z);
+            if(numberOfEnemies > 1)
+            {
+                yield return new WaitForSeconds(0.3f);
+            }
         }
+        numberOfEnemies = 1;
     }
 
     public void SpawnEnemiesBossSpell(Quaternion bossRotation)
@@ -294,13 +313,21 @@ public class SpawnManager : MonoBehaviour
     // Public function to create the health potion prefab if none exist in the scene
     public void CreateHealthPotionIfNotExists(Vector3 callingObjectPosition)
     {
+        int x = 1;
+        if (expManager.HealthPotionsTalentIsChosenExpManager)
+        {
+            x = 3;
+        }
         // Check if any instance of healthPotionPrefab exists in the scene
         GameObject[] existingPotions = GameObject.FindGameObjectsWithTag(healthPotionPrefab.tag);
-        if (existingPotions.Length == 0)
+        if (existingPotions.Length < x)
         {
-            // Set the spawn position to the calling object's position with the desired spawn height
-            Vector3 spawnPosition = new Vector3(callingObjectPosition.x, 0.3f, callingObjectPosition.z);
-            Instantiate(healthPotionPrefab, spawnPosition, Quaternion.identity);
+            for (int i = 0; i < x; i++)
+            {
+                // Set the spawn position to the calling object's position with the desired spawn height
+                Vector3 spawnPosition = new Vector3(callingObjectPosition.x, 0.3f, callingObjectPosition.z);
+                Instantiate(healthPotionPrefab, spawnPosition, Quaternion.identity);
+            }
         }
     }
     public void CreateExperienceAtPosition(Vector3 position, int prefabIndex)

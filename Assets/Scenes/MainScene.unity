@@ -3428,7 +3428,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Amplifies all heal
+  m_text: Decrease cooldown for minor health regeneration
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 09a06a0cd50d550499e7c7cc0fdb9cbb, type: 2}
   m_sharedMaterial: {fileID: 4896327277775826445, guid: 09a06a0cd50d550499e7c7cc0fdb9cbb, type: 2}
@@ -13727,6 +13727,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 183846000957389614, guid: 66ae442726d1cf4428dacb34edd61ac4, type: 3}
+      propertyPath: moveSpeed
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 183846000957389614, guid: 66ae442726d1cf4428dacb34edd61ac4, type: 3}
       propertyPath: attackRange
       value: 15
       objectReference: {fileID: 0}
@@ -13748,7 +13752,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6118174221721670358, guid: 66ae442726d1cf4428dacb34edd61ac4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 1.2
       objectReference: {fileID: 0}
     - target: {fileID: 6118174221721670358, guid: 66ae442726d1cf4428dacb34edd61ac4, type: 3}
       propertyPath: m_LocalPosition.z
@@ -24187,6 +24191,8 @@ MonoBehaviour:
   attackAddFromMinorTalents: 0
   shieldIncrementAdd: 0
   healthRegenMinorAdd: 0
+  healthRegenCooldown: 15
+  healthRegenCooldownMinus: 0
 --- !u!135 &1885716653
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -25826,6 +25832,7 @@ MonoBehaviour:
   minorTalentText:
   - {fileID: 1323742591}
   - {fileID: 113242996}
+  currentAnimationSpeedMultiplier: 1
   expRangePickUp: 7
   minorTalentsButtons:
   - {fileID: 863074265}
