@@ -161,7 +161,7 @@ public class Enemy : MonoBehaviour
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-        if (distanceToPlayer <= attackRange && !isAttacking)
+        if (distanceToPlayer <= attackRange && !isAttacking && !mainManager.win)
         {
             isAttacking = true;
             StartCoroutine(Attack());
@@ -231,7 +231,7 @@ public class Enemy : MonoBehaviour
     protected virtual IEnumerator deathAnimation()
     {
         PrefabIdentifier prefabIdentifier = GetComponent<PrefabIdentifier>();
-        if (prefabIdentifier.prefabName != "EnemyBoss")
+        if (prefabIdentifier.prefabName != "EnemyBoss" && !mainManager.win)
         {
             ExperienceSpawnOnDeath();
         }
@@ -335,7 +335,7 @@ public class Enemy : MonoBehaviour
         {
             if (prefabIdentifier.prefabName == "EnemyHard")
             {
-                break;
+                return;
             }
         }
         isUnderDefenceAura = false;

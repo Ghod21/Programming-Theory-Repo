@@ -55,7 +55,7 @@ public class EnemyRangeMedium : Enemy
         yield return new WaitForSeconds(1f);
         while (enemyHealth > 0)
         {
-            if (!isAttacking && isInAttackRange)
+            if (!isAttacking && isInAttackRange && !mainManager.win)
             {
                 isAttacking = true;
                 //attackIsOnCooldown = true;

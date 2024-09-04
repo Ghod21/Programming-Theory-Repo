@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class MediumEnemy : Enemy
@@ -24,7 +25,7 @@ public class MediumEnemy : Enemy
 
     IEnumerator StartChargeDelay()
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(Random.Range(1f,3f));
         StartCoroutine(Charge());
         isAbleToWalkBeforeFirstCharge = false;
     }
@@ -79,8 +80,13 @@ public class MediumEnemy : Enemy
             // Perform the charge
             Vector3 chargeDirection = (player.position - transform.position).normalized;
             float chargeEndTime = Time.time + chargeDuration;
+            if (enemyHealth !> 0)
+            {
+                yield break;
+            }
             playerScript.audioSource.PlayOneShot(playerScript.audioClips[19], DataPersistence.soundsVolume * 1f * DataPersistence.soundAdjustment);
 
+       
             while (Time.time < chargeEndTime)
             {
                 if (isAttacking) // Check if the boss is attacking

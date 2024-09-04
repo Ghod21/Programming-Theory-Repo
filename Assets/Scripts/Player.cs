@@ -27,6 +27,7 @@ public class Player : MonoBehaviour
     [SerializeField] GameObject dashFillArea;
     [SerializeField] public UnityEngine.UI.Image dashFillImage;
     [SerializeField] public float speed = 2.5f;
+    public float speedStart;
     public float speedAddFromMinorTalent = 0f;
     public float currentSpeed;
     [SerializeField] private float verticalSpeedMultiplier = 1f; // Adjust this multiplier for vertical speed
@@ -44,6 +45,7 @@ public class Player : MonoBehaviour
     // Attack variables
     [SerializeField] private string[] targetTags; // Tags of the targets
     public float attackRange = 3f; // Range of the attack
+    public float attackRangeStart;
     public float attackRangeAdd = 0f;
     [SerializeField] private float attackAngle = 180f; // Angle of the attack cone
     private bool isAttacking = false; 
@@ -174,6 +176,8 @@ public class Player : MonoBehaviour
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
+        attackRangeStart = attackRange;
+        speedStart = speed;
         shieldHealthMax = shieldHealth;
         mainManager = FindObjectOfType<MainManager>();
         vortexSpeed = dashSpeed;
@@ -212,9 +216,12 @@ public class Player : MonoBehaviour
             }
             HandleAnimations(); // Call the method to handle animations
             HealthLogic();
-            DashUILogic();
             ScoreUpdate();
-            AttackAndShieldLogic();
+            if (!mainManager.win)
+            {
+                DashUILogic();
+                AttackAndShieldLogic();
+            }
             //RunSound();
             //ChargedWeaponSoundLogic();
 
@@ -229,7 +236,7 @@ public class Player : MonoBehaviour
                 shieldHealth = 5;
                 shieldAttackTalentChosenActivated = true;
             }
-            if (Input.GetKeyDown(KeyCode.E))
+            if (Input.GetKeyDown(KeyCode.E) && !mainManager.win)
             {
                 UseSpell();
             }
@@ -259,20 +266,23 @@ public class Player : MonoBehaviour
 
         if (isAttacking && Input.GetMouseButtonDown(1) && !isUsingSpell && !shieldAttackTalentChosen && shieldHealth == shieldHealthMax && !shieldIsOnCooldown && !isShieldCooldownActive)
         {
+            isAttacking = false;
+            animator.SetBool("isAttacking", false);
+            StopCoroutine(AttackCoroutine());
             ShieldStart();
         }
         else if (isShielding && Input.GetMouseButtonDown(0) && !shieldAttackTalentChosen && !isUsingSpell && !isAttacking && attackCooldown <= 0f)
         {
-            Attack();
-            ShieldStop();
-        }
-        if(isShielding && isAttacking && !shieldAttackTalentChosen)
-        {
-            isAttacking = false;
-            animator.SetBool("isAttacking", false);
-            StopCoroutine(AttackCoroutine());
 
+            ShieldStop();
+            Attack();
         }
+        //if(isShielding && isAttacking && !shieldAttackTalentChosen)
+        //{
+        //    isAttacking = false;
+        //    animator.SetBool("isAttacking", false);
+        //    StopCoroutine(AttackCoroutine());
+        //}
     }
 
     private void FixedUpdate()
@@ -537,7 +547,8 @@ public class Player : MonoBehaviour
                     Enemy enemy = hitCollider.GetComponent<Enemy>();
                     if (enemy != null)
                     {
-                        if (!damageAttackTalentIsChosen && !enemy.damagedByVortex && !enemy.isUnderDefenceAura)
+                        //if (!damageAttackTalentIsChosen && !enemy.damagedByVortex && !enemy.isUnderDefenceAura)
+                        if (!enemy.damagedByVortex && !enemy.isUnderDefenceAura)
                         {
                             enemy.enemyHealth -= 3;
                             enemy.StartCoroutine(enemy.BladeVortexDamageCooldown());
@@ -968,11 +979,11 @@ public class Player : MonoBehaviour
     {
         if (dashSprintIsOn)
         {
-            speed = 2.5f + 0.5f + speedAddFromMinorTalent;
+            speed = speedStart + 0.5f + speedAddFromMinorTalent;
         }
         else
         {
-            speed = 2.5f + speedAddFromMinorTalent;
+            speed = speedStart + speedAddFromMinorTalent;
         }
     }
     public IEnumerator SprintDashTalent()
@@ -1365,6 +1376,12 @@ public class Player : MonoBehaviour
     IEnumerator AttackCoroutine()
     {
         yield return new WaitForSeconds((0.833f / 2) / attackSpeedMinorTalentAdaptation); // Half of the attack animation duration
+        if (isShielding && !shieldAttackTalentChosen)
+        {
+            isAttacking = false;
+            animator.SetBool("isAttacking", false);
+            yield break;
+        }
 
         // Perform attack action at halfway through the animation
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange);
@@ -1372,6 +1389,7 @@ public class Player : MonoBehaviour
         bool killed = false;
 
         Enemy initialTarget = null; // Variable to store the first enemy hit
+        
 
         foreach (var hitCollider in hitColliders)
         {
@@ -1380,7 +1398,6 @@ public class Player : MonoBehaviour
                 if (hitCollider.CompareTag("Enemy") || hitCollider.CompareTag("EnemyRange"))
                 {
                     // Apply damage to the target
-                    Debug.Log("Hit: " + hitCollider.name + " " + attackCount);
                     attackCount++;
                     Enemy enemy = hitCollider.GetComponent<Enemy>();
                     if (enemy != null && !enemy.isDying)

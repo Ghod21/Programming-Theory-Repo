@@ -55,7 +55,7 @@ public class EnemyRangeEasy : Enemy
         yield return new WaitForSeconds(1f);
         while (enemyHealth > 0)
         {
-            if (isInAttackRange && !isAttacking)
+            if (isInAttackRange && !isAttacking && !mainManager.win)
             {
                 isAttacking = true;
                 StartCoroutine(EnemyAttackToAnimation());

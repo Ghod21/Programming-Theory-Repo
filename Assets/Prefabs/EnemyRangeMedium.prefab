@@ -356,7 +356,7 @@ MonoBehaviour:
   expManager: {fileID: 0}
   expManagerScript: {fileID: 0}
   moveSpeed: 2
-  attackRange: 15
+  attackRange: 25
   enemyHealth: 4
   attacked: 0
   enemyIsBleeding: 0

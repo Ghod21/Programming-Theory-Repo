@@ -38,13 +38,13 @@ public class ExpManager : MonoBehaviour
     [SerializeField] GameObject[] healthTalentsUI;
     [SerializeField] GameObject[] attackTalentsUI;
     [SerializeField] GameObject[] skillsTalentsUI;
-    [SerializeField] GameObject[] minorTalentsUI;
-    [SerializeField] GameObject[] talentsUI;
+    [SerializeField] public GameObject[] minorTalentsUI;
+    [SerializeField] public GameObject[] talentsUI;
     private List<Action> talentFunctions = new List<Action>();
     public bool reflectionTalentIsChosenExpManager;
     public bool shieldDamageTalentChosenExpManager;
 
-    public bool HealthPotionsTalentIsChosenExpManager;
+    public bool HealthPotionsTalentIsChosenExpManager = false;
     bool talentIsChosen = false;
 
     //bool minorTalentOneIsChosen = false;
@@ -79,6 +79,7 @@ public class ExpManager : MonoBehaviour
 
     void Start()
     {
+        HealthPotionsTalentIsChosenExpManager = false;
         MinorTalentsSet();
         SetTalentFunctions();
         player = GameObject.Find("Player");
@@ -399,7 +400,15 @@ public class ExpManager : MonoBehaviour
     void minorHealthRegen(int index)
     {
         minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/healthRegenMinor");
-        minorTalentText[index].text = "Slow health regeneration over time";
+        if(!healthRegenMajorTalentIsChosen)
+        {
+            minorTalentText[index].text = "Slow health regeneration over time";
+        }
+        else
+        {
+            minorTalentText[index].text = "Health regeneration over time";
+        }
+
         minorTalentsButtons[index].onClick.AddListener(() => minorHealthRegenButton());
     }
     public void minorHealthRegenButton()
@@ -423,6 +432,33 @@ public class ExpManager : MonoBehaviour
             
             healthRegenCooldownLimit--;
             if (healthRegenCooldownLimit <=0)
+            {
+                minorTalentFunctions.Remove(minorHealthRegen);
+            }
+        }
+        if (!healthRegenMinorOnce)
+        {
+            playerScript.StartCoroutine(playerScript.HealthRegenTalent());
+            healthRegenMinorOnce = true;
+        }
+    }
+    public void minorHealthRegenForMajor()
+    {
+        SelectTalent(8);
+        playerScript.healthRegenMinorAdd++;
+        if (healthRegenMinorOnce)
+        {
+            if (!healthRegenMajorTalentIsChosen)
+            {
+                playerScript.healthRegenCooldownMinus++;
+            }
+            else
+            {
+                playerScript.healthRegenCooldownMinus += 2;
+            }
+
+            healthRegenCooldownLimit--;
+            if (healthRegenCooldownLimit <= 0)
             {
                 minorTalentFunctions.Remove(minorHealthRegen);
             }
@@ -596,6 +632,10 @@ public class ExpManager : MonoBehaviour
         AssignTalentImage(x);
         playerScript.healthRegenCooldown -= 5;
         playerScript.healthRegenCooldownMinus *= 2;
+        if(playerScript.healthRegenMinorAdd < 1)
+        {
+            minorHealthRegenForMajor();
+        }
     }
     public void PotionsHealthTalent()
     {

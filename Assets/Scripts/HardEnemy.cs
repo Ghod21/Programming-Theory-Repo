@@ -10,7 +10,7 @@ public class HardEnemy : Enemy
     {
         base.Start(); // Call the Start method from the base class
         // Additional initialization code for EasyEnemy
-        enemyHealth = 7;
+        enemyHealth = 10;
         isHardEnemy = true;
         DefenceAuraSearch();
         defenceAuraScript = defenceAuraObject.GetComponent<DefenceAura>();
@@ -18,7 +18,7 @@ public class HardEnemy : Enemy
     protected override void Update()
     {
         base.Update();
-        if (enemyHealth < 1)
+        if (enemyHealth !> 0)
         {
             defenceAuraScript.auraIsOn = false;
             Destroy(defenceAuraObject, 0.5f);
