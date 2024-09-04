@@ -10,7 +10,7 @@ public class HardEnemy : Enemy
     {
         base.Start(); // Call the Start method from the base class
         // Additional initialization code for EasyEnemy
-        enemyHealth = 7;
+        enemyHealth = 10;
         isHardEnemy = true;
         DefenceAuraSearch();
         defenceAuraScript = defenceAuraObject.GetComponent<DefenceAura>();
@@ -18,7 +18,7 @@ public class HardEnemy : Enemy
     protected override void Update()
     {
         base.Update();
-        if (enemyHealth < 1)
+        if (enemyHealth !> 0)
         {
             defenceAuraScript.auraIsOn = false;
             Destroy(defenceAuraObject, 0.5f);
@@ -36,16 +36,21 @@ public class HardEnemy : Enemy
         //playerScript.scoreMultiplierBase += 3;
         if (expManagerScript.HealthPotionsTalentIsChosenExpManager)
         {
-            if (Random.value < 0.5f)
+            if (Random.value - healthBottleAdaptiveSpawnChance < 0.5f)
             {
+                healthBottleAdaptiveSpawnChance = 0;
                 Vector3 currentPosition = transform.position;
                 spawnManager.CreateHealthPotionIfNotExists(currentPosition);
             }
         }
-        else if (Random.value < 0.2f)
+        else if (Random.value - healthBottleAdaptiveSpawnChance < 0.2f)
         {
+            healthBottleAdaptiveSpawnChance = 0;
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
+        } else
+        {
+            healthBottleAdaptiveSpawnChance += 0.01f;
         }
 
         defenceAuraScript.DisableDefenceAuraForAllEnemies();

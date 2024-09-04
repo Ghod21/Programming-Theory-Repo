@@ -17,6 +17,7 @@ public class SpawnManager : MonoBehaviour
     private const int maxRecentPositions = 3;
     private const float exclusionRadius = 5f;
     [SerializeField] GameObject bossObject;
+    ExpManager expManager;
 
     [SerializeField] GameObject[] bossSpawnSpellObjectPositions;
 
@@ -76,18 +77,23 @@ public class SpawnManager : MonoBehaviour
 
         //yield return new WaitForSeconds(0.1f);
         bossObject.SetActive(true);
+
+
         bossEnemy.StartCoroutine(bossEnemy.BossHPRegen());
         mainManagerScript.BossFightUIEnable();
         bossStarParticleSystem.Stop();
         bossStarParticleSystem.Clear();
         bossStarParticleObject.SetActive(false);
         audioManager.BossMusicChangeStop();
-        playerScript.audioSource.PlayOneShot(playerScript.audioClips[18], DataPersistence.soundsVolume * 0.7f * DataPersistence.soundAdjustment);
+        playerScript.audioSource.PlayOneShot(playerScript.audioClips[18], DataPersistence.soundsVolume * 0.6f * DataPersistence.soundAdjustment);
+        yield return new WaitForSeconds(0.1f);
+        bossEnemy.UpdateEnemySpeed(playerScript.speed);
+        bossEnemy.UpdateEnemyAttackRange(playerScript.attackRange);
     }
 
     private void Start()
     {
-
+        expManager = FindObjectOfType<ExpManager>();
         if (SceneManager.GetActiveScene().name == "MainScene")
         {
             bossStarParticleSystem = bossStarParticleObject.GetComponent<ParticleSystem>();
@@ -130,19 +136,41 @@ public class SpawnManager : MonoBehaviour
             }
 
             yield return new WaitForSeconds(spawnTime);
-            SpawnEnemies();
+            StartCoroutine(SpawnEnemies());
         }
     }
 
-    private void SpawnEnemies()
+    private IEnumerator SpawnEnemies()
     {
+        float y = 0;
+        if (difficultyMeter > 2)
+        {
+            y = 0.05f;
+        }
+        if (difficultyMeter >=5 && difficultyMeter <= 7 || difficultyMeter >= 13 && difficultyMeter <= 19)
+        {
+            y = 0.1f;
+        } else if (difficultyMeter >= 8 && difficultyMeter <= 12)
+        {
+            y = 0.15f;
+        }
+        int x = Random.Range(3, 6);
+        if (Random.value < y && y != 0)
+        {
+            numberOfEnemies = x;
+        }
         for (int i = 0; i < numberOfEnemies; i++)
         {
             Vector3 spawnPosition = GetRandomPointInBounds(spawnArea.bounds, exclusionZone);
             GameObject enemy = ChooseEnemyBasedOnDifficulty();
             GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, Quaternion.identity);
             instantiatedEnemy.transform.position = new Vector3(instantiatedEnemy.transform.position.x, spawnHeight, instantiatedEnemy.transform.position.z);
+            if(numberOfEnemies > 1)
+            {
+                yield return new WaitForSeconds(0.3f);
+            }
         }
+        numberOfEnemies = 1;
     }
 
     public void SpawnEnemiesBossSpell(Quaternion bossRotation)
@@ -156,11 +184,11 @@ public class SpawnManager : MonoBehaviour
 
             if (i == fixedPositionIndex)
             {
-                enemy = enemies[1];
+                enemy = enemies[3];
             }
             else
             {
-                enemy = enemies[0];
+                enemy = enemies[Random.value < 0.5f ? 0 : 2];
             }
 
             GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, bossRotation);
@@ -294,15 +322,28 @@ public class SpawnManager : MonoBehaviour
     // Public function to create the health potion prefab if none exist in the scene
     public void CreateHealthPotionIfNotExists(Vector3 callingObjectPosition)
     {
-        // Check if any instance of healthPotionPrefab exists in the scene
+        int maxHealthPotions = expManager.HealthPotionsTalentIsChosenExpManager ? 3 : 1;
+
         GameObject[] existingPotions = GameObject.FindGameObjectsWithTag(healthPotionPrefab.tag);
-        if (existingPotions.Length == 0)
+        int existingPotionCount = existingPotions.Length;
+
+        int potionsToCreate = maxHealthPotions - existingPotionCount;
+
+        if (potionsToCreate > 0 && !mainManagerScript.win)
         {
-            // Set the spawn position to the calling object's position with the desired spawn height
-            Vector3 spawnPosition = new Vector3(callingObjectPosition.x, 0.3f, callingObjectPosition.z);
-            Instantiate(healthPotionPrefab, spawnPosition, Quaternion.identity);
+            for (int i = 0; i < 1; i++)
+            {
+                Vector3 spawnPosition = new Vector3(callingObjectPosition.x, 0.3f, callingObjectPosition.z);
+                Instantiate(healthPotionPrefab, spawnPosition, Quaternion.identity);
+            }
         }
     }
+
+
+
+
+
+
     public void CreateExperienceAtPosition(Vector3 position, int prefabIndex)
     {
         // Validate index

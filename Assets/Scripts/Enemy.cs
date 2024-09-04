@@ -32,6 +32,7 @@ public class Enemy : MonoBehaviour
     private UnityEngine.Color originalColor;
     private UnityEngine.Color newColor;
     protected bool isUsingSpell;
+    protected float healthBottleAdaptiveSpawnChance = 0;
 
     public bool damagedByVortex = false;
 
@@ -66,6 +67,7 @@ public class Enemy : MonoBehaviour
 
     protected virtual void Update()
     {
+        CheckForPrefab();
         LookAtPlayer(); // Ensure the enemy always faces the player
         CheckBoundary();
         CheckAttackRange(); // Check if the enemy is within attack range
@@ -159,7 +161,7 @@ public class Enemy : MonoBehaviour
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-        if (distanceToPlayer <= attackRange && !isAttacking)
+        if (distanceToPlayer <= attackRange && !isAttacking && !mainManager.win)
         {
             isAttacking = true;
             StartCoroutine(Attack());
@@ -229,7 +231,7 @@ public class Enemy : MonoBehaviour
     protected virtual IEnumerator deathAnimation()
     {
         PrefabIdentifier prefabIdentifier = GetComponent<PrefabIdentifier>();
-        if (prefabIdentifier.prefabName != "EnemyBoss")
+        if (prefabIdentifier.prefabName != "EnemyBoss" && !mainManager.win)
         {
             ExperienceSpawnOnDeath();
         }
@@ -311,18 +313,32 @@ public class Enemy : MonoBehaviour
         if (playerScript.vampireHealthTalentIsChosen)
         {
             playerScript.killsToVampire--;
-            if (playerScript.killsToVampire <= 0)
+            if (playerScript.killsToVampire <= 0 && playerScript.playerHealth < 30)
             {
-                playerScript.playerHealth++;
-                playerScript.healEffect.Stop();
-                playerScript.healEffect.Clear();
-                playerScript.healEffect.Play();
-                if (playerScript.playerHealth > 30)
-                {
-                    playerScript.playerHealth = 30;
-                }
-                playerScript.killsToVampire = 7;
+                    playerScript.playerHealth++;
+                    playerScript.healEffect.Stop();
+                    playerScript.healEffect.Clear();
+                    playerScript.healEffect.Play();
+                    if (playerScript.playerHealth > 30)
+                    {
+                        playerScript.playerHealth = 30;
+                    }
+                    playerScript.killsToVampire = 7;
             }
         }
     }
+    void CheckForPrefab()
+    {
+        PrefabIdentifier[] allPrefabIdentifiers = FindObjectsOfType<PrefabIdentifier>();
+
+        foreach (PrefabIdentifier prefabIdentifier in allPrefabIdentifiers)
+        {
+            if (prefabIdentifier.prefabName == "EnemyHard")
+            {
+                return;
+            }
+        }
+        isUnderDefenceAura = false;
+    }
+
 }

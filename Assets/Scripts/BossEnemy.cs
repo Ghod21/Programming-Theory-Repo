@@ -17,16 +17,23 @@ public class BossEnemy : Enemy
     bool farEnoughToCharge;
     AudioSource audioSourceFire;
     private float radius;
+    public float speedRatio;
+    public float attackRangeRatio;
+    float moveSpeedNew;
 
 
     [SerializeField] private float chargeSpeed = 40f; // Speed during the charge
     [SerializeField] private float chargeDuration = 0.5f; // Duration of the charge
     [SerializeField] private float chargePause = 1f; // Time to pause before charging
 
+    [SerializeField] float bossHPRegenNumber;
+
 
     protected override void Start()
     {
         base.Start();
+        speedRatio = 6 / 2.5f;
+        attackRangeRatio = 2.5f / 3.2f;
         explosionBossSpell = FindParticleSystemInChildren("ExplosionBossSpell");
         explosionBossSpellSphereCollider = explosionBossSpell.GetComponent<SphereCollider>();
         audioSourceFire = spawnManager.aoeSpawnAreaObject.GetComponent<AudioSource>();
@@ -53,10 +60,10 @@ public class BossEnemy : Enemy
             Debug.LogError("Player Script is not set.");
         }
 
-        enemyHealth = 50;
+        enemyHealth = 150;
         enemyHealthMax = enemyHealth;
         StartCoroutine(BossSpellChangeRoutine());
-
+        moveSpeed = moveSpeedNew;
     }
 
     protected override void Update()
@@ -101,7 +108,7 @@ public class BossEnemy : Enemy
             {
                 StartCoroutine(Charge());
             } 
-            else if (index == 3)
+            else if (index == 3 && CanSpawnSpell())
             {
                 BossSpawnSpell();
             }
@@ -253,9 +260,9 @@ public class BossEnemy : Enemy
         }
         DataPersistence.currentPlayerScore = newScore;
 
-        vampireTalentRegen();
+        mainManager.StartCoroutine(mainManager.Win());
         return base.deathAnimation();
-    }
+    } 
     protected override void EnemyAttack()
     {
         // Method for enemy attacks
@@ -265,7 +272,7 @@ public class BossEnemy : Enemy
             if (!playerScript.backwardDashIsActive)
             {
                 playerScript.audioSource.PlayOneShot(playerScript.audioClips[5], DataPersistence.soundsVolume * 0.8f * 2 * soundAdjustment);
-                playerScript.playerHealth -= 4;
+                playerScript.playerHealth -= 5;
                 playerScript.scoreMultiplierBase -= 10;
             }
             Debug.Log("Health: " + playerScript.playerHealth);
@@ -305,8 +312,38 @@ public class BossEnemy : Enemy
             yield return new WaitForSeconds(15);
             if (enemyHealth < enemyHealthMax)
             {
-                enemyHealth++;
+                enemyHealth += bossHPRegenNumber;
             }
+        }
+    }
+
+    public void UpdateEnemySpeed(float newPlayerSpeed)
+    {
+        moveSpeed = newPlayerSpeed * speedRatio;
+    }
+    public void UpdateEnemyAttackRange(float newPlayerAttackRange)
+    {
+        attackRange = newPlayerAttackRange * attackRangeRatio;
+    }
+
+    bool CanSpawnSpell()
+    {
+        int counter = 0;
+        PrefabIdentifier[] allPrefabIdentifiers = FindObjectsOfType<PrefabIdentifier>();
+
+        foreach (PrefabIdentifier prefabIdentifier in allPrefabIdentifiers)
+        {
+            if (prefabIdentifier.prefabName == "EnemyMedium")
+            {
+                counter++;
+            }
+        }
+        if (counter < 1)
+        {
+            return true;
+        } else
+        {
+            return false;
         }
     }
 }

@@ -29,16 +29,22 @@ public class EnemyRangeMedium : Enemy
         //playerScript.scoreMultiplierBase += 2;
         if (expManagerScript.HealthPotionsTalentIsChosenExpManager)
         {
-            if (Random.value < 0.3f)
+            if (Random.value - healthBottleAdaptiveSpawnChance < 0.3f)
             {
+                healthBottleAdaptiveSpawnChance = 0;
                 Vector3 currentPosition = transform.position;
                 spawnManager.CreateHealthPotionIfNotExists(currentPosition);
             }
         }
-        else if (Random.value < 0.15f)
+        else if (Random.value - healthBottleAdaptiveSpawnChance < 0.15f)
         {
+            healthBottleAdaptiveSpawnChance = 0;
             Vector3 currentPosition = transform.position;
             spawnManager.CreateHealthPotionIfNotExists(currentPosition);
+        }
+        else
+        {
+            healthBottleAdaptiveSpawnChance += 0.01f;
         }
         vampireTalentRegen();
         return base.deathAnimation();
@@ -49,7 +55,7 @@ public class EnemyRangeMedium : Enemy
         yield return new WaitForSeconds(1f);
         while (enemyHealth > 0)
         {
-            if (!isAttacking)
+            if (!isAttacking && isInAttackRange && !mainManager.win)
             {
                 isAttacking = true;
                 //attackIsOnCooldown = true;
@@ -57,9 +63,10 @@ public class EnemyRangeMedium : Enemy
                 yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
                 StartCoroutine(EnemySecondAttackToAnimation());
             }
-            yield return new WaitForSeconds(attackInterval);
-            //attackIsOnCooldown = false;
-            isAttacking = false;
+
+             yield return new WaitForSeconds(attackInterval);
+                //attackIsOnCooldown = false;
+                isAttacking = false;
         }
     }
 
@@ -74,7 +81,7 @@ public class EnemyRangeMedium : Enemy
             isEscaping = true;
             isInAttackRange = false;
         }
-        else if (distanceToPlayer <= attackRange)
+        else if (distanceToPlayer <= attackRange && !isEscaping)
         {
             isInAttackRange = true;
             isEscaping = false;

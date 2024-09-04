@@ -18,7 +18,9 @@ public class MainManager : MonoBehaviour
     [SerializeField] GameObject player;
     [SerializeField] GameObject[] uiToggle;
     [SerializeField] GameObject[] gameOverUI;
+    [SerializeField] GameObject[] winUI;
     [SerializeField] TextMeshProUGUI[] gameOverUIText;
+    [SerializeField] TextMeshProUGUI[] winUIText;
     [SerializeField] TextMeshProUGUI nameText;
     [SerializeField] UnityEngine.UI.Toggle startInfoToggle;
     [SerializeField] TMP_InputField nameInputField;
@@ -28,7 +30,8 @@ public class MainManager : MonoBehaviour
     [SerializeField] AudioClip[] menuSounds;
     [SerializeField] public AudioSource audioSource;
     private Player playerScript;
-
+    public bool win = false;
+    public bool canEsc = true;
 
     private int totalUiElements = 16;
     private int timerSeconds;
@@ -52,6 +55,12 @@ public class MainManager : MonoBehaviour
     public bool bossFightIsActive;
     [SerializeField] GameObject pauseUIText;
     public bool paused;
+    ExpManager expManager;
+
+    //Win
+    [SerializeField] GameObject[] confettiSpawnPoints;
+    ParticleSystem confetti1;
+    ParticleSystem confetti2;
 
     public string PlayerName
     {
@@ -76,6 +85,10 @@ public class MainManager : MonoBehaviour
 
     private void Start()
     {
+        expManager = FindObjectOfType<ExpManager>();
+        canEsc = true;
+        confetti1 = Resources.Load<ParticleSystem>("Prefabs/Confetti1");
+        confetti2 = Resources.Load<ParticleSystem>("Prefabs/Confetti2");
         leaderBoardUpdated = false;
         if (SceneManager.GetActiveScene().name == "Menu")
         {
@@ -163,7 +176,7 @@ public class MainManager : MonoBehaviour
         }
         if (SceneManager.GetActiveScene().name == "MainScene")
         {
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetKeyDown(KeyCode.Escape) && canEsc)
             {
                 SceneManager.LoadScene("Menu");
             }
@@ -319,6 +332,21 @@ public class MainManager : MonoBehaviour
                 uiToggle[i].SetActive(false);
             }
         }
+        for (int i = 0; i < expManager.minorTalentsUI.Length; i++)
+        {
+            if (expManager.minorTalentsUI[i] != null)
+            {
+                expManager.minorTalentsUI[i].SetActive(false);
+            }
+        }
+        for (int i = 0; i < expManager.talentsUI.Length; i++)
+        {
+            if (expManager.talentsUI[i] != null)
+            {
+                expManager.talentsUI[i].SetActive(false);
+            }
+        }
+        bossHPUIBar.SetActive(false);
         UpdateLeaderboard();
         WallOfFameUpdate();
         if (SceneManager.GetActiveScene().name == "MainScene")
@@ -354,6 +382,7 @@ public class MainManager : MonoBehaviour
             gameOverUIText[2].text = DataPersistence.currentPlayerScore.ToString(); // Player Score
         }
     }
+
     private void WallOfFameUpdate()
     {
         wallOfFameLeaders[0].text = DataPersistence.playerOne + ": " + DataPersistence.playerOneScore.ToString();
@@ -411,7 +440,7 @@ public class MainManager : MonoBehaviour
         //expUIToMoveOnBossSpawn.SetActive(false);
         bossHPUIBar.SetActive(true);
         bossHealthSlider.minValue = 0;
-        bossHealthSlider.maxValue = 50;
+        bossHealthSlider.maxValue = 150;
     }
     void BossFightUIUpdate()
     {
@@ -482,5 +511,113 @@ public class MainManager : MonoBehaviour
         DataPersistence.Instance.SaveData();
     }
 
+    public IEnumerator Win()
+    {
+        win = true;
+        canEsc = false;
+        playerScript.playerHealth = 30;
+        WinUI();
+        bossHPUIBar.SetActive(false);
+        StartCoroutine(ClearAfterWin());
+        yield return new WaitForSeconds(3f);
+        winUI[winUI.Length - 1].SetActive(true);
+        canEsc = true;
 
+        while (true) // Будет повторяться до тех пор, пока корутина не будет остановлена
+        {
+            // Выбор случайного количества объектов конфетти (от 1 до 3)
+            int numberOfConfetti = Random.Range(1, 4); // 1 включительно, 4 не включительно
+
+            for (int i = 0; i < numberOfConfetti; i++)
+            {
+                // Выбор случайной позиции из массива confettiSpawnPoints
+                GameObject randomSpawnPoint = confettiSpawnPoints[Random.Range(0, confettiSpawnPoints.Length)];
+
+                // Выбор случайного конфетти
+                ParticleSystem selectedConfetti = Random.value < 0.5f ? confetti1 : confetti2;
+
+                // Создание экземпляра конфетти
+                ParticleSystem spawnedConfetti = Instantiate(selectedConfetti, randomSpawnPoint.transform.position, Quaternion.identity);
+
+                // Запуск конфетти
+                spawnedConfetti.Play();
+
+                // Удаление конфетти через 5 секунд
+                playerScript.audioSource.PlayOneShot(playerScript.audioClips[20], DataPersistence.soundsVolume * 3f * DataPersistence.soundAdjustment);
+                Destroy(spawnedConfetti.gameObject, 5f);
+                yield return new WaitForSeconds(0.2f);
+            }
+
+            // Ожидание перед следующей итерацией
+            yield return new WaitForSeconds(1.5f);
+        }
+    }
+    IEnumerator ClearAfterWin()
+    {
+        Enemy[] enemies = FindObjectsOfType<Enemy>();
+
+        foreach (Enemy enemy in enemies)
+        {
+            enemy.enemyHealth = 0;
+            yield return new WaitForSeconds(0.2f);
+        }
+    }
+    private void WinUI()
+    {
+        for (int i = 0; i < uiToggle.Length; i++)
+        {
+            if (uiToggle[i] != null)
+            {
+                uiToggle[i].SetActive(false);
+            }
+        }
+        for (int i = 0; i < expManager.minorTalentsUI.Length; i++)
+        {
+            if (expManager.minorTalentsUI[i] != null)
+            {
+                expManager.minorTalentsUI[i].SetActive(false);
+            }
+        }
+        for (int i = 0; i < expManager.talentsUI.Length; i++)
+        {
+            if (expManager.talentsUI[i] != null)
+            {
+                expManager.talentsUI[i].SetActive(false);
+            }
+        }
+        UpdateLeaderboard();
+        WallOfFameUpdate();
+        if (SceneManager.GetActiveScene().name == "MainScene")
+        {
+            // Show GameOver UI
+            for (int i = 0; i < winUI.Length - 1; i++)
+            {
+                if (winUI[i] != null)
+                {
+                    winUI[i].SetActive(true);
+                }
+            }
+            float[] playerScores = { DataPersistence.playerOneScore, DataPersistence.playerTwoScore, DataPersistence.playerThreeScore };
+            if (!deathSoundsPlayed)
+            {
+                if (DataPersistence.currentPlayerScore <= playerScores[0] && DataPersistence.currentPlayerScore <= playerScores[1] && DataPersistence.currentPlayerScore <= playerScores[2])
+                {
+                    winUIText[0].text = "Good Run!";// No new high score
+                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[8], DataPersistence.soundsVolume * soundAdjustment);
+                }
+                else
+                {
+                    winUIText[0].text = "Congratulations - You are on the Wall of Fame!";// New high score
+                    playerScript.audioSource.PlayOneShot(playerScript.audioClips[8], DataPersistence.soundsVolume * soundAdjustment);
+                }
+                deathSoundsPlayed = true;
+                AudioManager audioManagerScript = audioManager.GetComponent<AudioManager>();
+                audioManagerScript.playMusic = false;
+            }
+
+
+            winUIText[1].text = DataPersistence.currentPlayerName;// PlayerName
+            winUIText[2].text = DataPersistence.currentPlayerScore.ToString(); // Player Score
+        }
+    }
 }
