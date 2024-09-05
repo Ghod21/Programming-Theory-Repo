@@ -80,8 +80,9 @@ public class MediumEnemy : Enemy
             // Perform the charge
             Vector3 chargeDirection = (player.position - transform.position).normalized;
             float chargeEndTime = Time.time + chargeDuration;
-            if (enemyHealth !> 0)
+            if (enemyHealth < 0.01)
             {
+                chargeCooldownBool = true;
                 yield break;
             }
             playerScript.audioSource.PlayOneShot(playerScript.audioClips[19], DataPersistence.soundsVolume * 1f * DataPersistence.soundAdjustment);
@@ -96,7 +97,11 @@ public class MediumEnemy : Enemy
                     chargeCooldownBool = true;
                     break; // Exit the inner while loop to stop the current charge
                 }
-
+                if (enemyHealth < 0.001)
+                {
+                    chargeCooldownBool = true;
+                    yield break;
+                }
                 rb.velocity = chargeDirection * chargeSpeed;
                 yield return null; // Wait until the next frame
             }

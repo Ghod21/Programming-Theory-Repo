@@ -13,8 +13,8 @@ public class ExpManager : MonoBehaviour
     GameObject player;
     [SerializeField] GameObject enemy;
     Player playerScript;
-    [SerializeField] GameObject fillArea;
-    [SerializeField] UnityEngine.UI.Image[] chosenTalentsUIImages;
+    [SerializeField] public GameObject fillArea;
+    [SerializeField] public UnityEngine.UI.Image[] chosenTalentsUIImages;
     [SerializeField] GameObject[] chosenTalentsUI;
     public int level = 1;
 
@@ -38,8 +38,8 @@ public class ExpManager : MonoBehaviour
     [SerializeField] GameObject[] healthTalentsUI;
     [SerializeField] GameObject[] attackTalentsUI;
     [SerializeField] GameObject[] skillsTalentsUI;
-    [SerializeField] public GameObject[] minorTalentsUI;
-    [SerializeField] public GameObject[] talentsUI;
+    [SerializeField] GameObject[] minorTalentsUI;
+    [SerializeField] GameObject[] talentsUI;
     private List<Action> talentFunctions = new List<Action>();
     public bool reflectionTalentIsChosenExpManager;
     public bool shieldDamageTalentChosenExpManager;
@@ -61,8 +61,8 @@ public class ExpManager : MonoBehaviour
     [SerializeField] UnityEngine.UI.Button[] minorTalentsButtons;
     bool minorTalentIsChosen = false;
 
-    [SerializeField] private UnityEngine.UI.Image[] minorTalentSlots; // Слоты для отображения иконок талантов
-    [SerializeField] private TextMeshProUGUI[] minorTalentCountTexts; // Тексты для отображения счетчика талантов
+    [SerializeField] public UnityEngine.UI.Image[] minorTalentSlots; // Слоты для отображения иконок талантов
+    [SerializeField] public TextMeshProUGUI[] minorTalentCountTexts; // Тексты для отображения счетчика талантов
     private Dictionary<string, int> selectedTalents = new Dictionary<string, int>(); // Хранит таланты и количество их выборов
     [SerializeField] private Talent[] talents; // Массив или список всех талантов
     private Dictionary<string, int> talentSlotIndices = new Dictionary<string, int>(); // Словарь для хранения индексов слотов для каждого таланта
@@ -219,6 +219,7 @@ public class ExpManager : MonoBehaviour
         for (int i = 0; i < minorTalentsUI.Length; i++)
         {
             minorTalentsUI[i].SetActive(true);
+            DeactivateButtonTemporarily(minorTalentsUI[i]);
         }
         playerScript.timeIsFrozen = true;
         Time.timeScale = 0f;
@@ -478,6 +479,7 @@ public class ExpManager : MonoBehaviour
         for (int i = 0; i < skillsTalentsUI.Length; i++)
         {
             skillsTalentsUI[i].SetActive(true);
+            DeactivateButtonTemporarily(skillsTalentsUI[i]);
         }
         playerScript.timeIsFrozen = true;
         Time.timeScale = 0f;
@@ -548,6 +550,7 @@ public class ExpManager : MonoBehaviour
         for (int i = 0; i < attackTalentsUI.Length; i++)
         {
             attackTalentsUI[i].SetActive(true);
+            DeactivateButtonTemporarily(attackTalentsUI[i]);
         }
         playerScript.timeIsFrozen = true;
         Time.timeScale = 0f;
@@ -608,6 +611,7 @@ public class ExpManager : MonoBehaviour
         for (int i = 0; i < healthTalentsUI.Length; i++)
         {
             healthTalentsUI[i].SetActive(true);
+            DeactivateButtonTemporarily(healthTalentsUI[i]);
         }
         playerScript.timeIsFrozen = true;
         Time.timeScale = 0f;
@@ -665,6 +669,7 @@ public class ExpManager : MonoBehaviour
         for (int i = 0; i < dashTalentsUI.Length; i++)
         {
             dashTalentsUI[i].SetActive(true);
+            DeactivateButtonTemporarily(dashTalentsUI[i]);
         }
         playerScript.timeIsFrozen = true;
         Time.timeScale = 0f;
@@ -728,6 +733,7 @@ public class ExpManager : MonoBehaviour
         for (int i = 0; i < shieldTalentsUI.Length; i++)
         {
             shieldTalentsUI[i].SetActive(true);
+            DeactivateButtonTemporarily(shieldTalentsUI[i]);
         }
         playerScript.timeIsFrozen = true;
         Time.timeScale = 0f;
@@ -923,4 +929,26 @@ public class ExpManager : MonoBehaviour
 
         currentTalentIndex++;
     }
+    public void DeactivateButtonTemporarily(GameObject toDeactivate)
+    {
+        UnityEngine.UI.Button button = toDeactivate.GetComponent<UnityEngine.UI.Button>(); // Получаем компонент Button из дочерних объектов
+
+        if (button != null)
+        {
+            StartCoroutine(DisableButtonTemporarily(button));
+        }
+    }
+
+    private IEnumerator DisableButtonTemporarily(UnityEngine.UI.Button button)
+    {
+        // Disable the button
+        button.interactable = false;
+
+        // Wait for 1 second
+        yield return new WaitForSecondsRealtime(1f);
+
+        // Re-enable the button
+        button.interactable = true;
+    }
+
 }

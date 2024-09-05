@@ -29,7 +29,7 @@ public class MainManager : MonoBehaviour
     [SerializeField] GameObject audioManager;
     [SerializeField] AudioClip[] menuSounds;
     [SerializeField] public AudioSource audioSource;
-    private Player playerScript;
+    [SerializeField] Player playerScript;
     public bool win = false;
     public bool canEsc = true;
 
@@ -85,6 +85,10 @@ public class MainManager : MonoBehaviour
 
     private void Start()
     {
+        if (SceneManager.GetActiveScene().name == "Menu")
+        {
+            nameInputField.text = DataPersistence.lastPlayerName;
+        }
         expManager = FindObjectOfType<ExpManager>();
         canEsc = true;
         confetti1 = Resources.Load<ParticleSystem>("Prefabs/Confetti1");
@@ -106,7 +110,6 @@ public class MainManager : MonoBehaviour
         timerMinutes = 0;
 
         difficultyMeter = 30; // Switch for difficulty. 30 is normal. __________________________
-        playerScript = player.GetComponent<Player>();
         if (SceneManager.GetActiveScene().name == "MainScene")
         {
             nameText.text = DataPersistence.currentPlayerName;
@@ -155,7 +158,7 @@ public class MainManager : MonoBehaviour
                 // Check if the name is valid
                 correctNameToStart = IsValidName(nameInputField.text);
             }
-            if (Input.GetKeyDown(KeyCode.T))
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
                 if (!paused && Time.timeScale != 0f)
                 {
@@ -176,7 +179,7 @@ public class MainManager : MonoBehaviour
         }
         if (SceneManager.GetActiveScene().name == "MainScene")
         {
-            if (Input.GetKeyDown(KeyCode.Escape) && canEsc)
+            if (Input.GetKeyDown(KeyCode.M) && canEsc)
             {
                 SceneManager.LoadScene("Menu");
             }
@@ -193,6 +196,7 @@ public class MainManager : MonoBehaviour
         if (correctNameToStart)
         {
             audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 10f * soundAdjustment);
+            DataPersistence.lastPlayerName = PlayerName;
             DataPersistence.Instance.SaveData();
             SceneManager.LoadScene("MainScene");
         }
@@ -332,20 +336,30 @@ public class MainManager : MonoBehaviour
                 uiToggle[i].SetActive(false);
             }
         }
-        for (int i = 0; i < expManager.minorTalentsUI.Length; i++)
+        for (int i = 0; i < expManager.minorTalentSlots.Length; i++)
         {
-            if (expManager.minorTalentsUI[i] != null)
+            if (expManager.minorTalentSlots[i] != null)
             {
-                expManager.minorTalentsUI[i].SetActive(false);
+                expManager.minorTalentSlots[i].gameObject.SetActive(false);
             }
         }
-        for (int i = 0; i < expManager.talentsUI.Length; i++)
+        for (int i = 0; i < expManager.minorTalentCountTexts.Length; i++)
         {
-            if (expManager.talentsUI[i] != null)
+            if (expManager.minorTalentCountTexts[i] != null)
             {
-                expManager.talentsUI[i].SetActive(false);
+                expManager.minorTalentCountTexts[i].gameObject.SetActive(false);
             }
         }
+        for (int i = 0; i < expManager.chosenTalentsUIImages.Length; i++)
+        {
+            if (expManager.chosenTalentsUIImages[i] != null)
+            {
+                expManager.chosenTalentsUIImages[i].gameObject.SetActive(false);
+            }
+        }
+        playerScript.skillFillImage.gameObject.SetActive(false);
+        playerScript.skillImage.gameObject.SetActive(false);
+
         bossHPUIBar.SetActive(false);
         UpdateLeaderboard();
         WallOfFameUpdate();
@@ -561,6 +575,12 @@ public class MainManager : MonoBehaviour
             enemy.enemyHealth = 0;
             yield return new WaitForSeconds(0.2f);
         }
+        Experience[] expObjects = FindObjectsOfType<Experience>();
+
+        foreach (Experience exp in expObjects)
+        {
+            Destroy(exp.gameObject);
+        }
     }
     private void WinUI()
     {
@@ -571,20 +591,30 @@ public class MainManager : MonoBehaviour
                 uiToggle[i].SetActive(false);
             }
         }
-        for (int i = 0; i < expManager.minorTalentsUI.Length; i++)
+        for (int i = 0; i < expManager.minorTalentSlots.Length; i++)
         {
-            if (expManager.minorTalentsUI[i] != null)
+            if (expManager.minorTalentSlots[i] != null)
             {
-                expManager.minorTalentsUI[i].SetActive(false);
+                expManager.minorTalentSlots[i].gameObject.SetActive(false);
             }
         }
-        for (int i = 0; i < expManager.talentsUI.Length; i++)
+        for (int i = 0; i < expManager.minorTalentCountTexts.Length; i++)
         {
-            if (expManager.talentsUI[i] != null)
+            if (expManager.minorTalentCountTexts[i] != null)
             {
-                expManager.talentsUI[i].SetActive(false);
+                expManager.minorTalentCountTexts[i].gameObject.SetActive(false);
             }
         }
+        for (int i = 0; i < expManager.chosenTalentsUIImages.Length; i++)
+        {
+            if (expManager.chosenTalentsUIImages[i] != null)
+            {
+                expManager.chosenTalentsUIImages[i].gameObject.SetActive(false);
+            }
+        }
+        playerScript.skillFillImage.gameObject.SetActive(false);
+        playerScript.skillImage.gameObject.SetActive(false);
+
         UpdateLeaderboard();
         WallOfFameUpdate();
         if (SceneManager.GetActiveScene().name == "MainScene")

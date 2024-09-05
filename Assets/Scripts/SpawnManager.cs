@@ -38,7 +38,7 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] GameObject aoeAreasObjects;
     [SerializeField] public GameObject aoeSpawnAreaObject;
     [SerializeField] GameObject bossStarParticleObject;
-    float bossStarMoveSpeed = 10f;
+    float bossStarMoveSpeed = 7f;
     private Vector3 targetPosition = new Vector3(2.750329f, 1f, 2.416487f);
     ParticleSystem bossStarParticleSystem;
     [SerializeField] ParticleSystem bossStarFallParticleSystem;
@@ -47,12 +47,15 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] AudioManager audioManager;
     [SerializeField] Player playerScript;
 
+    public bool bossFightIsOn = false;
+
     public void ActivateAndMoveBossStar()
     {
         if (SceneManager.GetActiveScene().name == "MainScene")
         {
             bossStarParticleObject.SetActive(true);
             startSpawn = false;
+            bossFightIsOn = true;
 
             StartCoroutine(MoveBossStar());
         }
@@ -145,7 +148,7 @@ public class SpawnManager : MonoBehaviour
         float y = 0;
         if (difficultyMeter > 2)
         {
-            y = 0.05f;
+            y = 0.07f;
         }
         if (difficultyMeter >=5 && difficultyMeter <= 7 || difficultyMeter >= 13 && difficultyMeter <= 19)
         {

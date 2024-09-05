@@ -16,7 +16,8 @@ public class DataPersistence : MonoBehaviour
     public static float playerTwoScore = 10;
     public static float playerThreeScore = 5;
     public static bool startInfoDontShowData;
-    public static float soundAdjustment = 0.5f;
+    public static float soundAdjustment = 0.3f;
+    public static string lastPlayerName = " ";
 
     private void Awake()
     {
@@ -54,6 +55,7 @@ public class DataPersistence : MonoBehaviour
         public float player3Score;
         public bool startInfoDontShowAgain;
         public float soundAdjust;
+        public string lastPlayerName;
     }
     public void SaveData()
     {
@@ -67,6 +69,7 @@ public class DataPersistence : MonoBehaviour
         data.player2Score = playerTwoScore;
         data.player3Score = playerThreeScore;
         data.startInfoDontShowAgain = startInfoDontShowData;
+        data.lastPlayerName = lastPlayerName;
 
         string json = JsonUtility.ToJson(data);
 
@@ -89,6 +92,7 @@ public class DataPersistence : MonoBehaviour
             playerTwoScore = data.player2Score;
             playerThreeScore = data.player3Score;
             startInfoDontShowData = data.startInfoDontShowAgain;
+            lastPlayerName = data.lastPlayerName;
         }
     }
 

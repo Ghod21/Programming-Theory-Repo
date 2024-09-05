@@ -47,8 +47,8 @@ public class Player : MonoBehaviour
     public float attackRange = 3f; // Range of the attack
     public float attackRangeStart;
     public float attackRangeAdd = 0f;
-    [SerializeField] private float attackAngle = 180f; // Angle of the attack cone
-    private bool isAttacking = false; 
+    [SerializeField] public float attackAngle = 180f; // Angle of the attack cone
+    private bool isAttacking = false;
     private float attackCooldown = 0f; // Cooldown for attack
     private const float attackCooldownDuration = 0.833f; // Duration of the attack cooldown
     private int attackCount;
@@ -167,7 +167,7 @@ public class Player : MonoBehaviour
     public int healthRegenMinorAdd = 0;
     public float healthRegenCooldown = 15f;
     public float healthRegenCooldownMinus = 0;
-    
+
 
 
 
@@ -376,7 +376,7 @@ public class Player : MonoBehaviour
                 if (fireBreathTalentIsChosen)
                 {
                     ShieldStop();
-                    
+
                     FireBreath();
                     StartCoroutine(SpellCooldownTimer());
                 }
@@ -410,9 +410,6 @@ public class Player : MonoBehaviour
                 }
                 else if (lightningTalentIsChosen && !weaponIsCharged)
                 {
-                    isAttacking = false;
-                    animator.SetBool("isAttacking", false);
-                    StopCoroutine(AttackCoroutine());
                     ShieldStop();
                     StartCoroutine(ChargeWeapon());
 
@@ -569,11 +566,11 @@ public class Player : MonoBehaviour
                         {
                             hitEnemy = true;
                         }
-                        if (bleedAttackTalentIsChosen && !enemy.enemyIsBleeding)
-                        {
-                            StartCoroutine(BleedTalentEffect(enemy));
-                            enemy.AddMaterial();
-                        }
+                        //if (bleedAttackTalentIsChosen && !enemy.enemyIsBleeding)
+                        //{
+                        //    StartCoroutine(BleedTalentEffect(enemy));
+                        //    enemy.AddMaterial();
+                        //}
                     }
 
                 }
@@ -839,7 +836,7 @@ public class Player : MonoBehaviour
 
         shieldWallPiecesLogic();
 
-        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell && shieldAttackTalentChosen || Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell && !shieldAttackTalentChosen && !isAttacking)
+        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell && shieldAttackTalentChosen && !mainManager.paused || Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell && !shieldAttackTalentChosen && !isAttacking && !mainManager.paused)
         {
             ShieldStart();
             audioSource.PlayOneShot(audioClips[4], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
@@ -1376,10 +1373,13 @@ public class Player : MonoBehaviour
     IEnumerator AttackCoroutine()
     {
         yield return new WaitForSeconds((0.833f / 2) / attackSpeedMinorTalentAdaptation); // Half of the attack animation duration
-        if (isShielding && !shieldAttackTalentChosen)
+        if (isShielding && !shieldAttackTalentChosen || isUsingSpell)
         {
             isAttacking = false;
-            animator.SetBool("isAttacking", false);
+            if (!isUsingSpell)
+            {
+                animator.SetBool("isAttacking", false);
+            }
             yield break;
         }
 

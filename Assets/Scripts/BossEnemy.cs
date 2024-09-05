@@ -14,7 +14,7 @@ public class BossEnemy : Enemy
     SphereCollider explosionBossSpellSphereCollider;
     float distanceThreshold = 10;
     bool closeEnoughToExplode;
-    bool farEnoughToCharge;
+    //bool farEnoughToCharge;
     AudioSource audioSourceFire;
     private float radius;
     public float speedRatio;
@@ -90,7 +90,7 @@ public class BossEnemy : Enemy
             {
                 index = RandomSpellIndex();
             }
-            while ((fireAreasSpellIsActive && index == 0) || (!closeEnoughToExplode && index == 1) || (!farEnoughToCharge && index == 2));
+            while ((fireAreasSpellIsActive && index == 0) || (!closeEnoughToExplode && index == 1));
 
             Debug.Log($"Selected spell index: {index}");
 
@@ -180,10 +180,10 @@ public class BossEnemy : Enemy
         }
         if (distanceToPlayer > distanceThreshold)
         {
-            farEnoughToCharge = true;
+            //farEnoughToCharge = true;
         } else
         {
-            farEnoughToCharge = false;
+            //farEnoughToCharge = false;
         }
     }
     IEnumerator FireAreasSpawn()
@@ -225,6 +225,10 @@ public class BossEnemy : Enemy
         // Perform the charge
         Vector3 chargeDirection = (player.position - transform.position).normalized;
         float chargeEndTime = Time.time + chargeDuration;
+        if (enemyHealth < 0.001)
+        {
+            yield break;
+        }
         playerScript.audioSource.PlayOneShot(playerScript.audioClips[19], DataPersistence.soundsVolume * 1f * DataPersistence.soundAdjustment);
 
         while (Time.time < chargeEndTime)
@@ -236,7 +240,10 @@ public class BossEnemy : Enemy
                 bossChargeCooldown = true;
                 break; // Exit the inner while loop to stop the current charge
             }
-
+            if (enemyHealth < 0.001)
+            {
+                yield break;
+            }
             rb.velocity = chargeDirection * chargeSpeed;
             yield return null; // Wait until the next frame
         }

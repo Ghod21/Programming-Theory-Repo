@@ -18,7 +18,7 @@ public class Enemy : MonoBehaviour
     protected Transform player; // Reference to the player's Transform
     protected Rigidbody rb; // Reference to the Rigidbody component
     [SerializeField] protected float moveSpeed = 3.5f;
-    [SerializeField] protected float attackRange = 2.0f; // Distance within which the enemy will attack
+    [SerializeField] public float attackRange = 2.0f; // Distance within which the enemy will attack
     protected bool isAttacking = false; // To prevent multiple attack calls
     public float enemyHealth;
     protected float enemyHealthMax;
@@ -231,7 +231,7 @@ public class Enemy : MonoBehaviour
     protected virtual IEnumerator deathAnimation()
     {
         PrefabIdentifier prefabIdentifier = GetComponent<PrefabIdentifier>();
-        if (prefabIdentifier.prefabName != "EnemyBoss" && !mainManager.win)
+        if (prefabIdentifier.prefabName != "EnemyBoss" && !spawnManager.bossFightIsOn)
         {
             ExperienceSpawnOnDeath();
         }
