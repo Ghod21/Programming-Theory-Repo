@@ -15,7 +15,7 @@ public class DataPersistence : MonoBehaviour
     public static float playerOneScore = 15;
     public static float playerTwoScore = 10;
     public static float playerThreeScore = 5;
-    public static bool startInfoDontShowData;
+    public static bool startInfoDontShowData = false;
     public static float soundAdjustment = 0.3f;
     public static string lastPlayerName = " ";
     public static bool easyDifficulty = true;

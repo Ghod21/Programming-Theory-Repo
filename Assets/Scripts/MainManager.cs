@@ -30,6 +30,7 @@ public class MainManager : MonoBehaviour
     [SerializeField] AudioClip[] menuSounds;
     [SerializeField] public AudioSource audioSource;
     [SerializeField] Player playerScript;
+    [SerializeField] TextMeshProUGUI difficultyText;
     public bool win = false;
     public bool canEsc = true;
 
@@ -100,13 +101,14 @@ public class MainManager : MonoBehaviour
         leaderBoardUpdated = false;
         if (SceneManager.GetActiveScene().name == "Menu")
         {
-            startInfoToggle.isOn = DataPersistence.startInfoDontShowData;
+            //startInfoToggle.isOn = DataPersistence.startInfoDontShowData;
             WallOfFameUpdate();
         }
         UISceneLogic();
         if (SceneManager.GetActiveScene().name == "Menu" && !DataPersistence.startInfoDontShowData)
         {
             StartInfo();
+            DataPersistence.startInfoDontShowData = true;
         }
         infoIsOn = false;
 
@@ -117,6 +119,17 @@ public class MainManager : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "MainScene")
         {
             nameText.text = DataPersistence.currentPlayerName;
+            if (DataPersistence.easyDifficulty)
+            {
+                //difficultyText.color = HexToColor("#7EF62B");
+                difficultyText.text = "Easy";
+            }
+            else
+            {
+                //difficultyText.color = HexToColor("#FCBE2E");
+                difficultyText.text = "Hard";
+            }
+
             isTimerRunning = true;  // Start the timer when the game starts
             StartCoroutine(Timer());
             for (int i = 0; i < gameOverUI.Length; i++)
@@ -149,7 +162,7 @@ public class MainManager : MonoBehaviour
     {
         if (!playerScript.gameOver)
         {
-            UIStartInfoDontShowLogic();
+            //UIStartInfoDontShowLogic();
             timerUI.text = "Time: " + timerMinutes.ToString("D2") + ":" + timerSeconds.ToString("D2");
             if (startInfoIsOn && Input.anyKeyDown)
             {
@@ -177,7 +190,7 @@ public class MainManager : MonoBehaviour
                 // Check if the name is valid
                 correctNameToStart = IsValidName(nameInputField.text);
             }
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetKeyDown(KeyCode.Escape) && SceneManager.GetActiveScene().name == "MainScene")
             {
                 if (!paused && Time.timeScale != 0f)
                 {
@@ -255,7 +268,9 @@ public class MainManager : MonoBehaviour
                     uiToggle[i].SetActive(true);
                 }
             }
-            uiToggle[16].SetActive(true);
+
+            easyDifficultyButton.gameObject.SetActive(false);
+            hardDifficultyButton.gameObject.SetActive(false);
 
             infoIsOn = true;
         }
@@ -270,6 +285,8 @@ public class MainManager : MonoBehaviour
                     uiToggle[i].SetActive(false);
                 }
             }
+            easyDifficultyButton.gameObject.SetActive(true);
+            hardDifficultyButton.gameObject.SetActive(true);
         }
     }
     private void StartInfo()
@@ -329,13 +346,13 @@ public class MainManager : MonoBehaviour
         }
     }
 
-    private void UIStartInfoDontShowLogic()
-    {
-        if (SceneManager.GetActiveScene().name == "Menu")
-        {
-            DataPersistence.startInfoDontShowData = startInfoToggle.isOn ? true : false;
-        }
-    }
+    //private void UIStartInfoDontShowLogic()
+    //{
+    //    if (SceneManager.GetActiveScene().name == "Menu")
+    //    {
+    //        DataPersistence.startInfoDontShowData = startInfoToggle.isOn ? true : false;
+    //    }
+    //}
 
     private void NameInputFieldUI()
     {
@@ -696,7 +713,7 @@ public class MainManager : MonoBehaviour
 
         DataPersistence.easyDifficulty = false;
     }
-    Color HexToColor(string hex)
+    public Color HexToColor(string hex)
     {
         hex = hex.Replace("#", "");
 

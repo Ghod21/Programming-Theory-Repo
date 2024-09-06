@@ -14,7 +14,7 @@ public class Enemy : MonoBehaviour
     protected MainManager mainManager;
     public GameObject expManager;
     public ExpManager expManagerScript;
-    private float desiredY = 1.4f; // Desired height for the position
+    private float desiredY = 1.2f; // Desired height for the position
     protected Transform player; // Reference to the player's Transform
     protected Rigidbody rb; // Reference to the Rigidbody component
     [SerializeField] protected float moveSpeed = 3.5f;
@@ -33,6 +33,7 @@ public class Enemy : MonoBehaviour
     private UnityEngine.Color newColor;
     protected bool isUsingSpell;
     protected float healthBottleAdaptiveSpawnChance = 0;
+    Transform lookAtPlayerObject;
 
     public bool damagedByVortex = false;
 
@@ -49,6 +50,7 @@ public class Enemy : MonoBehaviour
 
     protected virtual void Start()
     {
+        lookAtPlayerObject = GameObject.FindWithTag("LookAtPlayer").GetComponent<Transform>();
         mainManager = GameObject.Find("MainManager").GetComponent<MainManager>();
         expManager = GameObject.Find("Exp_Bar");
         expManagerScript = expManager.GetComponent<ExpManager>();
@@ -130,6 +132,11 @@ public class Enemy : MonoBehaviour
         if (enemyPosition != closestPointInBounds)
         {
             Vector3 newPosition = GetClosestValidPoint(closestPointInBounds);
+            PrefabIdentifier prefabName = GetComponent<PrefabIdentifier>();
+            if (prefabName.prefabName == "EnemyRangeEasy" || prefabName.prefabName == "EnemyRangeMedium")
+            {
+                desiredY = 1.4f;
+            }
             newPosition.y = desiredY; // Set the desired height
             transform.position = newPosition;
         }

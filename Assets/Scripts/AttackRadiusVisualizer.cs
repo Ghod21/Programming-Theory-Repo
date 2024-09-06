@@ -40,12 +40,12 @@ public class AttackRadiusVisualizer : MonoBehaviour
 
         if (playerComponent != null)
         {
-            attackRadius = playerComponent.attackRange * 0.8f; // Get player's attack radius
+            attackRadius = playerComponent.attackRange - 0.7f; // Get player's attack radius
             SetColor(HexToColor("#2B8A2B", 0.3f)); // Use HEX code for green with 30% transparency
         }
         else if (enemyComponent != null)
         {
-            attackRadius = enemyComponent.attackRange * 0.8f; // Get enemy's attack radius
+            attackRadius = enemyComponent.attackRange - 0.7f; // Get enemy's attack radius
             SetColor(HexToColor("#B74443", 0.3f)); // Use HEX code for red with 30% transparency
         }
 

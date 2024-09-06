@@ -6448,7 +6448,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1163511576
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10149,13 +10149,13 @@ MonoBehaviour:
   - {fileID: 718029868}
   - {fileID: 1266598945}
   - {fileID: 799519653}
-  - {fileID: 1163511575}
+  - {fileID: 799519653}
   gameOverUI: []
   winUI: []
   gameOverUIText: []
   winUIText: []
   nameText: {fileID: 0}
-  startInfoToggle: {fileID: 1163511577}
+  startInfoToggle: {fileID: 0}
   nameInputField: {fileID: 1611972304}
   nameFieldImage: {fileID: 1611972305}
   wrongNameText: {fileID: 1012237834}
@@ -10165,6 +10165,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: fcf77559b4c484b4bb499c9a95c32e21, type: 3}
   audioSource: {fileID: 1177333152}
   playerScript: {fileID: 1885716652}
+  difficultyText: {fileID: 0}
   win: 0
   canEsc: 1
   difficultyMeter: 0

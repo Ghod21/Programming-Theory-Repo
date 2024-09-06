@@ -24,7 +24,7 @@ public class SpawnManager : MonoBehaviour
 
     [SerializeField] MainManager mainManagerScript;
     private int numberOfEnemies; // Number of enemies to spawn
-    private float spawnHeight = 1.4f; // Desired spawn height
+    private float spawnHeight = 1.2f; // Desired spawn height
     public int waveDifficulty;
     private bool startSpawn;
     private float spawnTime = 3;
@@ -175,6 +175,11 @@ public class SpawnManager : MonoBehaviour
             Vector3 spawnPosition = GetRandomPointInBounds(spawnArea.bounds, exclusionZone);
             GameObject enemy = ChooseEnemyBasedOnDifficulty();
             GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, Quaternion.identity);
+            PrefabIdentifier prefabName = enemy.GetComponent<PrefabIdentifier>();
+            if (prefabName.prefabName == "EnemyRangeEasy" || prefabName.prefabName == "EnemyRangeMedium")
+            {
+                spawnHeight = 1.4f;
+            }
             instantiatedEnemy.transform.position = new Vector3(instantiatedEnemy.transform.position.x, spawnHeight, instantiatedEnemy.transform.position.z);
             if(numberOfEnemies > 1)
             {
