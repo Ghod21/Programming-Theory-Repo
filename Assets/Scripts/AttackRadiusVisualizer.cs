@@ -55,33 +55,36 @@ public class AttackRadiusVisualizer : MonoBehaviour
 
     void Update()
     {
-        // Check if the Alt key is pressed to toggle the circle visibility
-        if (Input.GetKeyDown(KeyCode.LeftAlt) && !lineRenderer.enabled)
+        if (DataPersistence.easyDifficulty && SceneManager.GetActiveScene().name == "MainScene")
         {
-            visualizerEnabled = true;
-        }
-        else if (Input.GetKeyDown(KeyCode.LeftAlt))
-        {
-            visualizerEnabled = false;
-        }
-        if (visualizerEnabled && playerComponent != null)
-        {
-            lineRenderer.enabled = true;
-        }
-        else if (visualizerEnabled && enemyComponent.enemyHealth > 0 && enemyComponent != null)
-        {
-            lineRenderer.enabled = true;
-        }
-        else
-        {
-            lineRenderer.enabled = false;
-        }
+            // Check if the Alt key is pressed to toggle the circle visibility
+            if (Input.GetKeyDown(KeyCode.LeftAlt) && !lineRenderer.enabled)
+            {
+                visualizerEnabled = true;
+            }
+            else if (Input.GetKeyDown(KeyCode.LeftAlt))
+            {
+                visualizerEnabled = false;
+            }
+            if (visualizerEnabled && playerComponent != null)
+            {
+                lineRenderer.enabled = true;
+            }
+            else if (visualizerEnabled && enemyComponent.enemyHealth > 0 && enemyComponent != null)
+            {
+                lineRenderer.enabled = true;
+            }
+            else
+            {
+                lineRenderer.enabled = false;
+            }
 
-        // Update the position of the circle to follow the parent (player or enemy)
-        if (transform.parent != null)
-        {
-            transform.position = transform.parent.position;
-            transform.rotation = initialRotation;
+            // Update the position of the circle to follow the parent (player or enemy)
+            if (transform.parent != null)
+            {
+                transform.position = transform.parent.position;
+                transform.rotation = initialRotation;
+            }
         }
     }
 

@@ -9,7 +9,7 @@ public class HardEnemy : Enemy
     protected override void Start()
     {
         base.Start(); // Call the Start method from the base class
-        // Additional initialization code for EasyEnemy
+                      // Additional initialization code for EasyEnemy
         enemyHealth = 7;
         isHardEnemy = true;
         DefenceAuraSearch();

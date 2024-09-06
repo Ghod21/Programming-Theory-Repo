@@ -12,7 +12,13 @@ public class EasyEnemy : Enemy
         //if (spawnManager.difficultyMeter >= 3)
         //{
         //    objectTransform.localScale = new Vector3(1.25f, 1.25f, 1.25f);
+        if (DataPersistence.easyDifficulty)
+        {
+            enemyHealth = 2;
+        } else
+        {
             enemyHealth = 3;
+        }
         //} else
         //{
         //    objectTransform.localScale = new Vector3(1f, 1f, 1f);

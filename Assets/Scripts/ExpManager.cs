@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.UIElements;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class ExpManager : MonoBehaviour
 {
@@ -99,6 +100,13 @@ public class ExpManager : MonoBehaviour
         availableTalentFunctions = new List<Action<int>>(minorTalentFunctions);
         //ShowSkillsTalentsUI();
         //ShowMinorTalentsUI(); // Minor talents test
+        if (DataPersistence.easyDifficulty && SceneManager.GetActiveScene().name == "MainScene")
+        {
+            SelectTalent(8);
+            playerScript.healthRegenMinorAdd++;
+            playerScript.StartCoroutine(playerScript.HealthRegenTalent());
+            healthRegenMinorOnce = true;
+        }
     }
 
     void Update()

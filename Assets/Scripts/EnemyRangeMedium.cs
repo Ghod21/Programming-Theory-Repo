@@ -19,6 +19,14 @@ public class EnemyRangeMedium : Enemy
     {
         projectilePrefab = Resources.Load<GameObject>("Prefabs/ProjectileRangeEnemy");
         base.Start();
+        if (DataPersistence.easyDifficulty)
+        {
+            enemyHealth = 3;
+        }
+        else
+        {
+            enemyHealth = 4;
+        }
         StartCoroutine(AttackRoutine());
     }
 

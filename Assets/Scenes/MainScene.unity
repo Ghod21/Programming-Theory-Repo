@@ -1456,7 +1456,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &108101339
 Transform:
   m_ObjectHideFlags: 0
@@ -10633,7 +10633,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &848778938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22486,6 +22486,9 @@ MonoBehaviour:
   - {fileID: 1149318208}
   - {fileID: 1340649526}
   - {fileID: 1246913454}
+  easyDifficultyButton: {fileID: 0}
+  hardDifficultyButton: {fileID: 0}
+  logoText: {fileID: 0}
 --- !u!4 &1839713938
 Transform:
   m_ObjectHideFlags: 0

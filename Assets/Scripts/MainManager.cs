@@ -62,6 +62,10 @@ public class MainManager : MonoBehaviour
     ParticleSystem confetti1;
     ParticleSystem confetti2;
 
+    [SerializeField] UnityEngine.UI.Button easyDifficultyButton;
+    [SerializeField] UnityEngine.UI.Button hardDifficultyButton;
+    [SerializeField] private TextMeshProUGUI logoText;
+
     public string PlayerName
     {
         get => DataPersistence.currentPlayerName;
@@ -123,6 +127,21 @@ public class MainManager : MonoBehaviour
                 }
             }
             DataPersistence.currentPlayerScore = 0;
+        }
+        if (DataPersistence.easyDifficulty && SceneManager.GetActiveScene().name == "Menu")
+        {
+            easyDifficultyButton.interactable = false;
+            hardDifficultyButton.interactable = true;
+            logoText.color = HexToColor("#7EF62B");
+
+            DataPersistence.easyDifficulty = true;
+        } else if (SceneManager.GetActiveScene().name == "Menu")
+        {
+            hardDifficultyButton.interactable = false;
+            easyDifficultyButton.interactable = true;
+            logoText.color = HexToColor("#FCBE2E");
+
+            DataPersistence.easyDifficulty = false;
         }
     }
 
@@ -454,7 +473,15 @@ public class MainManager : MonoBehaviour
         //expUIToMoveOnBossSpawn.SetActive(false);
         bossHPUIBar.SetActive(true);
         bossHealthSlider.minValue = 0;
-        bossHealthSlider.maxValue = 150;
+        if (DataPersistence.easyDifficulty)
+        {
+            bossHealthSlider.maxValue = 100;
+        }
+        else
+        {
+            bossHealthSlider.maxValue = 150;
+        }
+
     }
     void BossFightUIUpdate()
     {
@@ -649,5 +676,46 @@ public class MainManager : MonoBehaviour
             winUIText[1].text = DataPersistence.currentPlayerName;// PlayerName
             winUIText[2].text = DataPersistence.currentPlayerScore.ToString(); // Player Score
         }
+    }
+
+    public void SetEasyDifficulty()
+    {
+        easyDifficultyButton.interactable = false;
+        hardDifficultyButton.interactable = true;
+        logoText.color = HexToColor("#7EF62B");
+        audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 10f * soundAdjustment);
+
+        DataPersistence.easyDifficulty = true;
+    }
+    public void SetHardDifficulty()
+    {
+        hardDifficultyButton.interactable = false;
+        easyDifficultyButton.interactable = true;
+        logoText.color = HexToColor("#FCBE2E");
+        audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 10f * soundAdjustment);
+
+        DataPersistence.easyDifficulty = false;
+    }
+    Color HexToColor(string hex)
+    {
+        hex = hex.Replace("#", "");
+
+        if (hex.Length != 6 && hex.Length != 8)
+        {
+            Debug.LogError("Invalid HEX color code.");
+            return Color.white;
+        }
+
+        byte r = byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+        byte g = byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+        byte b = byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+        byte a = 255;
+
+        if (hex.Length == 8)
+        {
+            a = byte.Parse(hex.Substring(6, 2), System.Globalization.NumberStyles.HexNumber);
+        }
+
+        return new Color32(r, g, b, a);
     }
 }

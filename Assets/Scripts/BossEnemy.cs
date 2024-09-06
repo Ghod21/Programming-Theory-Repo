@@ -60,7 +60,14 @@ public class BossEnemy : Enemy
             Debug.LogError("Player Script is not set.");
         }
 
-        enemyHealth = 150;
+        if (DataPersistence.easyDifficulty)
+        {
+            enemyHealth = 100;
+        }
+        else
+        {
+            enemyHealth = 150;
+        }
         enemyHealthMax = enemyHealth;
         StartCoroutine(BossSpellChangeRoutine());
         moveSpeed = moveSpeedNew;

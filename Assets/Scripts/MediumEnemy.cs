@@ -19,7 +19,14 @@ public class MediumEnemy : Enemy
         base.Start(); // Call the Start method from the base class
 
         // Additional initialization code for MediumEnemy
-        enemyHealth = 5;
+        if (DataPersistence.easyDifficulty)
+        {
+            enemyHealth = 4;
+        }
+        else
+        {
+            enemyHealth = 5;
+        }
         StartCoroutine(StartChargeDelay());
     }
 

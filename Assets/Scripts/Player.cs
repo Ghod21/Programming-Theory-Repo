@@ -176,7 +176,6 @@ public class Player : MonoBehaviour
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
-        attackRangeStart = attackRange;
         speedStart = speed;
         shieldHealthMax = shieldHealth;
         mainManager = FindObjectOfType<MainManager>();
@@ -203,6 +202,13 @@ public class Player : MonoBehaviour
         }
         UpdateDashUI();
         StartCoroutine(TrackBackwardsDashState());
+        if (DataPersistence.easyDifficulty && SceneManager.GetActiveScene().name == "MainScene")
+        {
+            attackRange = 3.5f;
+            attackRangeStart = attackRange;
+            swordSizeMultiplier += 0.3f;
+            SwordSizeForAttackRange();
+        }
     }
 
     private void Update()
