@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
-public class EasyEnemy : Enemy
+public class EasyEnemy : Enemy // INHERITANCE
 {
     //Transform objectTransform;
     // Easy enemy child script.
@@ -26,12 +26,12 @@ public class EasyEnemy : Enemy
         //}
 
     }
-    public override void MoveTowardsPlayer()
+    public override void MoveTowardsPlayer()  // POLYMORPHISM
     {
         moveSpeed = 5f;
         base.MoveTowardsPlayer();
     }
-    protected override IEnumerator deathAnimation()
+    protected override IEnumerator deathAnimation()  // POLYMORPHISM
     {
         isDying = true;
         //DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;

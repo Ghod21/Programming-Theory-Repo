@@ -4,7 +4,7 @@ using System.Drawing;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour // INHERITANCE (PARENT)
 {
     // Main enemy parent script.
     [SerializeField] protected BoxCollider boundaryCollider; // Collider defining the boundary
@@ -17,7 +17,7 @@ public class Enemy : MonoBehaviour
     private float desiredY = 1.2f; // Desired height for the position
     protected Transform player; // Reference to the player's Transform
     protected Rigidbody rb; // Reference to the Rigidbody component
-    [SerializeField] protected float moveSpeed = 3.5f;
+    [SerializeField] public float moveSpeed = 3.5f;
     [SerializeField] public float attackRange = 2.0f; // Distance within which the enemy will attack
     protected bool isAttacking = false; // To prevent multiple attack calls
     public float enemyHealth;
@@ -48,7 +48,7 @@ public class Enemy : MonoBehaviour
     public bool shieldDamageTalentChosen = false;
     public bool isDying = false;
 
-    protected virtual void Start()
+    protected virtual void Start() // POLYMORPHISM
     {
         lookAtPlayerObject = GameObject.FindWithTag("LookAtPlayer").GetComponent<Transform>();
         mainManager = GameObject.Find("MainManager").GetComponent<MainManager>();
@@ -67,11 +67,11 @@ public class Enemy : MonoBehaviour
         SkinnedMeshRendererSearch();
     }
 
-    protected virtual void Update()
+    protected virtual void Update() // POLYMORPHISM
     {
-        CheckForPrefab();
+        CheckForPrefab(); // ABSTRACTION
         LookAtPlayer(); // Ensure the enemy always faces the player
-        CheckBoundary();
+        CheckBoundary(); // ABSTRACTION
         CheckAttackRange(); // Check if the enemy is within attack range
         rb.velocity = Vector3.zero; // Reset velocity to avoid residual movement
         rb.angularVelocity = Vector3.zero; // Reset angular velocity to avoid rotation issues
@@ -113,7 +113,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    public virtual void MoveTowardsPlayer()
+    public virtual void MoveTowardsPlayer() // POLYMORPHISM
     {
         if (!attacked && enemyHealth > 0)
         {
@@ -164,7 +164,7 @@ public class Enemy : MonoBehaviour
         return Vector3.Distance(point, closestPoint) < Mathf.Epsilon;
     }
 
-    protected virtual void CheckAttackRange()
+    protected virtual void CheckAttackRange() // POLYMORPHISM
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
@@ -194,7 +194,7 @@ public class Enemy : MonoBehaviour
 
 
 
-    protected virtual void EnemyAttack()
+    protected virtual void EnemyAttack() // POLYMORPHISM
     {
         // Method for enemy attacks
         animator.SetBool("isAttacking", true);
@@ -235,7 +235,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    protected virtual IEnumerator deathAnimation()
+    protected virtual IEnumerator deathAnimation() // POLYMORPHISM
     {
         PrefabIdentifier prefabIdentifier = GetComponent<PrefabIdentifier>();
         if (prefabIdentifier.prefabName != "EnemyBoss" && !spawnManager.bossFightIsOn)

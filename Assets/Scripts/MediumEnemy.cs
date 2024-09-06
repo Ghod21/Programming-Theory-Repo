@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class MediumEnemy : Enemy
+public class MediumEnemy : Enemy // INHERITANCE
 {
 
     private bool chargeCooldownBool;
@@ -14,7 +14,7 @@ public class MediumEnemy : Enemy
     private readonly float chargePause = 1f; // Time to pause before charging
     bool isAbleToWalkBeforeFirstCharge = true;
 
-    protected override void Start()
+    protected override void Start()  // POLYMORPHISM
     {
         base.Start(); // Call the Start method from the base class
 
@@ -37,7 +37,7 @@ public class MediumEnemy : Enemy
         isAbleToWalkBeforeFirstCharge = false;
     }
 
-    public override void MoveTowardsPlayer()
+    public override void MoveTowardsPlayer()  // POLYMORPHISM
     {
         moveSpeed = 4f;
         if (!attacked && enemyHealth > 0 && chargeCooldownBool || !attacked && enemyHealth > 0 && isAbleToWalkBeforeFirstCharge)
@@ -48,7 +48,7 @@ public class MediumEnemy : Enemy
         }
     }
 
-    protected override IEnumerator deathAnimation()
+    protected override IEnumerator deathAnimation()  // POLYMORPHISM
     {
         isDying = true;
         //DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
@@ -122,7 +122,7 @@ public class MediumEnemy : Enemy
         }
     }
 
-    protected override void EnemyAttack()
+    protected override void EnemyAttack()  // POLYMORPHISM
     {
         // Method for enemy attacks
         animator.SetBool("isAttacking", true);

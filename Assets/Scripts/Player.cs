@@ -215,18 +215,18 @@ public class Player : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "MainScene" && !gameOver && !timeIsFrozen)
         {
-            GatherInput();
+            GatherInput(); // ABSTRACTION
             if (!mainManager.paused)
             {
-                LookAtMouse();
+                LookAtMouse(); // ABSTRACTION
             }
             HandleAnimations(); // Call the method to handle animations
-            HealthLogic();
-            ScoreUpdate();
+            HealthLogic(); // ABSTRACTION
+            ScoreUpdate(); // ABSTRACTION
             if (!mainManager.win)
             {
-                DashUILogic();
-                AttackAndShieldLogic();
+                DashUILogic(); // ABSTRACTION
+                AttackAndShieldLogic(); // ABSTRACTION
             }
             //RunSound();
             //ChargedWeaponSoundLogic();
@@ -244,7 +244,7 @@ public class Player : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.E) && !mainManager.win)
             {
-                UseSpell();
+                UseSpell(); // ABSTRACTION
             }
 
 
@@ -255,7 +255,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    void AttackAndShieldLogic()
+    void AttackAndShieldLogic() // ABSTRACTION
     {
         isNotAttackingCheck(); // Check if not attacking
         ShieldLogic();

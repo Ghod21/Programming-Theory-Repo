@@ -133,7 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 11749221}
   m_Layer: 5
-  m_Name: AttaclTalentsUI
+  m_Name: AttackTalentsUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2286,7 +2286,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Increased chance of health potions dropping
+  m_text: More potions
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 09a06a0cd50d550499e7c7cc0fdb9cbb, type: 2}
   m_sharedMaterial: {fileID: 4896327277775826445, guid: 09a06a0cd50d550499e7c7cc0fdb9cbb, type: 2}
@@ -3531,7 +3531,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Improves health regeneration minor talent effectiveness
+  m_text: Better regeneration
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 09a06a0cd50d550499e7c7cc0fdb9cbb, type: 2}
   m_sharedMaterial: {fileID: 4896327277775826445, guid: 09a06a0cd50d550499e7c7cc0fdb9cbb, type: 2}
@@ -4044,8 +4044,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 15, y: 0}
-  m_SizeDelta: {x: -24, y: 0}
+  m_AnchoredPosition: {x: 16.25, y: 0}
+  m_SizeDelta: {x: -26.499998, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &259932020
 MonoBehaviour:
@@ -4067,7 +4067,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '- 5 shield HP. You  can attack 3 times in shield mode. '
+  m_text: Weaker shield. You  can attack 3 times in shield mode
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 09a06a0cd50d550499e7c7cc0fdb9cbb, type: 2}
   m_sharedMaterial: {fileID: 4896327277775826445, guid: 09a06a0cd50d550499e7c7cc0fdb9cbb, type: 2}

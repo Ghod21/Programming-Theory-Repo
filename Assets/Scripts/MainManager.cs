@@ -67,7 +67,7 @@ public class MainManager : MonoBehaviour
     [SerializeField] UnityEngine.UI.Button hardDifficultyButton;
     [SerializeField] private TextMeshProUGUI logoText;
 
-    public string PlayerName
+    public string PlayerName // ENCAPSULATION
     {
         get => DataPersistence.currentPlayerName;
         private set
@@ -581,32 +581,25 @@ public class MainManager : MonoBehaviour
         winUI[winUI.Length - 1].SetActive(true);
         canEsc = true;
 
-        while (true) // Будет повторяться до тех пор, пока корутина не будет остановлена
+        while (true)
         {
-            // Выбор случайного количества объектов конфетти (от 1 до 3)
-            int numberOfConfetti = Random.Range(1, 4); // 1 включительно, 4 не включительно
+            int numberOfConfetti = Random.Range(1, 4);
 
             for (int i = 0; i < numberOfConfetti; i++)
             {
-                // Выбор случайной позиции из массива confettiSpawnPoints
                 GameObject randomSpawnPoint = confettiSpawnPoints[Random.Range(0, confettiSpawnPoints.Length)];
 
-                // Выбор случайного конфетти
                 ParticleSystem selectedConfetti = Random.value < 0.5f ? confetti1 : confetti2;
 
-                // Создание экземпляра конфетти
                 ParticleSystem spawnedConfetti = Instantiate(selectedConfetti, randomSpawnPoint.transform.position, Quaternion.identity);
 
-                // Запуск конфетти
                 spawnedConfetti.Play();
 
-                // Удаление конфетти через 5 секунд
                 playerScript.audioSource.PlayOneShot(playerScript.audioClips[20], DataPersistence.soundsVolume * 3f * DataPersistence.soundAdjustment);
                 Destroy(spawnedConfetti.gameObject, 5f);
                 yield return new WaitForSeconds(0.2f);
             }
 
-            // Ожидание перед следующей итерацией
             yield return new WaitForSeconds(1.5f);
         }
     }

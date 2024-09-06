@@ -16,7 +16,7 @@ public class DataPersistence : MonoBehaviour
     public static float playerTwoScore = 10;
     public static float playerThreeScore = 5;
     public static bool startInfoDontShowData = false;
-    public static float soundAdjustment = 0.3f;
+    public static float soundAdjustment = 0.2f;
     public static string lastPlayerName = " ";
     public static bool easyDifficulty = true;
 
@@ -36,7 +36,7 @@ public class DataPersistence : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        // Function to pull information for between sessions data pers.
+        // Function to pull information for between sessions data persistence.
     }
     public void Exit()
     {

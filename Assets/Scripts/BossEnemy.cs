@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-public class BossEnemy : Enemy
+public class BossEnemy : Enemy // INHERITANCE
 {
     // Boss enemy child script.
     private bool bossChargeCooldown;
@@ -29,7 +29,7 @@ public class BossEnemy : Enemy
     [SerializeField] float bossHPRegenNumber;
 
 
-    protected override void Start()
+    protected override void Start() // POLYMORPHISM
     {
         base.Start();
         speedRatio = 6 / 2.5f;
@@ -73,7 +73,7 @@ public class BossEnemy : Enemy
         moveSpeed = moveSpeedNew;
     }
 
-    protected override void Update()
+    protected override void Update() // POLYMORPHISM
     {
         base.Update();
         CheckDistanceToPlayer();
@@ -212,7 +212,7 @@ public class BossEnemy : Enemy
         fireAreasSpellIsActive = false;
     }
 
-    public override void MoveTowardsPlayer()
+    public override void MoveTowardsPlayer() // POLYMORPHISM
     {
         if (!attacked && enemyHealth > 0 && !bossChargeCooldown && !isUsingSpell)
         {
@@ -261,7 +261,7 @@ public class BossEnemy : Enemy
         // Wait for the cooldown period
         bossChargeCooldown = false;
     }
-    protected override IEnumerator deathAnimation()
+    protected override IEnumerator deathAnimation() // POLYMORPHISM
     {
         isDying = true;
         // Code to prevent 0.5 ending result when adding bonus points for killing the boss.
@@ -277,7 +277,7 @@ public class BossEnemy : Enemy
         mainManager.StartCoroutine(mainManager.Win());
         return base.deathAnimation();
     } 
-    protected override void EnemyAttack()
+    protected override void EnemyAttack() // POLYMORPHISM
     {
         // Method for enemy attacks
         animator.SetBool("isAttacking", true);

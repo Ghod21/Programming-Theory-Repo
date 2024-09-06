@@ -85,6 +85,14 @@ public class AttackRadiusVisualizer : MonoBehaviour
                 transform.position = transform.parent.position;
                 transform.rotation = initialRotation;
             }
+            if (playerComponent != null)
+            {
+                attackRadius = playerComponent.attackRange - 0.7f; // Get player's attack radius
+            }
+            else if (enemyComponent != null)
+            {
+                attackRadius = enemyComponent.attackRange - 0.7f; // Get enemy's attack radius
+            }
         }
     }
 

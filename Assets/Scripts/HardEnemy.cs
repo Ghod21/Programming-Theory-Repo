@@ -1,12 +1,12 @@
 using System.Collections;
 using UnityEngine;
 
-public class HardEnemy : Enemy
+public class HardEnemy : Enemy // INHERITANCE
 {
     // Hard enemy child script.
     private GameObject defenceAuraObject;
     private DefenceAura defenceAuraScript;
-    protected override void Start()
+    protected override void Start()  // POLYMORPHISM
     {
         base.Start(); // Call the Start method from the base class
                       // Additional initialization code for EasyEnemy
@@ -15,7 +15,7 @@ public class HardEnemy : Enemy
         DefenceAuraSearch();
         defenceAuraScript = defenceAuraObject.GetComponent<DefenceAura>();
     }
-    protected override void Update()
+    protected override void Update()  // POLYMORPHISM
     {
         base.Update();
         if (enemyHealth < 0.01f)
@@ -24,12 +24,12 @@ public class HardEnemy : Enemy
             Destroy(defenceAuraObject, 0.5f);
         }
     }
-    public override void MoveTowardsPlayer()
+    public override void MoveTowardsPlayer()  // POLYMORPHISM
     {
         moveSpeed = 3f;
         base.MoveTowardsPlayer();
     }
-    protected override IEnumerator deathAnimation()
+    protected override IEnumerator deathAnimation()  // POLYMORPHISM
     {
         isDying = true;
         //DataPersistence.currentPlayerScore += 20 * playerScript.scoreMultiplier;
@@ -57,7 +57,7 @@ public class HardEnemy : Enemy
         vampireTalentRegen();
         return base.deathAnimation();
     }
-    protected override void EnemyAttack()
+    protected override void EnemyAttack()  // POLYMORPHISM
     {
         // Method for enemy attacks
         animator.SetBool("isAttacking", true);

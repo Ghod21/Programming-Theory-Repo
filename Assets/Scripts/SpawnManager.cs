@@ -94,6 +94,10 @@ public class SpawnManager : MonoBehaviour
         {
             bossEnemy.UpdateEnemySpeed(playerScript.speed);
             bossEnemy.UpdateEnemyAttackRange(playerScript.attackRange);
+        } else
+        {
+            bossEnemy.moveSpeed = 6;
+            bossEnemy.attackRange = 2.5f;
         }
     }
 
