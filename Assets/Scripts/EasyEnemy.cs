@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
-public class EasyEnemy : Enemy
+public class EasyEnemy : Enemy // INHERITANCE
 {
     //Transform objectTransform;
     // Easy enemy child script.
@@ -12,7 +12,13 @@ public class EasyEnemy : Enemy
         //if (spawnManager.difficultyMeter >= 3)
         //{
         //    objectTransform.localScale = new Vector3(1.25f, 1.25f, 1.25f);
+        if (DataPersistence.easyDifficulty)
+        {
+            enemyHealth = 2;
+        } else
+        {
             enemyHealth = 3;
+        }
         //} else
         //{
         //    objectTransform.localScale = new Vector3(1f, 1f, 1f);
@@ -20,12 +26,12 @@ public class EasyEnemy : Enemy
         //}
 
     }
-    public override void MoveTowardsPlayer()
+    public override void MoveTowardsPlayer()  // POLYMORPHISM
     {
         moveSpeed = 5f;
         base.MoveTowardsPlayer();
     }
-    protected override IEnumerator deathAnimation()
+    protected override IEnumerator deathAnimation()  // POLYMORPHISM
     {
         isDying = true;
         //DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;

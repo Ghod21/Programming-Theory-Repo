@@ -51,7 +51,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4877543831620728468
 Transform:
   m_ObjectHideFlags: 0
@@ -69,6 +69,7 @@ Transform:
   - {fileID: 1132587462078682535}
   - {fileID: 929862583430499095}
   - {fileID: 6480614778556932680}
+  - {fileID: 4629733038150443684}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 225, z: 0}
 --- !u!135 &90381821423556659
@@ -137,7 +138,7 @@ MonoBehaviour:
   playerScript: {fileID: 0}
   expManager: {fileID: 0}
   expManagerScript: {fileID: 0}
-  moveSpeed: 5
+  moveSpeed: 6
   attackRange: 2.5
   enemyHealth: 0
   attacked: 0
@@ -149,9 +150,12 @@ MonoBehaviour:
   shieldDamageTalentChosen: 0
   isDying: 0
   explosionBossSpell: {fileID: 0}
-  chargeSpeed: 15
-  chargeDuration: 1
+  speedRatio: 0
+  attackRangeRatio: 0
+  chargeSpeed: 20
+  chargeDuration: 0.7
   chargePause: 1
+  bossHPRegenNumber: 3
 --- !u!95 &-6373334986911107143
 Animator:
   serializedVersion: 5
@@ -186,6 +190,52 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabName: EnemyBoss
+--- !u!1 &290915246438409287
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4629733038150443684}
+  - component: {fileID: 9211597602182950487}
+  m_Layer: 10
+  m_Name: AttackRangeAlt (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4629733038150443684
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290915246438409287}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.9238796, z: -0, w: -0.38268325}
+  m_LocalPosition: {x: -2.1842792, y: -0.016602278, z: 4.0900507}
+  m_LocalScale: {x: 0.3125, y: 0.3125, z: 0.3125}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4877543831620728468}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9211597602182950487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290915246438409287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5c56b5effc131a49a78cec400723de7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRadius: 5
+  segments: 50
 --- !u!1 &997837049454502412
 GameObject:
   m_ObjectHideFlags: 0

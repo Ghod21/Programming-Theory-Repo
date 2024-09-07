@@ -81,7 +81,7 @@ public class FireArea : MonoBehaviour
             Debug.Log("Applying damage to player.");
             if (!playerScript.backwardDashIsActive)
             {
-                playerScript.playerHealth--;
+                playerScript.playerHealth -= 2;
             }
             playerScript.audioSource.PlayOneShot(playerScript.audioClips[14], DataPersistence.soundsVolume * 2f * DataPersistence.soundAdjustment);
             yield return new WaitForSeconds(1f);

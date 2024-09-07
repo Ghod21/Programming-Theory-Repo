@@ -15,8 +15,10 @@ public class DataPersistence : MonoBehaviour
     public static float playerOneScore = 15;
     public static float playerTwoScore = 10;
     public static float playerThreeScore = 5;
-    public static bool startInfoDontShowData;
-    public static float soundAdjustment = 0.5f;
+    public static bool startInfoDontShowData = false;
+    public static float soundAdjustment = 0.2f;
+    public static string lastPlayerName = " ";
+    public static bool easyDifficulty = true;
 
     private void Awake()
     {
@@ -34,7 +36,7 @@ public class DataPersistence : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        // Function to pull information for between sessions data pers.
+        // Function to pull information for between sessions data persistence.
     }
     public void Exit()
     {
@@ -54,6 +56,8 @@ public class DataPersistence : MonoBehaviour
         public float player3Score;
         public bool startInfoDontShowAgain;
         public float soundAdjust;
+        public string lastPlayerName;
+        public bool easyDifficulty;
     }
     public void SaveData()
     {
@@ -67,6 +71,8 @@ public class DataPersistence : MonoBehaviour
         data.player2Score = playerTwoScore;
         data.player3Score = playerThreeScore;
         data.startInfoDontShowAgain = startInfoDontShowData;
+        data.lastPlayerName = lastPlayerName;
+        data.easyDifficulty = easyDifficulty;
 
         string json = JsonUtility.ToJson(data);
 
@@ -89,6 +95,8 @@ public class DataPersistence : MonoBehaviour
             playerTwoScore = data.player2Score;
             playerThreeScore = data.player3Score;
             startInfoDontShowData = data.startInfoDontShowAgain;
+            lastPlayerName = data.lastPlayerName;
+            easyDifficulty = data.easyDifficulty;
         }
     }
 

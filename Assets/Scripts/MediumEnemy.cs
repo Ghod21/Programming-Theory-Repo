@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class MediumEnemy : Enemy
+public class MediumEnemy : Enemy // INHERITANCE
 {
 
     private bool chargeCooldownBool;
@@ -14,12 +14,19 @@ public class MediumEnemy : Enemy
     private readonly float chargePause = 1f; // Time to pause before charging
     bool isAbleToWalkBeforeFirstCharge = true;
 
-    protected override void Start()
+    protected override void Start()  // POLYMORPHISM
     {
         base.Start(); // Call the Start method from the base class
 
         // Additional initialization code for MediumEnemy
-        enemyHealth = 5;
+        if (DataPersistence.easyDifficulty)
+        {
+            enemyHealth = 4;
+        }
+        else
+        {
+            enemyHealth = 5;
+        }
         StartCoroutine(StartChargeDelay());
     }
 
@@ -30,7 +37,7 @@ public class MediumEnemy : Enemy
         isAbleToWalkBeforeFirstCharge = false;
     }
 
-    public override void MoveTowardsPlayer()
+    public override void MoveTowardsPlayer()  // POLYMORPHISM
     {
         moveSpeed = 4f;
         if (!attacked && enemyHealth > 0 && chargeCooldownBool || !attacked && enemyHealth > 0 && isAbleToWalkBeforeFirstCharge)
@@ -41,7 +48,7 @@ public class MediumEnemy : Enemy
         }
     }
 
-    protected override IEnumerator deathAnimation()
+    protected override IEnumerator deathAnimation()  // POLYMORPHISM
     {
         isDying = true;
         //DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
@@ -80,8 +87,9 @@ public class MediumEnemy : Enemy
             // Perform the charge
             Vector3 chargeDirection = (player.position - transform.position).normalized;
             float chargeEndTime = Time.time + chargeDuration;
-            if (enemyHealth !> 0)
+            if (enemyHealth < 0.01)
             {
+                chargeCooldownBool = true;
                 yield break;
             }
             playerScript.audioSource.PlayOneShot(playerScript.audioClips[19], DataPersistence.soundsVolume * 1f * DataPersistence.soundAdjustment);
@@ -96,7 +104,11 @@ public class MediumEnemy : Enemy
                     chargeCooldownBool = true;
                     break; // Exit the inner while loop to stop the current charge
                 }
-
+                if (enemyHealth < 0.001)
+                {
+                    chargeCooldownBool = true;
+                    yield break;
+                }
                 rb.velocity = chargeDirection * chargeSpeed;
                 yield return null; // Wait until the next frame
             }
@@ -110,7 +122,7 @@ public class MediumEnemy : Enemy
         }
     }
 
-    protected override void EnemyAttack()
+    protected override void EnemyAttack()  // POLYMORPHISM
     {
         // Method for enemy attacks
         animator.SetBool("isAttacking", true);

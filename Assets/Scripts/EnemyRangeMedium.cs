@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyRangeMedium : Enemy
+public class EnemyRangeMedium : Enemy // INHERITANCE
 {
     private GameObject projectilePrefab;
     private float projectileSpeed = 5f;
@@ -15,14 +15,22 @@ public class EnemyRangeMedium : Enemy
     // New variable to define the distance at which the enemy starts to escape
     [SerializeField] private float escapeDistance = 1.0f;
 
-    protected override void Start()
+    protected override void Start()  // POLYMORPHISM
     {
         projectilePrefab = Resources.Load<GameObject>("Prefabs/ProjectileRangeEnemy");
         base.Start();
+        if (DataPersistence.easyDifficulty)
+        {
+            enemyHealth = 3;
+        }
+        else
+        {
+            enemyHealth = 4;
+        }
         StartCoroutine(AttackRoutine());
     }
 
-    protected override IEnumerator deathAnimation()
+    protected override IEnumerator deathAnimation()  // POLYMORPHISM
     {
         isDying = true;
         //DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
@@ -70,7 +78,7 @@ public class EnemyRangeMedium : Enemy
         }
     }
 
-    protected override void CheckAttackRange()
+    protected override void CheckAttackRange()  // POLYMORPHISM
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
@@ -94,7 +102,7 @@ public class EnemyRangeMedium : Enemy
         }
     }
 
-    protected override void EnemyAttack()
+    protected override void EnemyAttack()  // POLYMORPHISM
     {
         playerScript.audioSource.PlayOneShot(playerScript.audioClips[9], DataPersistence.soundsVolume * 0.6f * soundAdjustment);
         Vector3 directionToPlayer = (player.position - transform.position).normalized;
@@ -141,7 +149,7 @@ public class EnemyRangeMedium : Enemy
         yield return null;
     }
 
-    public override void MoveTowardsPlayer()
+    public override void MoveTowardsPlayer() // POLYMORPHISM
     {
         if (!isAttacking)
         {

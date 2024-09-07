@@ -29,7 +29,8 @@ public class MainManager : MonoBehaviour
     [SerializeField] GameObject audioManager;
     [SerializeField] AudioClip[] menuSounds;
     [SerializeField] public AudioSource audioSource;
-    private Player playerScript;
+    [SerializeField] Player playerScript;
+    [SerializeField] TextMeshProUGUI difficultyText;
     public bool win = false;
     public bool canEsc = true;
 
@@ -62,7 +63,11 @@ public class MainManager : MonoBehaviour
     ParticleSystem confetti1;
     ParticleSystem confetti2;
 
-    public string PlayerName
+    [SerializeField] UnityEngine.UI.Button easyDifficultyButton;
+    [SerializeField] UnityEngine.UI.Button hardDifficultyButton;
+    [SerializeField] private TextMeshProUGUI logoText;
+
+    public string PlayerName // ENCAPSULATION
     {
         get => DataPersistence.currentPlayerName;
         private set
@@ -85,6 +90,10 @@ public class MainManager : MonoBehaviour
 
     private void Start()
     {
+        if (SceneManager.GetActiveScene().name == "Menu")
+        {
+            nameInputField.text = DataPersistence.lastPlayerName;
+        }
         expManager = FindObjectOfType<ExpManager>();
         canEsc = true;
         confetti1 = Resources.Load<ParticleSystem>("Prefabs/Confetti1");
@@ -92,13 +101,14 @@ public class MainManager : MonoBehaviour
         leaderBoardUpdated = false;
         if (SceneManager.GetActiveScene().name == "Menu")
         {
-            startInfoToggle.isOn = DataPersistence.startInfoDontShowData;
+            //startInfoToggle.isOn = DataPersistence.startInfoDontShowData;
             WallOfFameUpdate();
         }
         UISceneLogic();
         if (SceneManager.GetActiveScene().name == "Menu" && !DataPersistence.startInfoDontShowData)
         {
             StartInfo();
+            DataPersistence.startInfoDontShowData = true;
         }
         infoIsOn = false;
 
@@ -106,10 +116,20 @@ public class MainManager : MonoBehaviour
         timerMinutes = 0;
 
         difficultyMeter = 30; // Switch for difficulty. 30 is normal. __________________________
-        playerScript = player.GetComponent<Player>();
         if (SceneManager.GetActiveScene().name == "MainScene")
         {
             nameText.text = DataPersistence.currentPlayerName;
+            if (DataPersistence.easyDifficulty)
+            {
+                //difficultyText.color = HexToColor("#7EF62B");
+                difficultyText.text = "Easy";
+            }
+            else
+            {
+                //difficultyText.color = HexToColor("#FCBE2E");
+                difficultyText.text = "Hard";
+            }
+
             isTimerRunning = true;  // Start the timer when the game starts
             StartCoroutine(Timer());
             for (int i = 0; i < gameOverUI.Length; i++)
@@ -121,13 +141,28 @@ public class MainManager : MonoBehaviour
             }
             DataPersistence.currentPlayerScore = 0;
         }
+        if (DataPersistence.easyDifficulty && SceneManager.GetActiveScene().name == "Menu")
+        {
+            easyDifficultyButton.interactable = false;
+            hardDifficultyButton.interactable = true;
+            logoText.color = HexToColor("#7EF62B");
+
+            DataPersistence.easyDifficulty = true;
+        } else if (SceneManager.GetActiveScene().name == "Menu")
+        {
+            hardDifficultyButton.interactable = false;
+            easyDifficultyButton.interactable = true;
+            logoText.color = HexToColor("#FCBE2E");
+
+            DataPersistence.easyDifficulty = false;
+        }
     }
 
     private void Update()
     {
         if (!playerScript.gameOver)
         {
-            UIStartInfoDontShowLogic();
+            //UIStartInfoDontShowLogic();
             timerUI.text = "Time: " + timerMinutes.ToString("D2") + ":" + timerSeconds.ToString("D2");
             if (startInfoIsOn && Input.anyKeyDown)
             {
@@ -155,7 +190,7 @@ public class MainManager : MonoBehaviour
                 // Check if the name is valid
                 correctNameToStart = IsValidName(nameInputField.text);
             }
-            if (Input.GetKeyDown(KeyCode.T))
+            if (Input.GetKeyDown(KeyCode.Escape) && SceneManager.GetActiveScene().name == "MainScene")
             {
                 if (!paused && Time.timeScale != 0f)
                 {
@@ -167,6 +202,10 @@ public class MainManager : MonoBehaviour
                     Time.timeScale = 1f;
                     pauseUIText.SetActive(false);
                     paused = false;
+                    if (playerScript.isShielding && !Input.GetMouseButton(1))
+                    {
+                        playerScript.ShieldStop();
+                    }
                 }
             }
         }
@@ -176,7 +215,7 @@ public class MainManager : MonoBehaviour
         }
         if (SceneManager.GetActiveScene().name == "MainScene")
         {
-            if (Input.GetKeyDown(KeyCode.Escape) && canEsc)
+            if (Input.GetKeyDown(KeyCode.M) && canEsc)
             {
                 SceneManager.LoadScene("Menu");
             }
@@ -193,6 +232,7 @@ public class MainManager : MonoBehaviour
         if (correctNameToStart)
         {
             audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 10f * soundAdjustment);
+            DataPersistence.lastPlayerName = PlayerName;
             DataPersistence.Instance.SaveData();
             SceneManager.LoadScene("MainScene");
         }
@@ -232,7 +272,9 @@ public class MainManager : MonoBehaviour
                     uiToggle[i].SetActive(true);
                 }
             }
-            uiToggle[16].SetActive(true);
+
+            easyDifficultyButton.gameObject.SetActive(false);
+            hardDifficultyButton.gameObject.SetActive(false);
 
             infoIsOn = true;
         }
@@ -247,6 +289,8 @@ public class MainManager : MonoBehaviour
                     uiToggle[i].SetActive(false);
                 }
             }
+            easyDifficultyButton.gameObject.SetActive(true);
+            hardDifficultyButton.gameObject.SetActive(true);
         }
     }
     private void StartInfo()
@@ -261,6 +305,8 @@ public class MainManager : MonoBehaviour
         }
         uiToggle[4].SetActive(true);
         uiToggle[15].SetActive(true);
+        easyDifficultyButton.gameObject.SetActive(false);
+        hardDifficultyButton.gameObject.SetActive(false);
 
         // Actual info
         uiToggle[14].SetActive(true);
@@ -294,6 +340,8 @@ public class MainManager : MonoBehaviour
                 uiToggle[i].SetActive(true);
             }
         }
+        easyDifficultyButton.gameObject.SetActive(true);
+        hardDifficultyButton.gameObject.SetActive(true);
     }
     private void UILogicMainScene()
     {
@@ -306,13 +354,13 @@ public class MainManager : MonoBehaviour
         }
     }
 
-    private void UIStartInfoDontShowLogic()
-    {
-        if (SceneManager.GetActiveScene().name == "Menu")
-        {
-            DataPersistence.startInfoDontShowData = startInfoToggle.isOn ? true : false;
-        }
-    }
+    //private void UIStartInfoDontShowLogic()
+    //{
+    //    if (SceneManager.GetActiveScene().name == "Menu")
+    //    {
+    //        DataPersistence.startInfoDontShowData = startInfoToggle.isOn ? true : false;
+    //    }
+    //}
 
     private void NameInputFieldUI()
     {
@@ -332,20 +380,30 @@ public class MainManager : MonoBehaviour
                 uiToggle[i].SetActive(false);
             }
         }
-        for (int i = 0; i < expManager.minorTalentsUI.Length; i++)
+        for (int i = 0; i < expManager.minorTalentSlots.Length; i++)
         {
-            if (expManager.minorTalentsUI[i] != null)
+            if (expManager.minorTalentSlots[i] != null)
             {
-                expManager.minorTalentsUI[i].SetActive(false);
+                expManager.minorTalentSlots[i].gameObject.SetActive(false);
             }
         }
-        for (int i = 0; i < expManager.talentsUI.Length; i++)
+        for (int i = 0; i < expManager.minorTalentCountTexts.Length; i++)
         {
-            if (expManager.talentsUI[i] != null)
+            if (expManager.minorTalentCountTexts[i] != null)
             {
-                expManager.talentsUI[i].SetActive(false);
+                expManager.minorTalentCountTexts[i].gameObject.SetActive(false);
             }
         }
+        for (int i = 0; i < expManager.chosenTalentsUIImages.Length; i++)
+        {
+            if (expManager.chosenTalentsUIImages[i] != null)
+            {
+                expManager.chosenTalentsUIImages[i].gameObject.SetActive(false);
+            }
+        }
+        playerScript.skillFillImage.gameObject.SetActive(false);
+        playerScript.skillImage.gameObject.SetActive(false);
+
         bossHPUIBar.SetActive(false);
         UpdateLeaderboard();
         WallOfFameUpdate();
@@ -440,7 +498,15 @@ public class MainManager : MonoBehaviour
         //expUIToMoveOnBossSpawn.SetActive(false);
         bossHPUIBar.SetActive(true);
         bossHealthSlider.minValue = 0;
-        bossHealthSlider.maxValue = 150;
+        if (DataPersistence.easyDifficulty)
+        {
+            bossHealthSlider.maxValue = 100;
+        }
+        else
+        {
+            bossHealthSlider.maxValue = 150;
+        }
+
     }
     void BossFightUIUpdate()
     {
@@ -523,32 +589,25 @@ public class MainManager : MonoBehaviour
         winUI[winUI.Length - 1].SetActive(true);
         canEsc = true;
 
-        while (true) // Будет повторяться до тех пор, пока корутина не будет остановлена
+        while (true)
         {
-            // Выбор случайного количества объектов конфетти (от 1 до 3)
-            int numberOfConfetti = Random.Range(1, 4); // 1 включительно, 4 не включительно
+            int numberOfConfetti = Random.Range(1, 4);
 
             for (int i = 0; i < numberOfConfetti; i++)
             {
-                // Выбор случайной позиции из массива confettiSpawnPoints
                 GameObject randomSpawnPoint = confettiSpawnPoints[Random.Range(0, confettiSpawnPoints.Length)];
 
-                // Выбор случайного конфетти
                 ParticleSystem selectedConfetti = Random.value < 0.5f ? confetti1 : confetti2;
 
-                // Создание экземпляра конфетти
                 ParticleSystem spawnedConfetti = Instantiate(selectedConfetti, randomSpawnPoint.transform.position, Quaternion.identity);
 
-                // Запуск конфетти
                 spawnedConfetti.Play();
 
-                // Удаление конфетти через 5 секунд
                 playerScript.audioSource.PlayOneShot(playerScript.audioClips[20], DataPersistence.soundsVolume * 3f * DataPersistence.soundAdjustment);
                 Destroy(spawnedConfetti.gameObject, 5f);
                 yield return new WaitForSeconds(0.2f);
             }
 
-            // Ожидание перед следующей итерацией
             yield return new WaitForSeconds(1.5f);
         }
     }
@@ -561,6 +620,12 @@ public class MainManager : MonoBehaviour
             enemy.enemyHealth = 0;
             yield return new WaitForSeconds(0.2f);
         }
+        Experience[] expObjects = FindObjectsOfType<Experience>();
+
+        foreach (Experience exp in expObjects)
+        {
+            Destroy(exp.gameObject);
+        }
     }
     private void WinUI()
     {
@@ -571,20 +636,30 @@ public class MainManager : MonoBehaviour
                 uiToggle[i].SetActive(false);
             }
         }
-        for (int i = 0; i < expManager.minorTalentsUI.Length; i++)
+        for (int i = 0; i < expManager.minorTalentSlots.Length; i++)
         {
-            if (expManager.minorTalentsUI[i] != null)
+            if (expManager.minorTalentSlots[i] != null)
             {
-                expManager.minorTalentsUI[i].SetActive(false);
+                expManager.minorTalentSlots[i].gameObject.SetActive(false);
             }
         }
-        for (int i = 0; i < expManager.talentsUI.Length; i++)
+        for (int i = 0; i < expManager.minorTalentCountTexts.Length; i++)
         {
-            if (expManager.talentsUI[i] != null)
+            if (expManager.minorTalentCountTexts[i] != null)
             {
-                expManager.talentsUI[i].SetActive(false);
+                expManager.minorTalentCountTexts[i].gameObject.SetActive(false);
             }
         }
+        for (int i = 0; i < expManager.chosenTalentsUIImages.Length; i++)
+        {
+            if (expManager.chosenTalentsUIImages[i] != null)
+            {
+                expManager.chosenTalentsUIImages[i].gameObject.SetActive(false);
+            }
+        }
+        playerScript.skillFillImage.gameObject.SetActive(false);
+        playerScript.skillImage.gameObject.SetActive(false);
+
         UpdateLeaderboard();
         WallOfFameUpdate();
         if (SceneManager.GetActiveScene().name == "MainScene")
@@ -619,5 +694,46 @@ public class MainManager : MonoBehaviour
             winUIText[1].text = DataPersistence.currentPlayerName;// PlayerName
             winUIText[2].text = DataPersistence.currentPlayerScore.ToString(); // Player Score
         }
+    }
+
+    public void SetEasyDifficulty()
+    {
+        easyDifficultyButton.interactable = false;
+        hardDifficultyButton.interactable = true;
+        logoText.color = HexToColor("#7EF62B");
+        audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 10f * soundAdjustment);
+
+        DataPersistence.easyDifficulty = true;
+    }
+    public void SetHardDifficulty()
+    {
+        hardDifficultyButton.interactable = false;
+        easyDifficultyButton.interactable = true;
+        logoText.color = HexToColor("#FCBE2E");
+        audioSource.PlayOneShot(menuSounds[0], DataPersistence.soundsVolume * 10f * soundAdjustment);
+
+        DataPersistence.easyDifficulty = false;
+    }
+    public Color HexToColor(string hex)
+    {
+        hex = hex.Replace("#", "");
+
+        if (hex.Length != 6 && hex.Length != 8)
+        {
+            Debug.LogError("Invalid HEX color code.");
+            return Color.white;
+        }
+
+        byte r = byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+        byte g = byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+        byte b = byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+        byte a = 255;
+
+        if (hex.Length == 8)
+        {
+            a = byte.Parse(hex.Substring(6, 2), System.Globalization.NumberStyles.HexNumber);
+        }
+
+        return new Color32(r, g, b, a);
     }
 }

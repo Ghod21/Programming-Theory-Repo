@@ -81,15 +81,34 @@ public class Experience : MonoBehaviour
             playerScript.playerExperience += experiencePlus;
             if (experiencePlus == 10)
             {
-                DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;
+                if (DataPersistence.easyDifficulty)
+                {
+                    DataPersistence.currentPlayerScore += 1 * playerScript.scoreMultiplier;
+                } else
+                {
+                    DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;
+                }
                 playerScript.scoreMultiplierBase++;
             } else if (experiencePlus == 25)
             {
-                DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
-                playerScript.scoreMultiplierBase += 2;
+                if (DataPersistence.easyDifficulty)
+                {
+                    DataPersistence.currentPlayerScore += 3 * playerScript.scoreMultiplier;
+                }
+                else
+                {
+                    DataPersistence.currentPlayerScore += 10 * playerScript.scoreMultiplier;
+                }
             } else
             {
-                DataPersistence.currentPlayerScore += 20 * playerScript.scoreMultiplier;
+                if (DataPersistence.easyDifficulty)
+                {
+                    DataPersistence.currentPlayerScore += 5 * playerScript.scoreMultiplier;
+                }
+                else
+                {
+                    DataPersistence.currentPlayerScore += 20 * playerScript.scoreMultiplier;
+                }
                 playerScript.scoreMultiplierBase += 3;
             }
 

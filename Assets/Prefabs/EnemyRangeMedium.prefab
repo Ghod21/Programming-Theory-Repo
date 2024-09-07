@@ -217,6 +217,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 9083326610525337203}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6490153628483481302
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5462098151741853752}
+  - component: {fileID: 711657434104889758}
+  m_Layer: 10
+  m_Name: AttackRangeAlt (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5462098151741853752
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6490153628483481302}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -1.0400001, y: -0.28993395, z: -8.7085705}
+  m_LocalScale: {x: 0.7142857, y: 0.7142857, z: 0.7142857}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6118174221721670358}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &711657434104889758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6490153628483481302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5c56b5effc131a49a78cec400723de7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRadius: 5
+  segments: 50
 --- !u!1 &6891580169314388076
 GameObject:
   m_ObjectHideFlags: 0
@@ -253,6 +299,7 @@ Transform:
   m_Children:
   - {fileID: 7744448503475035389}
   - {fileID: 592038533539604657}
+  - {fileID: 5462098151741853752}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!135 &6558751153971004517
@@ -301,7 +348,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 116
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!95 &8976618242682331791
 Animator:
@@ -356,7 +403,7 @@ MonoBehaviour:
   expManager: {fileID: 0}
   expManagerScript: {fileID: 0}
   moveSpeed: 2
-  attackRange: 25
+  attackRange: 15
   enemyHealth: 4
   attacked: 0
   enemyIsBleeding: 0

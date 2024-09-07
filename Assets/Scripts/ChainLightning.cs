@@ -47,7 +47,7 @@ public class ChainLightning : MonoBehaviour
     {
         while (currentTarget != null)
         {
-            if (currentTarget == null)
+            if (currentTarget.enemyHealth < 0.0001)
             {
                 //Debug.LogError("Current target is null.");
                 //yield break; // Exit the coroutine if the target is null

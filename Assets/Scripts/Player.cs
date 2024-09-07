@@ -47,8 +47,8 @@ public class Player : MonoBehaviour
     public float attackRange = 3f; // Range of the attack
     public float attackRangeStart;
     public float attackRangeAdd = 0f;
-    [SerializeField] private float attackAngle = 180f; // Angle of the attack cone
-    private bool isAttacking = false; 
+    [SerializeField] public float attackAngle = 180f; // Angle of the attack cone
+    private bool isAttacking = false;
     private float attackCooldown = 0f; // Cooldown for attack
     private const float attackCooldownDuration = 0.833f; // Duration of the attack cooldown
     private int attackCount;
@@ -67,7 +67,7 @@ public class Player : MonoBehaviour
     private int attackToShieldCount = 0;
     public bool isBlockingDamage = false;
     public float shieldHealth = 10;
-    float shieldHealthMax;
+    public float shieldHealthMax;
     public float shieldWallRotationSpeed = 30f;
 
     // Death and Health variables
@@ -167,7 +167,7 @@ public class Player : MonoBehaviour
     public int healthRegenMinorAdd = 0;
     public float healthRegenCooldown = 15f;
     public float healthRegenCooldownMinus = 0;
-    
+
 
 
 
@@ -176,9 +176,8 @@ public class Player : MonoBehaviour
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
-        attackRangeStart = attackRange;
+        shieldHealthMax = 10;
         speedStart = speed;
-        shieldHealthMax = shieldHealth;
         mainManager = FindObjectOfType<MainManager>();
         vortexSpeed = dashSpeed;
         vortexDuration = dashDuration;
@@ -203,24 +202,32 @@ public class Player : MonoBehaviour
         }
         UpdateDashUI();
         StartCoroutine(TrackBackwardsDashState());
+        if (DataPersistence.easyDifficulty && SceneManager.GetActiveScene().name == "MainScene")
+        {
+            attackRange = 3.5f;
+            attackRangeStart = attackRange;
+            swordSizeMultiplier += 0.3f;
+            SwordSizeForAttackRange();
+        }
     }
 
     private void Update()
     {
         if (SceneManager.GetActiveScene().name == "MainScene" && !gameOver && !timeIsFrozen)
         {
-            GatherInput();
+
+            GatherInput(); // ABSTRACTION
             if (!mainManager.paused)
             {
-                LookAtMouse();
+                LookAtMouse(); // ABSTRACTION
             }
             HandleAnimations(); // Call the method to handle animations
-            HealthLogic();
-            ScoreUpdate();
-            if (!mainManager.win)
+            HealthLogic(); // ABSTRACTION
+            ScoreUpdate(); // ABSTRACTION
+            if (!mainManager.win && !mainManager.paused)
             {
-                DashUILogic();
-                AttackAndShieldLogic();
+                DashUILogic(); // ABSTRACTION
+                AttackAndShieldLogic(); // ABSTRACTION
             }
             //RunSound();
             //ChargedWeaponSoundLogic();
@@ -236,9 +243,9 @@ public class Player : MonoBehaviour
                 shieldHealth = 5;
                 shieldAttackTalentChosenActivated = true;
             }
-            if (Input.GetKeyDown(KeyCode.E) && !mainManager.win)
+            if (Input.GetKeyDown(KeyCode.E) && !mainManager.win && !mainManager.paused)
             {
-                UseSpell();
+                UseSpell(); // ABSTRACTION
             }
 
 
@@ -249,7 +256,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    void AttackAndShieldLogic()
+    void AttackAndShieldLogic() // ABSTRACTION
     {
         isNotAttackingCheck(); // Check if not attacking
         ShieldLogic();
@@ -264,7 +271,7 @@ public class Player : MonoBehaviour
             isAttackQueued = true; // Queue the attack if one is already in progress
         }
 
-        if (isAttacking && Input.GetMouseButtonDown(1) && !isUsingSpell && !shieldAttackTalentChosen && shieldHealth == shieldHealthMax && !shieldIsOnCooldown && !isShieldCooldownActive)
+        if (isAttacking && Input.GetMouseButtonDown(1) && !isUsingSpell && !shieldAttackTalentChosen && shieldHealth == shieldHealthMax && !shieldIsOnCooldown && !isShieldCooldownActive && !mainManager.paused)
         {
             isAttacking = false;
             animator.SetBool("isAttacking", false);
@@ -340,7 +347,7 @@ public class Player : MonoBehaviour
             BladeVortexDash();
             StartCoroutine(SpellCooldownTimer());
         }
-        if (!shieldAttackTalentChosen && !isDashing)
+        if (!shieldAttackTalentChosen && !isDashing && !mainManager.paused)
         {
             if (!spellIsOnCooldown && !isUsingSpell && isAttacking)
             {
@@ -376,7 +383,7 @@ public class Player : MonoBehaviour
                 if (fireBreathTalentIsChosen)
                 {
                     ShieldStop();
-                    
+
                     FireBreath();
                     StartCoroutine(SpellCooldownTimer());
                 }
@@ -410,9 +417,6 @@ public class Player : MonoBehaviour
                 }
                 else if (lightningTalentIsChosen && !weaponIsCharged)
                 {
-                    isAttacking = false;
-                    animator.SetBool("isAttacking", false);
-                    StopCoroutine(AttackCoroutine());
                     ShieldStop();
                     StartCoroutine(ChargeWeapon());
 
@@ -569,11 +573,11 @@ public class Player : MonoBehaviour
                         {
                             hitEnemy = true;
                         }
-                        if (bleedAttackTalentIsChosen && !enemy.enemyIsBleeding)
-                        {
-                            StartCoroutine(BleedTalentEffect(enemy));
-                            enemy.AddMaterial();
-                        }
+                        //if (bleedAttackTalentIsChosen && !enemy.enemyIsBleeding)
+                        //{
+                        //    StartCoroutine(BleedTalentEffect(enemy));
+                        //    enemy.AddMaterial();
+                        //}
                     }
 
                 }
@@ -790,6 +794,10 @@ public class Player : MonoBehaviour
     {
         while (true)
         {
+            if (healthRegenCooldownMinus > 11)
+            {
+                healthRegenCooldownMinus = 11;
+            }
             yield return new WaitForSeconds(healthRegenCooldown - healthRegenCooldownMinus);
             if (playerHealth < 30)
             {
@@ -829,22 +837,26 @@ public class Player : MonoBehaviour
 
     private void ShieldLogic()
     {
-        if (!Input.GetMouseButton(1))
+        if (!Input.GetMouseButton(1) && !mainManager.paused)
         {
             ShieldStop();
         }
         float x = shieldAttackTalentChosen ? 5f : 10f;
 
         shieldSlider.value = Mathf.MoveTowards(shieldSlider.value, shieldHealth / x, Time.deltaTime * 100f);
+        if (shieldHealth >= shieldHealthMax)
+        {
+            shieldSlider.value = 1;
+        }
 
         shieldWallPiecesLogic();
 
-        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell && shieldAttackTalentChosen || Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell && !shieldAttackTalentChosen && !isAttacking)
+        if (Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell && shieldAttackTalentChosen && !mainManager.paused || Input.GetMouseButtonDown(1) && !shieldIsOnCooldown && !isShieldCooldownActive && !isUsingSpell && !shieldAttackTalentChosen && !isAttacking && !mainManager.paused)
         {
             ShieldStart();
             audioSource.PlayOneShot(audioClips[4], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
         }
-        else if (Input.GetMouseButtonUp(1) && isShielding)
+        else if (Input.GetMouseButtonUp(1) && isShielding && !mainManager.paused)
         {
             ShieldStop();
         }
@@ -945,10 +957,10 @@ public class Player : MonoBehaviour
             }
             yield return new WaitForSeconds(1f);
         }
-
-        // Once cooldown is complete, mark it as inactive
-        isShieldCooldownActive = false;
         shieldIsOnCooldown = false;
+        isShieldCooldownActive = false;
+        // Once cooldown is complete, mark it as inactive
+
     }
     private void shieldWallPiecesLogic()
     {
@@ -1030,6 +1042,11 @@ public class Player : MonoBehaviour
         }
 
         isDashing = false;
+        if (shieldHealth >= shieldHealthMax)
+        {
+            isShieldCooldownActive = false;
+            shieldIsOnCooldown = false;
+        }
         yield return new WaitForSeconds(1f);
 
         backwardDashIsActive = false;
@@ -1376,10 +1393,13 @@ public class Player : MonoBehaviour
     IEnumerator AttackCoroutine()
     {
         yield return new WaitForSeconds((0.833f / 2) / attackSpeedMinorTalentAdaptation); // Half of the attack animation duration
-        if (isShielding && !shieldAttackTalentChosen)
+        if (isShielding && !shieldAttackTalentChosen || isUsingSpell)
         {
             isAttacking = false;
-            animator.SetBool("isAttacking", false);
+            if (!isUsingSpell)
+            {
+                animator.SetBool("isAttacking", false);
+            }
             yield break;
         }
 

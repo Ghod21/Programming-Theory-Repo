@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using Unity.IO.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour // INHERITANCE (PARENT)
 {
     // Main enemy parent script.
     [SerializeField] protected BoxCollider boundaryCollider; // Collider defining the boundary
@@ -14,16 +15,16 @@ public class Enemy : MonoBehaviour
     protected MainManager mainManager;
     public GameObject expManager;
     public ExpManager expManagerScript;
-    private float desiredY = 1.4f; // Desired height for the position
+    private float desiredY = 1.25f; // Desired height for the position
     protected Transform player; // Reference to the player's Transform
     protected Rigidbody rb; // Reference to the Rigidbody component
-    [SerializeField] protected float moveSpeed = 3.5f;
-    [SerializeField] protected float attackRange = 2.0f; // Distance within which the enemy will attack
+    [SerializeField] public float moveSpeed = 3.5f;
+    [SerializeField] public float attackRange = 2.0f; // Distance within which the enemy will attack
     protected bool isAttacking = false; // To prevent multiple attack calls
     public float enemyHealth;
     protected float enemyHealthMax;
     public bool attacked;
-    bool deathAnimationDone = false;
+    protected bool deathAnimationDone = false;
     protected float soundAdjustment = DataPersistence.soundAdjustment;
     int prefabIndex;
     public bool enemyIsBleeding;
@@ -33,6 +34,8 @@ public class Enemy : MonoBehaviour
     private UnityEngine.Color newColor;
     protected bool isUsingSpell;
     protected float healthBottleAdaptiveSpawnChance = 0;
+    Transform lookAtPlayerObject;
+    Transform lookAtPlayerObjectMelee;
 
     public bool damagedByVortex = false;
 
@@ -47,8 +50,10 @@ public class Enemy : MonoBehaviour
     public bool shieldDamageTalentChosen = false;
     public bool isDying = false;
 
-    protected virtual void Start()
+    protected virtual void Start() // POLYMORPHISM
     {
+        lookAtPlayerObject = GameObject.FindWithTag("LookAtPlayer").GetComponent<Transform>();
+        lookAtPlayerObjectMelee = GameObject.Find("LookAtPointForMelee").GetComponent<Transform>();
         mainManager = GameObject.Find("MainManager").GetComponent<MainManager>();
         expManager = GameObject.Find("Exp_Bar");
         expManagerScript = expManager.GetComponent<ExpManager>();
@@ -65,11 +70,11 @@ public class Enemy : MonoBehaviour
         SkinnedMeshRendererSearch();
     }
 
-    protected virtual void Update()
+    protected virtual void Update() // POLYMORPHISM
     {
-        CheckForPrefab();
+        CheckForPrefab(); // ABSTRACTION
         LookAtPlayer(); // Ensure the enemy always faces the player
-        CheckBoundary();
+        CheckBoundary(); // ABSTRACTION
         CheckAttackRange(); // Check if the enemy is within attack range
         rb.velocity = Vector3.zero; // Reset velocity to avoid residual movement
         rb.angularVelocity = Vector3.zero; // Reset angular velocity to avoid rotation issues
@@ -89,10 +94,22 @@ public class Enemy : MonoBehaviour
 
     private void FixedUpdate()
     {
+        float avoidRadius = 1f;
+        float avoidForce = 1f;
         if (!isAttacking && !animator.GetBool("isAttacking")) // Only move if not attacking
         {
             MoveTowardsPlayer(); // Move the enemy towards the player
         }
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, avoidRadius);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.CompareTag("Enemy") && hitCollider.gameObject != this.gameObject)
+            {
+                Vector3 directionAway = (transform.position - hitCollider.transform.position).normalized;
+                rb.AddForce(directionAway * avoidForce, ForceMode.Impulse);
+            }
+        }
+
     }
     public IEnumerator BladeVortexDamageCooldown()
     {
@@ -101,17 +118,24 @@ public class Enemy : MonoBehaviour
         damagedByVortex = false;
     }
 
-    private void LookAtPlayer()
+    protected virtual void LookAtPlayer()
     {
-        if (!attacked && enemyHealth > 0)
+        PrefabIdentifier prefab = GetComponent<PrefabIdentifier>();
+        if (!attacked && enemyHealth > 0 && prefab.prefabName != "EnemyRangeEasy" && prefab.prefabName != "EnemyRangeMedium")
         {
-            Vector3 direction = (player.position - transform.position).normalized; // Calculate direction to the player
+            Vector3 direction = (lookAtPlayerObjectMelee.position - transform.position).normalized; // Calculate direction to the player
+            Quaternion lookRotation = Quaternion.LookRotation(direction); // Calculate the rotation to look at the player
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f); // Smoothly rotate towards the player
+        }
+        else if (!attacked && enemyHealth > 0)
+        {
+            Vector3 direction = (lookAtPlayerObject.position - transform.position).normalized; // Calculate direction to the player
             Quaternion lookRotation = Quaternion.LookRotation(direction); // Calculate the rotation to look at the player
             transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f); // Smoothly rotate towards the player
         }
     }
 
-    public virtual void MoveTowardsPlayer()
+    public virtual void MoveTowardsPlayer() // POLYMORPHISM
     {
         if (!attacked && enemyHealth > 0)
         {
@@ -130,6 +154,11 @@ public class Enemy : MonoBehaviour
         if (enemyPosition != closestPointInBounds)
         {
             Vector3 newPosition = GetClosestValidPoint(closestPointInBounds);
+            PrefabIdentifier prefabName = GetComponent<PrefabIdentifier>();
+            if (prefabName.prefabName == "EnemyRangeEasy" || prefabName.prefabName == "EnemyRangeMedium")
+            {
+                desiredY = 1.4f;
+            }
             newPosition.y = desiredY; // Set the desired height
             transform.position = newPosition;
         }
@@ -157,7 +186,7 @@ public class Enemy : MonoBehaviour
         return Vector3.Distance(point, closestPoint) < Mathf.Epsilon;
     }
 
-    protected virtual void CheckAttackRange()
+    protected virtual void CheckAttackRange() // POLYMORPHISM
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
@@ -169,7 +198,7 @@ public class Enemy : MonoBehaviour
     }
 
 
-    private IEnumerator Attack()
+    protected virtual IEnumerator Attack()
     {
         if (enemyHealth > 0 && !deathAnimationDone)
         {
@@ -187,7 +216,7 @@ public class Enemy : MonoBehaviour
 
 
 
-    protected virtual void EnemyAttack()
+    protected virtual void EnemyAttack() // POLYMORPHISM
     {
         // Method for enemy attacks
         animator.SetBool("isAttacking", true);
@@ -228,10 +257,10 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    protected virtual IEnumerator deathAnimation()
+    protected virtual IEnumerator deathAnimation() // POLYMORPHISM
     {
         PrefabIdentifier prefabIdentifier = GetComponent<PrefabIdentifier>();
-        if (prefabIdentifier.prefabName != "EnemyBoss" && !mainManager.win)
+        if (prefabIdentifier.prefabName != "EnemyBoss" && !spawnManager.bossFightIsOn)
         {
             ExperienceSpawnOnDeath();
         }
@@ -315,15 +344,15 @@ public class Enemy : MonoBehaviour
             playerScript.killsToVampire--;
             if (playerScript.killsToVampire <= 0 && playerScript.playerHealth < 30)
             {
-                    playerScript.playerHealth++;
-                    playerScript.healEffect.Stop();
-                    playerScript.healEffect.Clear();
-                    playerScript.healEffect.Play();
-                    if (playerScript.playerHealth > 30)
-                    {
-                        playerScript.playerHealth = 30;
-                    }
-                    playerScript.killsToVampire = 7;
+                playerScript.playerHealth++;
+                playerScript.healEffect.Stop();
+                playerScript.healEffect.Clear();
+                playerScript.healEffect.Play();
+                if (playerScript.playerHealth > 30)
+                {
+                    playerScript.playerHealth = 30;
+                }
+                playerScript.killsToVampire = 7;
             }
         }
     }
@@ -340,5 +369,6 @@ public class Enemy : MonoBehaviour
         }
         isUnderDefenceAura = false;
     }
+
 
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-public class BossEnemy : Enemy
+public class BossEnemy : Enemy // INHERITANCE
 {
     // Boss enemy child script.
     private bool bossChargeCooldown;
@@ -14,7 +14,7 @@ public class BossEnemy : Enemy
     SphereCollider explosionBossSpellSphereCollider;
     float distanceThreshold = 10;
     bool closeEnoughToExplode;
-    bool farEnoughToCharge;
+    //bool farEnoughToCharge;
     AudioSource audioSourceFire;
     private float radius;
     public float speedRatio;
@@ -27,9 +27,12 @@ public class BossEnemy : Enemy
     [SerializeField] private float chargePause = 1f; // Time to pause before charging
 
     [SerializeField] float bossHPRegenNumber;
+    [SerializeField] ParticleSystem spawnEffect;
+    Quaternion spawnEffectRotation;
+    bool canAttackAgain = true;
 
 
-    protected override void Start()
+    protected override void Start() // POLYMORPHISM
     {
         base.Start();
         speedRatio = 6 / 2.5f;
@@ -60,16 +63,25 @@ public class BossEnemy : Enemy
             Debug.LogError("Player Script is not set.");
         }
 
-        enemyHealth = 150;
+        if (DataPersistence.easyDifficulty)
+        {
+            enemyHealth = 100;
+        }
+        else
+        {
+            enemyHealth = 150;
+        }
         enemyHealthMax = enemyHealth;
         StartCoroutine(BossSpellChangeRoutine());
         moveSpeed = moveSpeedNew;
+        spawnEffectRotation = spawnEffect.gameObject.transform.rotation;
     }
 
-    protected override void Update()
+    protected override void Update() // POLYMORPHISM
     {
         base.Update();
         CheckDistanceToPlayer();
+        spawnEffect.gameObject.transform.rotation = spawnEffectRotation;
     }
     int RandomSpellIndex()
     {
@@ -90,7 +102,7 @@ public class BossEnemy : Enemy
             {
                 index = RandomSpellIndex();
             }
-            while ((fireAreasSpellIsActive && index == 0) || (!closeEnoughToExplode && index == 1) || (!farEnoughToCharge && index == 2));
+            while ((fireAreasSpellIsActive && index == 0) || (!closeEnoughToExplode && index == 1));
 
             Debug.Log($"Selected spell index: {index}");
 
@@ -110,16 +122,34 @@ public class BossEnemy : Enemy
             } 
             else if (index == 3 && CanSpawnSpell())
             {
-                BossSpawnSpell();
+                StartCoroutine(BossSpawnSpell());
             }
 
             Debug.Log($"Started spell at index: {index}");
 
         }
     }
-
-    void BossSpawnSpell()
+    protected override void LookAtPlayer()
     {
+        if (!attacked && enemyHealth > 0)
+        {
+            Vector3 direction = (player.position - transform.position).normalized; // Calculate direction to the player
+            Quaternion lookRotation = Quaternion.LookRotation(direction); // Calculate the rotation to look at the player
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f); // Smoothly rotate towards the player
+        }
+    }
+
+    IEnumerator BossSpawnSpell()
+    {
+        float x = moveSpeed;
+        moveSpeed *= 0.5f;
+        spawnEffect.Stop();
+        spawnEffect.Clear();
+        spawnEffect.Play();
+        yield return new WaitForSeconds(2.3f);
+        playerScript.audioSource.PlayOneShot(playerScript.audioClips[21], DataPersistence.soundsVolume * 0.6f * DataPersistence.soundAdjustment);
+        yield return new WaitForSeconds(0.7f);
+        moveSpeed = x;
         Quaternion bossRotation = Quaternion.identity;
         spawnManager.SpawnEnemiesBossSpell(bossRotation);
     }
@@ -180,10 +210,10 @@ public class BossEnemy : Enemy
         }
         if (distanceToPlayer > distanceThreshold)
         {
-            farEnoughToCharge = true;
+            //farEnoughToCharge = true;
         } else
         {
-            farEnoughToCharge = false;
+            //farEnoughToCharge = false;
         }
     }
     IEnumerator FireAreasSpawn()
@@ -205,7 +235,7 @@ public class BossEnemy : Enemy
         fireAreasSpellIsActive = false;
     }
 
-    public override void MoveTowardsPlayer()
+    public override void MoveTowardsPlayer() // POLYMORPHISM
     {
         if (!attacked && enemyHealth > 0 && !bossChargeCooldown && !isUsingSpell)
         {
@@ -225,6 +255,10 @@ public class BossEnemy : Enemy
         // Perform the charge
         Vector3 chargeDirection = (player.position - transform.position).normalized;
         float chargeEndTime = Time.time + chargeDuration;
+        if (enemyHealth < 0.001)
+        {
+            yield break;
+        }
         playerScript.audioSource.PlayOneShot(playerScript.audioClips[19], DataPersistence.soundsVolume * 1f * DataPersistence.soundAdjustment);
 
         while (Time.time < chargeEndTime)
@@ -236,7 +270,10 @@ public class BossEnemy : Enemy
                 bossChargeCooldown = true;
                 break; // Exit the inner while loop to stop the current charge
             }
-
+            if (enemyHealth < 0.001)
+            {
+                yield break;
+            }
             rb.velocity = chargeDirection * chargeSpeed;
             yield return null; // Wait until the next frame
         }
@@ -247,7 +284,7 @@ public class BossEnemy : Enemy
         // Wait for the cooldown period
         bossChargeCooldown = false;
     }
-    protected override IEnumerator deathAnimation()
+    protected override IEnumerator deathAnimation() // POLYMORPHISM
     {
         isDying = true;
         // Code to prevent 0.5 ending result when adding bonus points for killing the boss.
@@ -263,7 +300,7 @@ public class BossEnemy : Enemy
         mainManager.StartCoroutine(mainManager.Win());
         return base.deathAnimation();
     } 
-    protected override void EnemyAttack()
+    protected override void EnemyAttack() // POLYMORPHISM
     {
         // Method for enemy attacks
         animator.SetBool("isAttacking", true);
@@ -319,11 +356,15 @@ public class BossEnemy : Enemy
 
     public void UpdateEnemySpeed(float newPlayerSpeed)
     {
-        moveSpeed = newPlayerSpeed * speedRatio;
+        moveSpeed = newPlayerSpeed * speedRatio - 0.3f;
     }
     public void UpdateEnemyAttackRange(float newPlayerAttackRange)
     {
         attackRange = newPlayerAttackRange * attackRangeRatio;
+        if (attackRange > 3f)
+        {
+            attackRange -= 0.4f;
+        }
     }
 
     bool CanSpawnSpell()
@@ -344,6 +385,34 @@ public class BossEnemy : Enemy
         } else
         {
             return false;
+        }
+    }
+    protected override void CheckAttackRange() // POLYMORPHISM
+    {
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+        if (distanceToPlayer <= attackRange && !isAttacking && !mainManager.win && canAttackAgain)
+        {
+            isAttacking = true;
+            canAttackAgain = false;
+            StartCoroutine(Attack());
+        }
+    }
+    protected override IEnumerator Attack() // POLYMORPHISM
+    {
+        if (enemyHealth > 0 && !deathAnimationDone)
+        {
+            // Attack logic
+            EnemyAttack();
+
+            // Wait for attack cooldown
+            yield return new WaitForSeconds(0.6f);
+
+            isAttacking = false;
+            animator.SetBool("isAttacking", false);
+            animator.SetTrigger("Idle");
+            yield return new WaitForSeconds(0.5f);
+            canAttackAgain = true;
         }
     }
 }

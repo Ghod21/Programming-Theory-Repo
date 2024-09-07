@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.UIElements;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class ExpManager : MonoBehaviour
 {
@@ -13,8 +14,8 @@ public class ExpManager : MonoBehaviour
     GameObject player;
     [SerializeField] GameObject enemy;
     Player playerScript;
-    [SerializeField] GameObject fillArea;
-    [SerializeField] UnityEngine.UI.Image[] chosenTalentsUIImages;
+    [SerializeField] public GameObject fillArea;
+    [SerializeField] public UnityEngine.UI.Image[] chosenTalentsUIImages;
     [SerializeField] GameObject[] chosenTalentsUI;
     public int level = 1;
 
@@ -38,8 +39,8 @@ public class ExpManager : MonoBehaviour
     [SerializeField] GameObject[] healthTalentsUI;
     [SerializeField] GameObject[] attackTalentsUI;
     [SerializeField] GameObject[] skillsTalentsUI;
-    [SerializeField] public GameObject[] minorTalentsUI;
-    [SerializeField] public GameObject[] talentsUI;
+    [SerializeField] GameObject[] minorTalentsUI;
+    [SerializeField] GameObject[] talentsUI;
     private List<Action> talentFunctions = new List<Action>();
     public bool reflectionTalentIsChosenExpManager;
     public bool shieldDamageTalentChosenExpManager;
@@ -61,11 +62,11 @@ public class ExpManager : MonoBehaviour
     [SerializeField] UnityEngine.UI.Button[] minorTalentsButtons;
     bool minorTalentIsChosen = false;
 
-    [SerializeField] private UnityEngine.UI.Image[] minorTalentSlots; // Слоты для отображения иконок талантов
-    [SerializeField] private TextMeshProUGUI[] minorTalentCountTexts; // Тексты для отображения счетчика талантов
-    private Dictionary<string, int> selectedTalents = new Dictionary<string, int>(); // Хранит таланты и количество их выборов
-    [SerializeField] private Talent[] talents; // Массив или список всех талантов
-    private Dictionary<string, int> talentSlotIndices = new Dictionary<string, int>(); // Словарь для хранения индексов слотов для каждого таланта
+    [SerializeField] public UnityEngine.UI.Image[] minorTalentSlots;
+    [SerializeField] public TextMeshProUGUI[] minorTalentCountTexts;
+    private Dictionary<string, int> selectedTalents = new Dictionary<string, int>();
+    [SerializeField] private Talent[] talents;
+    private Dictionary<string, int> talentSlotIndices = new Dictionary<string, int>();
 
     bool healthRegenMinorOnce = false;
 
@@ -80,8 +81,8 @@ public class ExpManager : MonoBehaviour
     void Start()
     {
         HealthPotionsTalentIsChosenExpManager = false;
-        MinorTalentsSet();
-        SetTalentFunctions();
+        MinorTalentsSet(); // ABSTRACTION
+        SetTalentFunctions(); // ABSTRACTION
         player = GameObject.Find("Player");
         if (player != null)
         {
@@ -91,23 +92,30 @@ public class ExpManager : MonoBehaviour
         {
             Debug.LogError("Player object not found in the scene!");
         }
-        UpdateLevelText();
+        UpdateLevelText(); // ABSTRACTION
         fillSlider.value = 0;
         audioSource = player.GetComponent<AudioSource>();
         levelUpSound = Resources.Load<AudioClip>("Audio/LevelUpSound");
-        SetMinorTalentFunctions();
+        SetMinorTalentFunctions(); // ABSTRACTION
         availableTalentFunctions = new List<Action<int>>(minorTalentFunctions);
         //ShowSkillsTalentsUI();
         //ShowMinorTalentsUI(); // Minor talents test
+        if (DataPersistence.easyDifficulty && SceneManager.GetActiveScene().name == "MainScene")
+        {
+            SelectTalent(8);
+            playerScript.healthRegenMinorAdd++;
+            playerScript.StartCoroutine(playerScript.HealthRegenTalent());
+            healthRegenMinorOnce = true;
+        }
     }
 
     void Update()
     {
         if (level < experienceThresholds.Length + 1)
         {
-            UpdateFillAmount();
-            CheckLevelUp();
-            LevelUpTalents();
+            UpdateFillAmount(); // ABSTRACTION
+            CheckLevelUp(); // ABSTRACTION
+            LevelUpTalents(); // ABSTRACTION
         }
         else
         {
@@ -219,6 +227,7 @@ public class ExpManager : MonoBehaviour
         for (int i = 0; i < minorTalentsUI.Length; i++)
         {
             minorTalentsUI[i].SetActive(true);
+            DeactivateButtonTemporarily(minorTalentsUI[i]);
         }
         playerScript.timeIsFrozen = true;
         Time.timeScale = 0f;
@@ -248,7 +257,7 @@ public class ExpManager : MonoBehaviour
     void minorAttackRange(int index)
     {
         minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/attackRangeMinor");
-        minorTalentText[index].text = "Slight increase in attack range";
+        minorTalentText[index].text = "Increase attack range";
         minorTalentsButtons[index].onClick.AddListener(() => minorAttackRangeButton());
     }
     public void minorAttackRangeButton()
@@ -266,7 +275,7 @@ public class ExpManager : MonoBehaviour
     void minorAttackSpeed(int index)
     {
         minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/attackSpeedMinor");
-        minorTalentText[index].text = "Slight increase in attack speed";
+        minorTalentText[index].text = "Increase attack speed";
         minorTalentsButtons[index].onClick.AddListener(() => minorAttackSpeedButton());
     }
     public void minorAttackSpeedButton()
@@ -284,7 +293,7 @@ public class ExpManager : MonoBehaviour
     void minorAttackDamage(int index)
     {
         minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/attackDamageMinor");
-        minorTalentText[index].text = "Slight increase in attack damage";
+        minorTalentText[index].text = "Increase attack damage";
         minorTalentsButtons[index].onClick.AddListener(() => minorAttackDamageButton());
     }
     public void minorAttackDamageButton()
@@ -300,7 +309,7 @@ public class ExpManager : MonoBehaviour
     void minorMoveSpeed(int index)
     {
         minorTalentImages[index].sprite = Resources.Load<Sprite>("TalentsUIMaterials/Minor/moveSpeedMinor");
-        minorTalentText[index].text = "Slight increase in move speed";
+        minorTalentText[index].text = "Increase move speed";
         minorTalentsButtons[index].onClick.AddListener(() => minorMoveSpeedButton());
     }
     public void minorMoveSpeedButton()
@@ -417,7 +426,8 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        
+
+        healthRegenCooldownLimit--;
         SelectTalent(8);
         playerScript.healthRegenMinorAdd++;
         if (healthRegenMinorOnce)
@@ -430,8 +440,7 @@ public class ExpManager : MonoBehaviour
                 playerScript.healthRegenCooldownMinus += 2;
             }
             
-            healthRegenCooldownLimit--;
-            if (healthRegenCooldownLimit <=0)
+            if (healthRegenCooldownLimit <=0 || playerScript.healthRegenCooldownMinus > 11)
             {
                 minorTalentFunctions.Remove(minorHealthRegen);
             }
@@ -439,11 +448,20 @@ public class ExpManager : MonoBehaviour
         if (!healthRegenMinorOnce)
         {
             playerScript.StartCoroutine(playerScript.HealthRegenTalent());
+            if (!healthRegenMajorTalentIsChosen)
+            {
+                playerScript.healthRegenCooldownMinus++;
+            }
+            else
+            {
+                playerScript.healthRegenCooldownMinus += 2;
+            }
             healthRegenMinorOnce = true;
         }
     }
     public void minorHealthRegenForMajor()
     {
+        healthRegenCooldownLimit--;
         SelectTalent(8);
         playerScript.healthRegenMinorAdd++;
         if (healthRegenMinorOnce)
@@ -457,8 +475,7 @@ public class ExpManager : MonoBehaviour
                 playerScript.healthRegenCooldownMinus += 2;
             }
 
-            healthRegenCooldownLimit--;
-            if (healthRegenCooldownLimit <= 0)
+            if (healthRegenCooldownLimit <= 0 || playerScript.healthRegenCooldownMinus > 11)
             {
                 minorTalentFunctions.Remove(minorHealthRegen);
             }
@@ -466,6 +483,14 @@ public class ExpManager : MonoBehaviour
         if (!healthRegenMinorOnce)
         {
             playerScript.StartCoroutine(playerScript.HealthRegenTalent());
+            if (!healthRegenMajorTalentIsChosen)
+            {
+                playerScript.healthRegenCooldownMinus++;
+            }
+            else
+            {
+                playerScript.healthRegenCooldownMinus += 2;
+            }
             healthRegenMinorOnce = true;
         }
     }
@@ -478,6 +503,7 @@ public class ExpManager : MonoBehaviour
         for (int i = 0; i < skillsTalentsUI.Length; i++)
         {
             skillsTalentsUI[i].SetActive(true);
+            DeactivateButtonTemporarily(skillsTalentsUI[i]);
         }
         playerScript.timeIsFrozen = true;
         Time.timeScale = 0f;
@@ -548,6 +574,7 @@ public class ExpManager : MonoBehaviour
         for (int i = 0; i < attackTalentsUI.Length; i++)
         {
             attackTalentsUI[i].SetActive(true);
+            DeactivateButtonTemporarily(attackTalentsUI[i]);
         }
         playerScript.timeIsFrozen = true;
         Time.timeScale = 0f;
@@ -608,6 +635,7 @@ public class ExpManager : MonoBehaviour
         for (int i = 0; i < healthTalentsUI.Length; i++)
         {
             healthTalentsUI[i].SetActive(true);
+            DeactivateButtonTemporarily(healthTalentsUI[i]);
         }
         playerScript.timeIsFrozen = true;
         Time.timeScale = 0f;
@@ -665,6 +693,7 @@ public class ExpManager : MonoBehaviour
         for (int i = 0; i < dashTalentsUI.Length; i++)
         {
             dashTalentsUI[i].SetActive(true);
+            DeactivateButtonTemporarily(dashTalentsUI[i]);
         }
         playerScript.timeIsFrozen = true;
         Time.timeScale = 0f;
@@ -728,6 +757,7 @@ public class ExpManager : MonoBehaviour
         for (int i = 0; i < shieldTalentsUI.Length; i++)
         {
             shieldTalentsUI[i].SetActive(true);
+            DeactivateButtonTemporarily(shieldTalentsUI[i]);
         }
         playerScript.timeIsFrozen = true;
         Time.timeScale = 0f;
@@ -749,6 +779,7 @@ public class ExpManager : MonoBehaviour
         Time.timeScale = 1f;
         HideShieldTalentsUI();
         playerScript.shieldHealth -= 5;
+        playerScript.shieldHealthMax = 5;
         playerScript.shieldAttackTalentChosen = true;
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
@@ -854,30 +885,26 @@ public class ExpManager : MonoBehaviour
     {
         if (selectedTalents.ContainsKey(talentName))
         {
-            // Если талант уже был выбран, увеличиваем его счетчик
             selectedTalents[talentName]++;
             UpdateTalentUI(talentName);
         }
         else
         {
-            // Если талант еще не был выбран, добавляем его в список и UI
             selectedTalents[talentName] = 1;
             AddTalentToUI(talentName, talentSprite);
         }
     }
 
-    // Функция для добавления таланта в UI
     private void AddTalentToUI(string talentName, Sprite talentSprite)
     {
         for (int i = 0; i < minorTalentSlots.Length; i++)
         {
-            if (minorTalentSlots[i].sprite == null) // Находим первый свободный слот
+            if (minorTalentSlots[i].sprite == null)
             {
                 minorTalentSlots[i].sprite = talentSprite;
                 minorTalentCountTexts[i].text = "";
                 minorTalentSlots[i].gameObject.SetActive(true);
 
-                // Сохраняем индекс слота для данного таланта
                 talentSlotIndices[talentName] = i;
 
                 break;
@@ -885,23 +912,20 @@ public class ExpManager : MonoBehaviour
         }
     }
 
-    // Функция для обновления UI при увеличении счетчика таланта
     private void UpdateTalentUI(string talentName)
     {
         if (talentSlotIndices.TryGetValue(talentName, out int slotIndex))
         {
             if (slotIndex >= 0 && slotIndex < minorTalentCountTexts.Length)
             {
-                // Проверяем, что спрайт в слоте соответствует ожидаемому
                 if (minorTalentSlots[slotIndex].sprite == talents[GetTalentIndex(talentName)].talentSprite)
                 {
-                    minorTalentCountTexts[slotIndex].text = "x" + selectedTalents[talentName].ToString(); // Обновляем счетчик
+                    minorTalentCountTexts[slotIndex].text = "x" + selectedTalents[talentName].ToString();
                 }
             }
         }
     }
 
-    // Функция для получения индекса таланта по его имени
     private int GetTalentIndex(string talentName)
     {
         for (int i = 0; i < talents.Length; i++)
@@ -909,7 +933,7 @@ public class ExpManager : MonoBehaviour
             if (talents[i].talentName == talentName)
                 return i;
         }
-        return -1; // Если не найдено
+        return -1;
     }
     void AssignRandomTalent()
     {
@@ -923,4 +947,26 @@ public class ExpManager : MonoBehaviour
 
         currentTalentIndex++;
     }
+    public void DeactivateButtonTemporarily(GameObject toDeactivate)
+    {
+        UnityEngine.UI.Button button = toDeactivate.GetComponent<UnityEngine.UI.Button>();
+
+        if (button != null)
+        {
+            StartCoroutine(DisableButtonTemporarily(button));
+        }
+    }
+
+    private IEnumerator DisableButtonTemporarily(UnityEngine.UI.Button button)
+    {
+        // Disable the button
+        button.interactable = false;
+
+        // Wait for 1 second
+        yield return new WaitForSecondsRealtime(1f);
+
+        // Re-enable the button
+        button.interactable = true;
+    }
+
 }

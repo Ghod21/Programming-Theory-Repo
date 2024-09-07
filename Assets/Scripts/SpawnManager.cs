@@ -24,7 +24,7 @@ public class SpawnManager : MonoBehaviour
 
     [SerializeField] MainManager mainManagerScript;
     private int numberOfEnemies; // Number of enemies to spawn
-    private float spawnHeight = 1.4f; // Desired spawn height
+    private float spawnHeight = 1.3f; // Desired spawn height
     public int waveDifficulty;
     private bool startSpawn;
     private float spawnTime = 3;
@@ -38,7 +38,7 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] GameObject aoeAreasObjects;
     [SerializeField] public GameObject aoeSpawnAreaObject;
     [SerializeField] GameObject bossStarParticleObject;
-    float bossStarMoveSpeed = 10f;
+    float bossStarMoveSpeed = 7f;
     private Vector3 targetPosition = new Vector3(2.750329f, 1f, 2.416487f);
     ParticleSystem bossStarParticleSystem;
     [SerializeField] ParticleSystem bossStarFallParticleSystem;
@@ -47,12 +47,15 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] AudioManager audioManager;
     [SerializeField] Player playerScript;
 
+    public bool bossFightIsOn = false;
+
     public void ActivateAndMoveBossStar()
     {
         if (SceneManager.GetActiveScene().name == "MainScene")
         {
             bossStarParticleObject.SetActive(true);
             startSpawn = false;
+            bossFightIsOn = true;
 
             StartCoroutine(MoveBossStar());
         }
@@ -87,8 +90,15 @@ public class SpawnManager : MonoBehaviour
         audioManager.BossMusicChangeStop();
         playerScript.audioSource.PlayOneShot(playerScript.audioClips[18], DataPersistence.soundsVolume * 0.6f * DataPersistence.soundAdjustment);
         yield return new WaitForSeconds(0.1f);
-        bossEnemy.UpdateEnemySpeed(playerScript.speed);
-        bossEnemy.UpdateEnemyAttackRange(playerScript.attackRange);
+        if (!DataPersistence.easyDifficulty)
+        {
+            bossEnemy.UpdateEnemySpeed(playerScript.speed);
+            bossEnemy.UpdateEnemyAttackRange(playerScript.attackRange);
+        } else
+        {
+            bossEnemy.moveSpeed = 6;
+            bossEnemy.attackRange = 2.5f;
+        }
     }
 
     private void Start()
@@ -142,28 +152,38 @@ public class SpawnManager : MonoBehaviour
 
     private IEnumerator SpawnEnemies()
     {
-        float y = 0;
-        if (difficultyMeter > 2)
+        if (!DataPersistence.easyDifficulty)
         {
-            y = 0.05f;
+            float y = 0;
+            if (difficultyMeter > 2)
+            {
+                y = 0.06f;
+            }
+            if (difficultyMeter >= 5 && difficultyMeter <= 7 || difficultyMeter >= 13 && difficultyMeter <= 19)
+            {
+                y = 0.09f;
+            }
+            else if (difficultyMeter >= 8 && difficultyMeter <= 12)
+            {
+                y = 0.14f;
+            }
+            int x = Random.Range(3, 6);
+            if (Random.value < y && y != 0)
+            {
+                numberOfEnemies = x;
+            }
         }
-        if (difficultyMeter >=5 && difficultyMeter <= 7 || difficultyMeter >= 13 && difficultyMeter <= 19)
-        {
-            y = 0.1f;
-        } else if (difficultyMeter >= 8 && difficultyMeter <= 12)
-        {
-            y = 0.15f;
-        }
-        int x = Random.Range(3, 6);
-        if (Random.value < y && y != 0)
-        {
-            numberOfEnemies = x;
-        }
+
         for (int i = 0; i < numberOfEnemies; i++)
         {
             Vector3 spawnPosition = GetRandomPointInBounds(spawnArea.bounds, exclusionZone);
             GameObject enemy = ChooseEnemyBasedOnDifficulty();
             GameObject instantiatedEnemy = Instantiate(enemy, spawnPosition, Quaternion.identity);
+            PrefabIdentifier prefabName = enemy.GetComponent<PrefabIdentifier>();
+            if (prefabName.prefabName == "EnemyRangeEasy" || prefabName.prefabName == "EnemyRangeMedium")
+            {
+                spawnHeight = 1.4f;
+            }
             instantiatedEnemy.transform.position = new Vector3(instantiatedEnemy.transform.position.x, spawnHeight, instantiatedEnemy.transform.position.z);
             if(numberOfEnemies > 1)
             {
@@ -184,7 +204,7 @@ public class SpawnManager : MonoBehaviour
 
             if (i == fixedPositionIndex)
             {
-                enemy = enemies[3];
+                enemy = enemies[Random.value < 0.5f ? 1 : 3];
             }
             else
             {
@@ -213,6 +233,14 @@ public class SpawnManager : MonoBehaviour
     private GameObject ChooseEnemyBasedOnDifficulty()
     {
         float[] probabilities = GetProbabilitiesForDifficulty(waveDifficulty);
+        if (DataPersistence.easyDifficulty)
+        {
+            probabilities = GetProbabilitiesForEasyDifficulty(waveDifficulty);
+        } else
+        {
+            probabilities = GetProbabilitiesForDifficulty(waveDifficulty);
+        }
+
         float randomValue = Random.value; // Random value between 0 and 1
 
         float cumulativeProbability = 0f;
@@ -276,6 +304,58 @@ public class SpawnManager : MonoBehaviour
                 return new float[] { 0, 0.15f, 0.7f, 0.1f, 0.05f };
             case 21:
                 return new float[] { 0, 0.15f, 0.7f, 0.1f, 0.05f };
+            default:
+                // Define fallback probabilities for higher difficulties
+                return new float[] { 0.4f, 0.3f, 0.2f, 0.05f, 0.05f }; // Example: 40%, 30%, 20%, 5%, 5%
+        }
+    }
+    private float[] GetProbabilitiesForEasyDifficulty(int difficulty)
+    {
+        // Define probabilities based on difficulty
+        switch (difficulty)
+        {
+            case 1:
+                return new float[] { 1f, 0f, 0f, 0f, 0f };
+            case 2:
+                return new float[] { 0.95f, 0.05f, 0f, 0f, 0f };
+            case 3:
+                return new float[] { 0.9f, 0.1f, 0f, 0f, 0f };
+            case 4:
+                return new float[] { 0.85f, 0.1f, 0.05f, 0f, 0f };
+            case 5:
+                return new float[] { 0.8f, 0.1f, 0.1f, 0f, 0f };
+            case 6:
+                return new float[] { 0.75f, 0.1f, 0.15f, 0f, 0f };
+            case 7:
+                return new float[] { 0.7f, 0.1f, 0.15f, 0.05f, 0f };
+            case 8:
+                return new float[] { 0.65f, 0.1f, 0.2f, 0.05f, 0f };
+            case 9:
+                return new float[] { 0.6f, 0.1f, 0.25f, 0.05f, 0f };
+            case 10:
+                return new float[] { 0.55f, 0.1f, 0.3f, 0.05f, 0f };
+            case 11:
+                return new float[] { 0.55f, 0.1f, 0.3f, 0.1f, 0f };
+            case 12:
+                return new float[] { 0.5f, 0.1f, 0.35f, 0.1f, 0f };
+            case 13:
+                return new float[] { 0.45f, 0.1f, 0.4f, 0.1f, 0f };
+            case 14:
+                return new float[] { 0.4f, 0.1f, 0.45f, 0.1f, 0f };
+            case 15:
+                return new float[] { 0.3f, 0.1f, 0.5f, 0.1f, 0f };
+            case 16:
+                return new float[] { 0.25f, 0.1f, 0.55f, 0.1f, 0f };
+            case 17:
+                return new float[] { 0.2f, 0.1f, 0.6f, 0.1f, 0f };
+            case 18:
+                return new float[] { 0.05f, 0.15f, 0.7f, 0.1f, 0f };
+            case 19:
+                return new float[] { 0.05f, 0.15f, 0.7f, 0.1f, 0f };
+            case 20:
+                return new float[] { 0.05f, 0.15f, 0.7f, 0.1f, 0f };
+            case 21:
+                return new float[] { 0.05f, 0.15f, 0.7f, 0.1f, 0f };
             default:
                 // Define fallback probabilities for higher difficulties
                 return new float[] { 0.4f, 0.3f, 0.2f, 0.05f, 0.05f }; // Example: 40%, 30%, 20%, 5%, 5%
