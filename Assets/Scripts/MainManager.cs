@@ -202,6 +202,10 @@ public class MainManager : MonoBehaviour
                     Time.timeScale = 1f;
                     pauseUIText.SetActive(false);
                     paused = false;
+                    if (playerScript.isShielding && !Input.GetMouseButton(1))
+                    {
+                        playerScript.ShieldStop();
+                    }
                 }
             }
         }

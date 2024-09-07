@@ -27,6 +27,8 @@ public class BossEnemy : Enemy // INHERITANCE
     [SerializeField] private float chargePause = 1f; // Time to pause before charging
 
     [SerializeField] float bossHPRegenNumber;
+    [SerializeField] ParticleSystem spawnEffect;
+    Quaternion spawnEffectRotation;
 
 
     protected override void Start() // POLYMORPHISM
@@ -71,12 +73,14 @@ public class BossEnemy : Enemy // INHERITANCE
         enemyHealthMax = enemyHealth;
         StartCoroutine(BossSpellChangeRoutine());
         moveSpeed = moveSpeedNew;
+        spawnEffectRotation = spawnEffect.gameObject.transform.rotation;
     }
 
     protected override void Update() // POLYMORPHISM
     {
         base.Update();
         CheckDistanceToPlayer();
+        spawnEffect.gameObject.transform.rotation = spawnEffectRotation;
     }
     int RandomSpellIndex()
     {
@@ -117,16 +121,34 @@ public class BossEnemy : Enemy // INHERITANCE
             } 
             else if (index == 3 && CanSpawnSpell())
             {
-                BossSpawnSpell();
+                StartCoroutine(BossSpawnSpell());
             }
 
             Debug.Log($"Started spell at index: {index}");
 
         }
     }
-
-    void BossSpawnSpell()
+    protected override void LookAtPlayer()
     {
+        if (!attacked && enemyHealth > 0)
+        {
+            Vector3 direction = (player.position - transform.position).normalized; // Calculate direction to the player
+            Quaternion lookRotation = Quaternion.LookRotation(direction); // Calculate the rotation to look at the player
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f); // Smoothly rotate towards the player
+        }
+    }
+
+    IEnumerator BossSpawnSpell()
+    {
+        float x = moveSpeed;
+        moveSpeed *= 0.5f;
+        spawnEffect.Stop();
+        spawnEffect.Clear();
+        spawnEffect.Play();
+        yield return new WaitForSeconds(2.3f);
+        playerScript.audioSource.PlayOneShot(playerScript.audioClips[21], DataPersistence.soundsVolume * 0.6f * DataPersistence.soundAdjustment);
+        yield return new WaitForSeconds(0.7f);
+        moveSpeed = x;
         Quaternion bossRotation = Quaternion.identity;
         spawnManager.SpawnEnemiesBossSpell(bossRotation);
     }
@@ -333,11 +355,15 @@ public class BossEnemy : Enemy // INHERITANCE
 
     public void UpdateEnemySpeed(float newPlayerSpeed)
     {
-        moveSpeed = newPlayerSpeed * speedRatio;
+        moveSpeed = newPlayerSpeed * speedRatio - 0.3f;
     }
     public void UpdateEnemyAttackRange(float newPlayerAttackRange)
     {
         attackRange = newPlayerAttackRange * attackRangeRatio;
+        if (attackRange > 2.8f)
+        {
+            attackRange -= 0.3f;
+        }
     }
 
     bool CanSpawnSpell()

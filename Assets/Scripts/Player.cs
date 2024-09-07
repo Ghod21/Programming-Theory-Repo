@@ -223,7 +223,7 @@ public class Player : MonoBehaviour
             HandleAnimations(); // Call the method to handle animations
             HealthLogic(); // ABSTRACTION
             ScoreUpdate(); // ABSTRACTION
-            if (!mainManager.win)
+            if (!mainManager.win && !mainManager.paused)
             {
                 DashUILogic(); // ABSTRACTION
                 AttackAndShieldLogic(); // ABSTRACTION
@@ -242,7 +242,7 @@ public class Player : MonoBehaviour
                 shieldHealth = 5;
                 shieldAttackTalentChosenActivated = true;
             }
-            if (Input.GetKeyDown(KeyCode.E) && !mainManager.win)
+            if (Input.GetKeyDown(KeyCode.E) && !mainManager.win && !mainManager.paused)
             {
                 UseSpell(); // ABSTRACTION
             }
@@ -270,7 +270,7 @@ public class Player : MonoBehaviour
             isAttackQueued = true; // Queue the attack if one is already in progress
         }
 
-        if (isAttacking && Input.GetMouseButtonDown(1) && !isUsingSpell && !shieldAttackTalentChosen && shieldHealth == shieldHealthMax && !shieldIsOnCooldown && !isShieldCooldownActive)
+        if (isAttacking && Input.GetMouseButtonDown(1) && !isUsingSpell && !shieldAttackTalentChosen && shieldHealth == shieldHealthMax && !shieldIsOnCooldown && !isShieldCooldownActive && !mainManager.paused)
         {
             isAttacking = false;
             animator.SetBool("isAttacking", false);
@@ -346,7 +346,7 @@ public class Player : MonoBehaviour
             BladeVortexDash();
             StartCoroutine(SpellCooldownTimer());
         }
-        if (!shieldAttackTalentChosen && !isDashing)
+        if (!shieldAttackTalentChosen && !isDashing && !mainManager.paused)
         {
             if (!spellIsOnCooldown && !isUsingSpell && isAttacking)
             {
@@ -832,7 +832,7 @@ public class Player : MonoBehaviour
 
     private void ShieldLogic()
     {
-        if (!Input.GetMouseButton(1))
+        if (!Input.GetMouseButton(1) && !mainManager.paused)
         {
             ShieldStop();
         }
@@ -847,7 +847,7 @@ public class Player : MonoBehaviour
             ShieldStart();
             audioSource.PlayOneShot(audioClips[4], DataPersistence.soundsVolume * 0.8f * soundAdjustment);
         }
-        else if (Input.GetMouseButtonUp(1) && isShielding)
+        else if (Input.GetMouseButtonUp(1) && isShielding && !mainManager.paused)
         {
             ShieldStop();
         }

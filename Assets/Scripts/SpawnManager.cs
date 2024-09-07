@@ -157,15 +157,15 @@ public class SpawnManager : MonoBehaviour
             float y = 0;
             if (difficultyMeter > 2)
             {
-                y = 0.07f;
+                y = 0.06f;
             }
             if (difficultyMeter >= 5 && difficultyMeter <= 7 || difficultyMeter >= 13 && difficultyMeter <= 19)
             {
-                y = 0.1f;
+                y = 0.09f;
             }
             else if (difficultyMeter >= 8 && difficultyMeter <= 12)
             {
-                y = 0.15f;
+                y = 0.14f;
             }
             int x = Random.Range(3, 6);
             if (Random.value < y && y != 0)
@@ -204,7 +204,7 @@ public class SpawnManager : MonoBehaviour
 
             if (i == fixedPositionIndex)
             {
-                enemy = enemies[3];
+                enemy = enemies[Random.value < 0.5f ? 1 : 3];
             }
             else
             {

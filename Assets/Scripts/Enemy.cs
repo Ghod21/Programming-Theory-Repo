@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using Unity.IO.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -34,6 +35,7 @@ public class Enemy : MonoBehaviour // INHERITANCE (PARENT)
     protected bool isUsingSpell;
     protected float healthBottleAdaptiveSpawnChance = 0;
     Transform lookAtPlayerObject;
+    Transform lookAtPlayerObjectMelee;
 
     public bool damagedByVortex = false;
 
@@ -51,6 +53,7 @@ public class Enemy : MonoBehaviour // INHERITANCE (PARENT)
     protected virtual void Start() // POLYMORPHISM
     {
         lookAtPlayerObject = GameObject.FindWithTag("LookAtPlayer").GetComponent<Transform>();
+        lookAtPlayerObjectMelee = GameObject.Find("LookAtPointForMelee").GetComponent<Transform>();
         mainManager = GameObject.Find("MainManager").GetComponent<MainManager>();
         expManager = GameObject.Find("Exp_Bar");
         expManagerScript = expManager.GetComponent<ExpManager>();
@@ -103,11 +106,17 @@ public class Enemy : MonoBehaviour // INHERITANCE (PARENT)
         damagedByVortex = false;
     }
 
-    private void LookAtPlayer()
+    protected virtual void LookAtPlayer()
     {
-        if (!attacked && enemyHealth > 0)
+        PrefabIdentifier prefab = GetComponent<PrefabIdentifier>();
+        if (!attacked && enemyHealth > 0 && prefab.prefabName != "EnemyRangeEasy" && prefab.prefabName != "EnemyRangeMedium")
         {
-            Vector3 direction = (player.position - transform.position).normalized; // Calculate direction to the player
+            Vector3 direction = (lookAtPlayerObjectMelee.position - transform.position).normalized; // Calculate direction to the player
+            Quaternion lookRotation = Quaternion.LookRotation(direction); // Calculate the rotation to look at the player
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f); // Smoothly rotate towards the player
+        } else if (!attacked && enemyHealth > 0)
+        {
+            Vector3 direction = (lookAtPlayerObject.position - transform.position).normalized; // Calculate direction to the player
             Quaternion lookRotation = Quaternion.LookRotation(direction); // Calculate the rotation to look at the player
             transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f); // Smoothly rotate towards the player
         }
