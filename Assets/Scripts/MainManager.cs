@@ -305,6 +305,8 @@ public class MainManager : MonoBehaviour
         }
         uiToggle[4].SetActive(true);
         uiToggle[15].SetActive(true);
+        easyDifficultyButton.gameObject.SetActive(false);
+        hardDifficultyButton.gameObject.SetActive(false);
 
         // Actual info
         uiToggle[14].SetActive(true);
@@ -338,6 +340,8 @@ public class MainManager : MonoBehaviour
                 uiToggle[i].SetActive(true);
             }
         }
+        easyDifficultyButton.gameObject.SetActive(true);
+        hardDifficultyButton.gameObject.SetActive(true);
     }
     private void UILogicMainScene()
     {

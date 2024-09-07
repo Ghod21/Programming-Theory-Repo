@@ -29,6 +29,7 @@ public class BossEnemy : Enemy // INHERITANCE
     [SerializeField] float bossHPRegenNumber;
     [SerializeField] ParticleSystem spawnEffect;
     Quaternion spawnEffectRotation;
+    bool canAttackAgain = true;
 
 
     protected override void Start() // POLYMORPHISM
@@ -360,9 +361,9 @@ public class BossEnemy : Enemy // INHERITANCE
     public void UpdateEnemyAttackRange(float newPlayerAttackRange)
     {
         attackRange = newPlayerAttackRange * attackRangeRatio;
-        if (attackRange > 2.8f)
+        if (attackRange > 3f)
         {
-            attackRange -= 0.3f;
+            attackRange -= 0.5f;
         }
     }
 
@@ -384,6 +385,34 @@ public class BossEnemy : Enemy // INHERITANCE
         } else
         {
             return false;
+        }
+    }
+    protected override void CheckAttackRange() // POLYMORPHISM
+    {
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+        if (distanceToPlayer <= attackRange && !isAttacking && !mainManager.win && canAttackAgain)
+        {
+            isAttacking = true;
+            canAttackAgain = false;
+            StartCoroutine(Attack());
+        }
+    }
+    protected override IEnumerator Attack() // POLYMORPHISM
+    {
+        if (enemyHealth > 0 && !deathAnimationDone)
+        {
+            // Attack logic
+            EnemyAttack();
+
+            // Wait for attack cooldown
+            yield return new WaitForSeconds(0.6f);
+
+            isAttacking = false;
+            animator.SetBool("isAttacking", false);
+            animator.SetTrigger("Idle");
+            yield return new WaitForSeconds(0.5f);
+            canAttackAgain = true;
         }
     }
 }

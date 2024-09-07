@@ -763,6 +763,7 @@ public class ExpManager : MonoBehaviour
         Time.timeScale = 1f;
         HideShieldTalentsUI();
         playerScript.shieldHealth -= 5;
+        playerScript.shieldHealthMax = 5;
         playerScript.shieldAttackTalentChosen = true;
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 

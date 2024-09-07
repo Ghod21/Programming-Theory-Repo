@@ -24,7 +24,7 @@ public class Enemy : MonoBehaviour // INHERITANCE (PARENT)
     public float enemyHealth;
     protected float enemyHealthMax;
     public bool attacked;
-    bool deathAnimationDone = false;
+    protected bool deathAnimationDone = false;
     protected float soundAdjustment = DataPersistence.soundAdjustment;
     int prefabIndex;
     public bool enemyIsBleeding;
@@ -185,7 +185,7 @@ public class Enemy : MonoBehaviour // INHERITANCE (PARENT)
     }
 
 
-    private IEnumerator Attack()
+    protected virtual IEnumerator Attack()
     {
         if (enemyHealth > 0 && !deathAnimationDone)
         {

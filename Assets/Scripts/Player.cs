@@ -67,7 +67,7 @@ public class Player : MonoBehaviour
     private int attackToShieldCount = 0;
     public bool isBlockingDamage = false;
     public float shieldHealth = 10;
-    float shieldHealthMax;
+    public float shieldHealthMax;
     public float shieldWallRotationSpeed = 30f;
 
     // Death and Health variables
@@ -176,8 +176,8 @@ public class Player : MonoBehaviour
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
+        shieldHealthMax = 10;
         speedStart = speed;
-        shieldHealthMax = shieldHealth;
         mainManager = FindObjectOfType<MainManager>();
         vortexSpeed = dashSpeed;
         vortexDuration = dashDuration;
@@ -215,6 +215,7 @@ public class Player : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "MainScene" && !gameOver && !timeIsFrozen)
         {
+
             GatherInput(); // ABSTRACTION
             if (!mainManager.paused)
             {
@@ -839,6 +840,10 @@ public class Player : MonoBehaviour
         float x = shieldAttackTalentChosen ? 5f : 10f;
 
         shieldSlider.value = Mathf.MoveTowards(shieldSlider.value, shieldHealth / x, Time.deltaTime * 100f);
+        if (shieldHealth >= shieldHealthMax)
+        {
+            shieldSlider.value = 1;
+        }
 
         shieldWallPiecesLogic();
 
@@ -948,10 +953,10 @@ public class Player : MonoBehaviour
             }
             yield return new WaitForSeconds(1f);
         }
-
-        // Once cooldown is complete, mark it as inactive
-        isShieldCooldownActive = false;
         shieldIsOnCooldown = false;
+        isShieldCooldownActive = false;
+        // Once cooldown is complete, mark it as inactive
+
     }
     private void shieldWallPiecesLogic()
     {
@@ -1033,6 +1038,11 @@ public class Player : MonoBehaviour
         }
 
         isDashing = false;
+        if (shieldHealth >= shieldHealthMax)
+        {
+            isShieldCooldownActive = false;
+            shieldIsOnCooldown = false;
+        }
         yield return new WaitForSeconds(1f);
 
         backwardDashIsActive = false;
