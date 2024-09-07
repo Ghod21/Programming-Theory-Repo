@@ -363,7 +363,7 @@ public class BossEnemy : Enemy // INHERITANCE
         attackRange = newPlayerAttackRange * attackRangeRatio;
         if (attackRange > 3f)
         {
-            attackRange -= 0.5f;
+            attackRange -= 0.4f;
         }
     }
 

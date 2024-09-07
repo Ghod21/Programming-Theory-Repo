@@ -24,7 +24,7 @@ public class SpawnManager : MonoBehaviour
 
     [SerializeField] MainManager mainManagerScript;
     private int numberOfEnemies; // Number of enemies to spawn
-    private float spawnHeight = 1.2f; // Desired spawn height
+    private float spawnHeight = 1.3f; // Desired spawn height
     public int waveDifficulty;
     private bool startSpawn;
     private float spawnTime = 3;

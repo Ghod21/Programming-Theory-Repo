@@ -15,7 +15,7 @@ public class Enemy : MonoBehaviour // INHERITANCE (PARENT)
     protected MainManager mainManager;
     public GameObject expManager;
     public ExpManager expManagerScript;
-    private float desiredY = 1.2f; // Desired height for the position
+    private float desiredY = 1.25f; // Desired height for the position
     protected Transform player; // Reference to the player's Transform
     protected Rigidbody rb; // Reference to the Rigidbody component
     [SerializeField] public float moveSpeed = 3.5f;
@@ -94,10 +94,22 @@ public class Enemy : MonoBehaviour // INHERITANCE (PARENT)
 
     private void FixedUpdate()
     {
+        float avoidRadius = 1f;
+        float avoidForce = 1f;
         if (!isAttacking && !animator.GetBool("isAttacking")) // Only move if not attacking
         {
             MoveTowardsPlayer(); // Move the enemy towards the player
         }
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, avoidRadius);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.CompareTag("Enemy") && hitCollider.gameObject != this.gameObject)
+            {
+                Vector3 directionAway = (transform.position - hitCollider.transform.position).normalized;
+                rb.AddForce(directionAway * avoidForce, ForceMode.Impulse);
+            }
+        }
+
     }
     public IEnumerator BladeVortexDamageCooldown()
     {
@@ -114,7 +126,8 @@ public class Enemy : MonoBehaviour // INHERITANCE (PARENT)
             Vector3 direction = (lookAtPlayerObjectMelee.position - transform.position).normalized; // Calculate direction to the player
             Quaternion lookRotation = Quaternion.LookRotation(direction); // Calculate the rotation to look at the player
             transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f); // Smoothly rotate towards the player
-        } else if (!attacked && enemyHealth > 0)
+        }
+        else if (!attacked && enemyHealth > 0)
         {
             Vector3 direction = (lookAtPlayerObject.position - transform.position).normalized; // Calculate direction to the player
             Quaternion lookRotation = Quaternion.LookRotation(direction); // Calculate the rotation to look at the player
@@ -331,15 +344,15 @@ public class Enemy : MonoBehaviour // INHERITANCE (PARENT)
             playerScript.killsToVampire--;
             if (playerScript.killsToVampire <= 0 && playerScript.playerHealth < 30)
             {
-                    playerScript.playerHealth++;
-                    playerScript.healEffect.Stop();
-                    playerScript.healEffect.Clear();
-                    playerScript.healEffect.Play();
-                    if (playerScript.playerHealth > 30)
-                    {
-                        playerScript.playerHealth = 30;
-                    }
-                    playerScript.killsToVampire = 7;
+                playerScript.playerHealth++;
+                playerScript.healEffect.Stop();
+                playerScript.healEffect.Clear();
+                playerScript.healEffect.Play();
+                if (playerScript.playerHealth > 30)
+                {
+                    playerScript.playerHealth = 30;
+                }
+                playerScript.killsToVampire = 7;
             }
         }
     }
@@ -356,5 +369,6 @@ public class Enemy : MonoBehaviour // INHERITANCE (PARENT)
         }
         isUnderDefenceAura = false;
     }
+
 
 }

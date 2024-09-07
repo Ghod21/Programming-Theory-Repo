@@ -426,7 +426,8 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        
+
+        healthRegenCooldownLimit--;
         SelectTalent(8);
         playerScript.healthRegenMinorAdd++;
         if (healthRegenMinorOnce)
@@ -439,8 +440,7 @@ public class ExpManager : MonoBehaviour
                 playerScript.healthRegenCooldownMinus += 2;
             }
             
-            healthRegenCooldownLimit--;
-            if (healthRegenCooldownLimit <=0)
+            if (healthRegenCooldownLimit <=0 || playerScript.healthRegenCooldownMinus > 11)
             {
                 minorTalentFunctions.Remove(minorHealthRegen);
             }
@@ -448,11 +448,20 @@ public class ExpManager : MonoBehaviour
         if (!healthRegenMinorOnce)
         {
             playerScript.StartCoroutine(playerScript.HealthRegenTalent());
+            if (!healthRegenMajorTalentIsChosen)
+            {
+                playerScript.healthRegenCooldownMinus++;
+            }
+            else
+            {
+                playerScript.healthRegenCooldownMinus += 2;
+            }
             healthRegenMinorOnce = true;
         }
     }
     public void minorHealthRegenForMajor()
     {
+        healthRegenCooldownLimit--;
         SelectTalent(8);
         playerScript.healthRegenMinorAdd++;
         if (healthRegenMinorOnce)
@@ -466,8 +475,7 @@ public class ExpManager : MonoBehaviour
                 playerScript.healthRegenCooldownMinus += 2;
             }
 
-            healthRegenCooldownLimit--;
-            if (healthRegenCooldownLimit <= 0)
+            if (healthRegenCooldownLimit <= 0 || playerScript.healthRegenCooldownMinus > 11)
             {
                 minorTalentFunctions.Remove(minorHealthRegen);
             }
@@ -475,6 +483,14 @@ public class ExpManager : MonoBehaviour
         if (!healthRegenMinorOnce)
         {
             playerScript.StartCoroutine(playerScript.HealthRegenTalent());
+            if (!healthRegenMajorTalentIsChosen)
+            {
+                playerScript.healthRegenCooldownMinus++;
+            }
+            else
+            {
+                playerScript.healthRegenCooldownMinus += 2;
+            }
             healthRegenMinorOnce = true;
         }
     }

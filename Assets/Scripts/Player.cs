@@ -794,6 +794,10 @@ public class Player : MonoBehaviour
     {
         while (true)
         {
+            if (healthRegenCooldownMinus > 11)
+            {
+                healthRegenCooldownMinus = 11;
+            }
             yield return new WaitForSeconds(healthRegenCooldown - healthRegenCooldownMinus);
             if (playerHealth < 30)
             {
