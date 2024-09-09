@@ -117,7 +117,7 @@ public class Player : MonoBehaviour
     public float attackRangeTalentAdd = 0f;
     [SerializeField] Transform swordTransform;
     public float swordSizeY = 1f;
-    public float swordSizeMultiplier = 1f;
+    public float swordSizeMultiplier = 0f;
     public float swordSizePushAttackRangeTalentIsOn = 0f;
     public bool bleedAttackTalentIsChosen = false;
     bool hasPlayedKillSound = false;
@@ -164,7 +164,6 @@ public class Player : MonoBehaviour
     public float attackSpeedMinorTalentAdaptation = 1f;
     public float attackAddFromMinorTalents = 0f;
     public float shieldIncrementAdd = 0f;
-    public int healthRegenMinorAdd = 0;
     public float healthRegenCooldown = 15f;
     public float healthRegenCooldownMinus = 0;
 
@@ -176,6 +175,7 @@ public class Player : MonoBehaviour
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
+        swordSizeY = 1.2f;
         shieldHealthMax = 10;
         speedStart = speed;
         mainManager = FindObjectOfType<MainManager>();
@@ -206,7 +206,11 @@ public class Player : MonoBehaviour
         {
             attackRange = 3.5f;
             attackRangeStart = attackRange;
-            swordSizeMultiplier += 0.3f;
+            swordSizeMultiplier += 0.15f;
+            SwordSizeForAttackRange();
+
+        } else if (SceneManager.GetActiveScene().name == "MainScene")
+        {
             SwordSizeForAttackRange();
         }
     }
@@ -794,11 +798,12 @@ public class Player : MonoBehaviour
     {
         while (true)
         {
-            if (healthRegenCooldownMinus > 11)
+            if (healthRegenCooldownMinus > 10)
             {
-                healthRegenCooldownMinus = 11;
+                healthRegenCooldownMinus = 10;
             }
             yield return new WaitForSeconds(healthRegenCooldown - healthRegenCooldownMinus);
+
             if (playerHealth < 30)
             {
                 playerHealth++;
@@ -909,7 +914,7 @@ public class Player : MonoBehaviour
         }
         return false;
     }
-    private void ShieldStart()
+    public void ShieldStart()
     {
         if (isShielding) return;
         isShielding = true;
@@ -1320,7 +1325,7 @@ public class Player : MonoBehaviour
     public void SwordSizeForAttackRange()
     {
         Vector3 newScale = swordTransform.localScale;
-        newScale.y = (swordSizeY * swordSizeMultiplier) + swordSizePushAttackRangeTalentIsOn;
+        newScale.y = swordSizeY + swordSizeMultiplier + swordSizePushAttackRangeTalentIsOn;
         swordTransform.localScale = newScale;
     }
     private void Attack()

@@ -11375,6 +11375,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2066896392038131398, guid: 45288819fde2143449a96207b14db0bb, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.2
+      objectReference: {fileID: 0}
     - target: {fileID: 2066896392038131574, guid: 45288819fde2143449a96207b14db0bb, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.25
@@ -11728,9 +11732,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2144242574}
     - target: {fileID: 3148276588015926008, guid: 45288819fde2143449a96207b14db0bb, type: 3}
+      propertyPath: swordSizeY
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3148276588015926008, guid: 45288819fde2143449a96207b14db0bb, type: 3}
       propertyPath: shieldFillArea
       value: 
       objectReference: {fileID: 3402831817934471391}
+    - target: {fileID: 3148276588015926008, guid: 45288819fde2143449a96207b14db0bb, type: 3}
+      propertyPath: swordSizeMultiplier
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3951229398020017800, guid: 45288819fde2143449a96207b14db0bb, type: 3}
       propertyPath: m_Layer
       value: 6
@@ -11885,6 +11897,7 @@ MonoBehaviour:
   shieldIsOnCooldown: 0
   isBlockingDamage: 0
   shieldHealth: 5
+  shieldHealthMax: 0
   shieldWallRotationSpeed: 90
   healthSlider: {fileID: 1733566768}
   fillArea: {fileID: 2144242574}
@@ -11935,7 +11948,6 @@ MonoBehaviour:
   attackSpeedMinorTalentAdaptation: 1
   attackAddFromMinorTalents: 0
   shieldIncrementAdd: 0
-  healthRegenMinorAdd: 0
   healthRegenCooldown: 15
   healthRegenCooldownMinus: 0
 --- !u!135 &1885716653

@@ -72,8 +72,8 @@ public class ExpManager : MonoBehaviour
 
     int skillCooldownLimit = 7;
     int dashCooldownLimit = 7;
-    int healthRegenCooldownLimit = 3;
     bool healthRegenMajorTalentIsChosen = false;
+    bool wasShieldedBeforePause;
 
 
 
@@ -103,7 +103,7 @@ public class ExpManager : MonoBehaviour
         if (DataPersistence.easyDifficulty && SceneManager.GetActiveScene().name == "MainScene")
         {
             SelectTalent(8);
-            playerScript.healthRegenMinorAdd++;
+            playerScript.healthRegenCooldownMinus++;
             playerScript.StartCoroutine(playerScript.HealthRegenTalent());
             healthRegenMinorOnce = true;
         }
@@ -215,7 +215,7 @@ public class ExpManager : MonoBehaviour
     // ----------------------------------------------------------------------------- Minor talents part start
     void NoShieldWithoutRMBAfterPause()
     {
-        if (!Input.GetMouseButtonUp(1))
+        if (!Input.GetMouseButton(1))
         {
             playerScript.ShieldStop();
         }
@@ -223,6 +223,7 @@ public class ExpManager : MonoBehaviour
 
     void ShowMinorTalentsUI()
     {
+        IfShieldedOnPauseShowIsTrue(true);
         talentsUI[0].SetActive(true);
         for (int i = 0; i < minorTalentsUI.Length; i++)
         {
@@ -240,9 +241,11 @@ public class ExpManager : MonoBehaviour
         AssignRandomTalent();
 
         currentTalentIndex = 0;
+
     }
     void HideMinorTalentsUI()
     {
+        IfShieldedOnPauseShowIsTrue(false);
         Time.timeScale = 1f;
         talentsUI[0].SetActive(false);
         for (int i = 0; i < minorTalentsUI.Length; i++)
@@ -266,8 +269,8 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        playerScript.attackRangeAdd += 0.15f;
-        playerScript.swordSizeMultiplier += 0.15f;
+        playerScript.attackRangeAdd += 0.1f;
+        playerScript.swordSizeMultiplier += 0.05f;
         playerScript.SwordSizeForAttackRange();
         playerScript.AttackRangeCalculation();
         SelectTalent(0);
@@ -427,70 +430,40 @@ public class ExpManager : MonoBehaviour
 
         // Functionality
 
-        healthRegenCooldownLimit--;
         SelectTalent(8);
-        playerScript.healthRegenMinorAdd++;
         if (healthRegenMinorOnce)
         {
-            if(!healthRegenMajorTalentIsChosen)
-            {
-                playerScript.healthRegenCooldownMinus++;
-            } else
-            {
-                playerScript.healthRegenCooldownMinus += 2;
-            }
+            playerScript.healthRegenCooldownMinus++;
             
-            if (healthRegenCooldownLimit <=0 || playerScript.healthRegenCooldownMinus > 11)
+            
+            if (playerScript.healthRegenCooldownMinus >= 5)
             {
                 minorTalentFunctions.Remove(minorHealthRegen);
             }
-        }
-        if (!healthRegenMinorOnce)
+        } else 
         {
             playerScript.StartCoroutine(playerScript.HealthRegenTalent());
-            if (!healthRegenMajorTalentIsChosen)
-            {
-                playerScript.healthRegenCooldownMinus++;
-            }
-            else
-            {
-                playerScript.healthRegenCooldownMinus += 2;
-            }
+            playerScript.healthRegenCooldownMinus++;
+
             healthRegenMinorOnce = true;
         }
     }
     public void minorHealthRegenForMajor()
     {
-        healthRegenCooldownLimit--;
         SelectTalent(8);
-        playerScript.healthRegenMinorAdd++;
         if (healthRegenMinorOnce)
         {
-            if (!healthRegenMajorTalentIsChosen)
-            {
-                playerScript.healthRegenCooldownMinus++;
-            }
-            else
-            {
-                playerScript.healthRegenCooldownMinus += 2;
-            }
+            playerScript.healthRegenCooldownMinus++;
 
-            if (healthRegenCooldownLimit <= 0 || playerScript.healthRegenCooldownMinus > 11)
+            if (playerScript.healthRegenCooldownMinus >= 5)
             {
                 minorTalentFunctions.Remove(minorHealthRegen);
             }
-        }
-        if (!healthRegenMinorOnce)
+        } else
         {
             playerScript.StartCoroutine(playerScript.HealthRegenTalent());
-            if (!healthRegenMajorTalentIsChosen)
-            {
-                playerScript.healthRegenCooldownMinus++;
-            }
-            else
-            {
-                playerScript.healthRegenCooldownMinus += 2;
-            }
+            playerScript.healthRegenCooldownMinus++;
+            
             healthRegenMinorOnce = true;
         }
     }
@@ -499,6 +472,7 @@ public class ExpManager : MonoBehaviour
 
     void ShowSkillsTalentsUI()
     {
+        IfShieldedOnPauseShowIsTrue(true);
         talentsUI[2].SetActive(true);
         for (int i = 0; i < skillsTalentsUI.Length; i++)
         {
@@ -510,6 +484,7 @@ public class ExpManager : MonoBehaviour
     }
     void HideSkillsTalentsUI()
     {
+        IfShieldedOnPauseShowIsTrue(false);
         Time.timeScale = 1f;
         talentsUI[2].SetActive(false);
         for (int i = 0; i < skillsTalentsUI.Length; i++)
@@ -570,6 +545,7 @@ public class ExpManager : MonoBehaviour
 
     void ShowAttackTalentsUI()
     {
+        IfShieldedOnPauseShowIsTrue(true);
         talentsUI[1].SetActive(true);
         for (int i = 0; i < attackTalentsUI.Length; i++)
         {
@@ -581,6 +557,7 @@ public class ExpManager : MonoBehaviour
     }
     void HideAttackTalentsUI()
     {
+        IfShieldedOnPauseShowIsTrue(false);
         Time.timeScale = 1f;
         talentsUI[1].SetActive(false);
         for (int i = 0; i < attackTalentsUI.Length; i++)
@@ -609,7 +586,7 @@ public class ExpManager : MonoBehaviour
         AssignTalentImage(x);
 
         playerScript.attackRangeTalentAdd = 0.45f;
-        playerScript.swordSizePushAttackRangeTalentIsOn = 0.45f;
+        playerScript.swordSizePushAttackRangeTalentIsOn = 0.2f;
         playerScript.attackRangeTalentIsChosen = true;
         playerScript.SwordSizeForAttackRange();
         playerScript.AttackRangeCalculation();
@@ -631,6 +608,7 @@ public class ExpManager : MonoBehaviour
 
     void ShowHealthTalentsUI()
     {
+        IfShieldedOnPauseShowIsTrue(true);
         talentsUI[1].SetActive(true);
         for (int i = 0; i < healthTalentsUI.Length; i++)
         {
@@ -642,6 +620,7 @@ public class ExpManager : MonoBehaviour
     }
     void HideHealthTalentsUI()
     {
+        IfShieldedOnPauseShowIsTrue(false);
         Time.timeScale = 1f;
         talentsUI[1].SetActive(false);
         for (int i = 0; i < healthTalentsUI.Length; i++)
@@ -658,9 +637,9 @@ public class ExpManager : MonoBehaviour
         HideHealthTalentsUI();
         Sprite x = Resources.Load<Sprite>("TalentsUIMaterials/Health/regenHealth");
         AssignTalentImage(x);
-        playerScript.healthRegenCooldown -= 5;
-        playerScript.healthRegenCooldownMinus *= 2;
-        if(playerScript.healthRegenMinorAdd < 1)
+        healthRegenMajorTalentIsChosen = true;
+        playerScript.healthRegenCooldownMinus += 5;
+        if (playerScript.healthRegenCooldownMinus < 1)
         {
             minorHealthRegenForMajor();
         }
@@ -689,6 +668,7 @@ public class ExpManager : MonoBehaviour
 
     void ShowDashTalentsUI()
     {
+        IfShieldedOnPauseShowIsTrue(true);
         talentsUI[1].SetActive(true);
         for (int i = 0; i < dashTalentsUI.Length; i++)
         {
@@ -700,6 +680,7 @@ public class ExpManager : MonoBehaviour
     }
     void HideDashTalentsUI()
     {
+        IfShieldedOnPauseShowIsTrue(false);
         Time.timeScale = 1f;
         talentsUI[1].SetActive(false);
         for (int i = 0; i < dashTalentsUI.Length; i++)
@@ -753,6 +734,7 @@ public class ExpManager : MonoBehaviour
 
     private void ShowShieldTalentsUI()
     {
+        IfShieldedOnPauseShowIsTrue(true);
         talentsUI[1].SetActive(true);
         for (int i = 0; i < shieldTalentsUI.Length; i++)
         {
@@ -764,6 +746,7 @@ public class ExpManager : MonoBehaviour
     }
     private void HideShieldTalentsUI()
     {
+        IfShieldedOnPauseShowIsTrue(false);
         Time.timeScale = 1f;
         talentsUI[1].SetActive(false);
         for (int i = 0; i < shieldTalentsUI.Length; i++)
@@ -968,5 +951,28 @@ public class ExpManager : MonoBehaviour
         // Re-enable the button
         button.interactable = true;
     }
-
+    IEnumerator NoDamageAfterTalentPick()
+    {
+        float x = DataPersistence.easyDifficulty ? 1f : 0.5f;
+        playerScript.backwardDashIsActive = true; // Variable for not taking damage
+        yield return new WaitForSeconds(x);
+        playerScript.backwardDashIsActive = false;
+    }
+    void IfShieldedOnPauseShowIsTrue(bool show)
+    {
+        if (show)
+        {
+            if (playerScript.isShielding)
+            {
+                wasShieldedBeforePause = true;
+            }
+        } else
+        {
+            if (wasShieldedBeforePause && Input.GetMouseButton(1))
+            {
+                playerScript.ShieldStart();
+                wasShieldedBeforePause = false;
+            }
+        }
+    }
 }

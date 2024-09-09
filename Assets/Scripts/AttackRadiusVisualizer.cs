@@ -57,10 +57,21 @@ public class AttackRadiusVisualizer : MonoBehaviour
     {
         if (DataPersistence.easyDifficulty && SceneManager.GetActiveScene().name == "MainScene")
         {
+            if (playerComponent != null)
+            {
+                attackRadius = playerComponent.attackRange - 0.7f; // Get player's attack radius
+                SetColor(HexToColor("#2B8A2B", 0.3f)); // Use HEX code for green with 30% transparency
+            }
+            else if (enemyComponent != null)
+            {
+                attackRadius = enemyComponent.attackRange - 0.7f; // Get enemy's attack radius
+                SetColor(HexToColor("#B74443", 0.3f)); // Use HEX code for red with 30% transparency
+            }
             // Check if the Alt key is pressed to toggle the circle visibility
             if (Input.GetKeyDown(KeyCode.LeftAlt) && !lineRenderer.enabled)
             {
                 visualizerEnabled = true;
+                DrawCircle();
             }
             else if (Input.GetKeyDown(KeyCode.LeftAlt))
             {
@@ -69,6 +80,7 @@ public class AttackRadiusVisualizer : MonoBehaviour
             if (visualizerEnabled && playerComponent != null)
             {
                 lineRenderer.enabled = true;
+                DrawCircle();
             }
             else if (visualizerEnabled && enemyComponent.enemyHealth > 0 && enemyComponent != null)
             {
@@ -87,7 +99,7 @@ public class AttackRadiusVisualizer : MonoBehaviour
             }
             if (playerComponent != null)
             {
-                attackRadius = playerComponent.attackRange - 0.7f; // Get player's attack radius
+                attackRadius = playerComponent.attackRange - 0.5f; // Get player's attack radius
             }
             else if (enemyComponent != null)
             {
