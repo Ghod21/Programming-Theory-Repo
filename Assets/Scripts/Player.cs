@@ -1341,6 +1341,7 @@ public class Player : MonoBehaviour
         {
             animator.SetBool("isShielding", false);
         }
+        animator.SetBool("isAttacking", false);
         animator.SetBool("isAttacking", true);
 
         // Start attack animation coroutine
@@ -1397,6 +1398,15 @@ public class Player : MonoBehaviour
 
     IEnumerator AttackCoroutine()
     {
+        if (isShielding && !shieldAttackTalentChosen || isUsingSpell)
+        {
+            isAttacking = false;
+            if (!isUsingSpell)
+            {
+                animator.SetBool("isAttacking", false);
+            }
+            yield break;
+        }
         yield return new WaitForSeconds((0.833f / 2) / attackSpeedMinorTalentAdaptation); // Half of the attack animation duration
         if (isShielding && !shieldAttackTalentChosen || isUsingSpell)
         {
@@ -1502,7 +1512,15 @@ public class Player : MonoBehaviour
         isAttackQueued = false;
         // Wait for the remaining half of the animation duration
         yield return new WaitForSeconds((0.833f / 2) / attackSpeedMinorTalentAdaptation);
-
+        if (isShielding && !shieldAttackTalentChosen || isUsingSpell)
+        {
+            isAttacking = false;
+            if (!isUsingSpell)
+            {
+                animator.SetBool("isAttacking", false);
+            }
+            yield break;
+        }
         // Reset attack state
         isAttacking = false;
         animator.SetBool("isAttacking", false);
