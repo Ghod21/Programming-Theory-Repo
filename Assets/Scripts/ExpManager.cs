@@ -321,7 +321,7 @@ public class ExpManager : MonoBehaviour
         audioSource.PlayOneShot(playerScript.audioClips[10], DataPersistence.soundsVolume * 4f * DataPersistence.soundAdjustment);
 
         // Functionality
-        playerScript.speedAddFromMinorTalent += 0.05f;
+        playerScript.speedAddFromMinorTalent += 0.07f;
         SelectTalent(3);
     }
     void minorExpPickUpRange(int index)

@@ -90,6 +90,7 @@ public class MainManager : MonoBehaviour
 
     private void Start()
     {
+        Screen.SetResolution(1024, 580, false);
         if (SceneManager.GetActiveScene().name == "Menu")
         {
             nameInputField.text = DataPersistence.lastPlayerName;

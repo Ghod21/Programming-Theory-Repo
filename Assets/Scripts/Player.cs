@@ -205,7 +205,6 @@ public class Player : MonoBehaviour
         if (DataPersistence.easyDifficulty && SceneManager.GetActiveScene().name == "MainScene")
         {
             attackRange = 3.5f;
-            attackRangeStart = attackRange;
             swordSizeMultiplier += 0.15f;
             SwordSizeForAttackRange();
 
@@ -213,6 +212,7 @@ public class Player : MonoBehaviour
         {
             SwordSizeForAttackRange();
         }
+        attackRangeStart = attackRange;
     }
 
     private void Update()
@@ -701,6 +701,7 @@ public class Player : MonoBehaviour
         StartCoroutine(FireBreathAnimation());
         yield return new WaitForSeconds(1f);
         speed = x;
+        isUsingSpell = false;
         yield return new WaitForSeconds(1f);
         fireBreathParticle.Stop();
         fireBreathParticle.Clear();
@@ -709,7 +710,6 @@ public class Player : MonoBehaviour
     {
         animator.SetBool("isFireBreathing", true);
         yield return new WaitForSeconds(0.75f);
-        isUsingSpell = false;
         animator.SetBool("isFireBreathing", false);
     }
     IEnumerator FireBreathHitCooldown(Enemy x)
@@ -960,12 +960,14 @@ public class Player : MonoBehaviour
                 shieldHealth = x;
                 shieldIsOnCooldown = false;
             }
+            if (shieldHealth == x)
+            {
+                shieldIsOnCooldown = false;
+                isShieldCooldownActive = false;
+                yield break;
+            }
             yield return new WaitForSeconds(1f);
         }
-        shieldIsOnCooldown = false;
-        isShieldCooldownActive = false;
-        // Once cooldown is complete, mark it as inactive
-
     }
     private void shieldWallPiecesLogic()
     {
@@ -1313,14 +1315,7 @@ public class Player : MonoBehaviour
 
     public void AttackRangeCalculation()
     {
-        if (!attackRangeTalentIsChosen)
-        {
-            attackRangeTalentAdd = 0;
-        } else
-        {
-            attackRangeTalentAdd = 1;
-        }
-        attackRange = (3 + attackRangeAdd) + attackRangeTalentAdd;
+        attackRange = (attackRangeStart + attackRangeAdd) + attackRangeTalentAdd;
     }
     public void SwordSizeForAttackRange()
     {
