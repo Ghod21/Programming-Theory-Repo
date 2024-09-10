@@ -117,7 +117,7 @@ public class Player : MonoBehaviour
     public float attackRangeTalentAdd = 0f;
     [SerializeField] Transform swordTransform;
     public float swordSizeY = 1f;
-    public float swordSizeMultiplier = 1f;
+    public float swordSizeMultiplier = 0f;
     public float swordSizePushAttackRangeTalentIsOn = 0f;
     public bool bleedAttackTalentIsChosen = false;
     bool hasPlayedKillSound = false;
@@ -164,7 +164,6 @@ public class Player : MonoBehaviour
     public float attackSpeedMinorTalentAdaptation = 1f;
     public float attackAddFromMinorTalents = 0f;
     public float shieldIncrementAdd = 0f;
-    public int healthRegenMinorAdd = 0;
     public float healthRegenCooldown = 15f;
     public float healthRegenCooldownMinus = 0;
 
@@ -176,6 +175,7 @@ public class Player : MonoBehaviour
     //  ....................................................................MAIN PART START................................................................
     private void Start()
     {
+        swordSizeY = 1.2f;
         shieldHealthMax = 10;
         speedStart = speed;
         mainManager = FindObjectOfType<MainManager>();
@@ -205,10 +205,14 @@ public class Player : MonoBehaviour
         if (DataPersistence.easyDifficulty && SceneManager.GetActiveScene().name == "MainScene")
         {
             attackRange = 3.5f;
-            attackRangeStart = attackRange;
-            swordSizeMultiplier += 0.3f;
+            swordSizeMultiplier += 0.15f;
+            SwordSizeForAttackRange();
+
+        } else if (SceneManager.GetActiveScene().name == "MainScene")
+        {
             SwordSizeForAttackRange();
         }
+        attackRangeStart = attackRange;
     }
 
     private void Update()
@@ -697,6 +701,7 @@ public class Player : MonoBehaviour
         StartCoroutine(FireBreathAnimation());
         yield return new WaitForSeconds(1f);
         speed = x;
+        isUsingSpell = false;
         yield return new WaitForSeconds(1f);
         fireBreathParticle.Stop();
         fireBreathParticle.Clear();
@@ -705,7 +710,6 @@ public class Player : MonoBehaviour
     {
         animator.SetBool("isFireBreathing", true);
         yield return new WaitForSeconds(0.75f);
-        isUsingSpell = false;
         animator.SetBool("isFireBreathing", false);
     }
     IEnumerator FireBreathHitCooldown(Enemy x)
@@ -794,11 +798,12 @@ public class Player : MonoBehaviour
     {
         while (true)
         {
-            if (healthRegenCooldownMinus > 11)
+            if (healthRegenCooldownMinus > 10)
             {
-                healthRegenCooldownMinus = 11;
+                healthRegenCooldownMinus = 10;
             }
             yield return new WaitForSeconds(healthRegenCooldown - healthRegenCooldownMinus);
+
             if (playerHealth < 30)
             {
                 playerHealth++;
@@ -909,7 +914,7 @@ public class Player : MonoBehaviour
         }
         return false;
     }
-    private void ShieldStart()
+    public void ShieldStart()
     {
         if (isShielding) return;
         isShielding = true;
@@ -955,12 +960,14 @@ public class Player : MonoBehaviour
                 shieldHealth = x;
                 shieldIsOnCooldown = false;
             }
+            if (shieldHealth == x)
+            {
+                shieldIsOnCooldown = false;
+                isShieldCooldownActive = false;
+                yield break;
+            }
             yield return new WaitForSeconds(1f);
         }
-        shieldIsOnCooldown = false;
-        isShieldCooldownActive = false;
-        // Once cooldown is complete, mark it as inactive
-
     }
     private void shieldWallPiecesLogic()
     {
@@ -1308,19 +1315,12 @@ public class Player : MonoBehaviour
 
     public void AttackRangeCalculation()
     {
-        if (!attackRangeTalentIsChosen)
-        {
-            attackRangeTalentAdd = 0;
-        } else
-        {
-            attackRangeTalentAdd = 1;
-        }
-        attackRange = (3 + attackRangeAdd) + attackRangeTalentAdd;
+        attackRange = (attackRangeStart + attackRangeAdd) + attackRangeTalentAdd;
     }
     public void SwordSizeForAttackRange()
     {
         Vector3 newScale = swordTransform.localScale;
-        newScale.y = (swordSizeY * swordSizeMultiplier) + swordSizePushAttackRangeTalentIsOn;
+        newScale.y = swordSizeY + swordSizeMultiplier + swordSizePushAttackRangeTalentIsOn;
         swordTransform.localScale = newScale;
     }
     private void Attack()
@@ -1336,6 +1336,7 @@ public class Player : MonoBehaviour
         {
             animator.SetBool("isShielding", false);
         }
+        animator.SetBool("isAttacking", false);
         animator.SetBool("isAttacking", true);
 
         // Start attack animation coroutine
@@ -1392,6 +1393,15 @@ public class Player : MonoBehaviour
 
     IEnumerator AttackCoroutine()
     {
+        if (isShielding && !shieldAttackTalentChosen || isUsingSpell)
+        {
+            isAttacking = false;
+            if (!isUsingSpell)
+            {
+                animator.SetBool("isAttacking", false);
+            }
+            yield break;
+        }
         yield return new WaitForSeconds((0.833f / 2) / attackSpeedMinorTalentAdaptation); // Half of the attack animation duration
         if (isShielding && !shieldAttackTalentChosen || isUsingSpell)
         {
@@ -1497,7 +1507,15 @@ public class Player : MonoBehaviour
         isAttackQueued = false;
         // Wait for the remaining half of the animation duration
         yield return new WaitForSeconds((0.833f / 2) / attackSpeedMinorTalentAdaptation);
-
+        if (isShielding && !shieldAttackTalentChosen || isUsingSpell)
+        {
+            isAttacking = false;
+            if (!isUsingSpell)
+            {
+                animator.SetBool("isAttacking", false);
+            }
+            yield break;
+        }
         // Reset attack state
         isAttacking = false;
         animator.SetBool("isAttacking", false);

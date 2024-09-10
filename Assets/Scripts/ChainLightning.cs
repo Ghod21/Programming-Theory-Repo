@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class ChainLightning : MonoBehaviour
 {
     private ParticleSystem lightningParticles; // Reference to the ParticleSystem
-    float detectionRadius = 5f; // Radius for detecting enemies
+    float detectionRadius = 7f; // Radius for detecting enemies
     float delayBetweenJumps = 0.15f; // Delay between lightning jumps
 
     private List<Enemy> hitEnemies = new List<Enemy>(); // List of enemies that have been hit

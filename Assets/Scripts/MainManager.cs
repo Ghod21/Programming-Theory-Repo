@@ -90,6 +90,7 @@ public class MainManager : MonoBehaviour
 
     private void Start()
     {
+        Screen.SetResolution(1024, 580, false);
         if (SceneManager.GetActiveScene().name == "Menu")
         {
             nameInputField.text = DataPersistence.lastPlayerName;
@@ -226,6 +227,7 @@ public class MainManager : MonoBehaviour
             }
         }
     }
+
     //  ....................................................................MENU UI PART START..............................................................
     public void PlayButtonClick()
     {
@@ -540,7 +542,14 @@ public class MainManager : MonoBehaviour
             playerNames[1] = playerNames[0];
 
             playerScores[0] = currentPlayerScore;
-            playerNames[0] = currentPlayerName;
+            if (win)
+            {
+                playerNames[0] = "(Winner) " + currentPlayerName;
+            } else
+            {
+                playerNames[0] = currentPlayerName;
+            }
+
 
             leaderBoardUpdated = true;
         }
@@ -552,7 +561,14 @@ public class MainManager : MonoBehaviour
             playerNames[2] = playerNames[1];
 
             playerScores[1] = currentPlayerScore;
-            playerNames[1] = currentPlayerName;
+            if (win)
+            {
+                playerNames[1] = "(Winner) " + currentPlayerName;
+            }
+            else
+            {
+                playerNames[1] = currentPlayerName;
+            }
 
             leaderBoardUpdated = true;
         }
@@ -560,7 +576,14 @@ public class MainManager : MonoBehaviour
         {
             // Current player takes the third place
             playerScores[2] = currentPlayerScore;
-            playerNames[2] = currentPlayerName;
+            if (win)
+            {
+                playerNames[2] = "(Winner) " + currentPlayerName;
+            }
+            else
+            {
+                playerNames[2] = currentPlayerName;
+            }
 
             leaderBoardUpdated = true;
         }
